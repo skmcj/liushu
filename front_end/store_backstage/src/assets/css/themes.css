@@ -1,0 +1,27 @@
+:root {
+    /* 共用主题色 */
+    --primary: #83CCD2;
+    --edit: #419EFF;
+    --disable: #FEDC5E;
+    --delete: #F56C6C;
+    --white: #FFFFFF;
+    --black: #1E2732;
+    --black-3: rgba(30, 39, 50, .3);
+    --green: #B1D5C8;
+    /* 字体色 */
+    --primary-font: #333333;
+    --regular-font: #818693;
+    /* 背景色 */
+    --primary-bg: #FFFFFF;
+    --default-bg: #F3F4F7;
+    /* border色 */
+    --primary-border: #F3F4F7;
+    --primary-border-f: var(--primary);
+    /* 列表背景色 */
+    --primary-tb-bg: #F1F1F1;
+    --primary-tl-bg: #FBFBFA;
+    /* 按钮颜色 */
+    --primary-btn: var(--primary);
+    --primary-btn-h: #9CD6DB;
+    --primary-btn-a: #73B2B8;
+}
