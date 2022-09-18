@@ -2,7 +2,7 @@
   <div class="container">
     <Aside width="196px" />
     <div class="right">
-      <Header :returnFlag="true" />
+      <Header :returnFlag="blackFlag" :headTitle="title" :name="nickname" />
       <Main />
     </div>
   </div>
@@ -18,6 +18,23 @@ export default {
     Aside,
     Header,
     Main
+  },
+  data() {
+    return {
+      blackFlag: false,
+      title: '员工管理',
+      nickname: '张三'
+    };
+  },
+  watch: {
+    // 监听当前路由信息
+    $route: {
+      immediate: true,
+      handler(val) {
+        this.title = val.meta.head;
+        this.blackFlag = val.meta.returnFlag;
+      }
+    }
   }
 };
 </script>

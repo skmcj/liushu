@@ -11,11 +11,15 @@
     /* 字体色 */
     --primary-font: #333333;
     --regular-font: #818693;
+    --secondary-font: #999999;
+    --gray: #BFCBD9;
+    --light-gray: #D4DDE1;
     /* 背景色 */
     --primary-bg: #FFFFFF;
     --default-bg: #F3F4F7;
     /* border色 */
     --primary-border: #F3F4F7;
+    --regular-border: #D8DDE3;
     --primary-border-f: var(--primary);
     /* 列表背景色 */
     --primary-tb-bg: #F1F1F1;
@@ -24,4 +28,13 @@
     --primary-btn: var(--primary);
     --primary-btn-h: #9CD6DB;
     --primary-btn-a: #73B2B8;
+    --continue-btn: #343744;
+    --continue-btn-h: #5D5F69;
+    --continue-btn-a: #23252E;
+    --disable-btn: var(--disable);
+    --disable-btn-h: #fEE37E;
+    --disable-btn-a: #DBC46D;
+    --delete-btn: var(--delete);
+    --delete-btn-h: #F78989;
+    --delete-btn-a: #E07C7C;
 }

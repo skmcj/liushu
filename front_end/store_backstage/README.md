@@ -1,24 +1,11 @@
-# store_backstage
+# 商家后台
 
-## Project setup
-```
-npm install
-```
+基于`vue2`构建，主要服务于商家，用于管理后台数据，如员工、分类、图书、订单等
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## 项目结构
 
-### Compiles and minifies for production
-```
-npm run build
-```
+- 大体框架
 
-### Lints and fixes files
-```
-npm run lint
-```
+![大体框架](https://s1.328888.xyz/2022/09/18/oraPB.png)
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+后续更新。。。

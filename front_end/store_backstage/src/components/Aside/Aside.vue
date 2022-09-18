@@ -5,24 +5,24 @@
       <p class="title">片刻书店</p>
     </div>
     <div class="menu">
-      <el-menu default-active="1" :router="true">
-        <el-menu-item index="1" :route="{ path: '/employee' }">
+      <el-menu :default-active="pathIndex" :router="true">
+        <el-menu-item index="/employee">
           <i class="icon fbookfont ic-staff"></i>
           <span slot="title">员工管理</span>
         </el-menu-item>
-        <el-menu-item index="2" :route="{ path: '/cate' }">
+        <el-menu-item index="/cate">
           <i class="icon fbookfont ic-cate-2"></i>
           <span slot="title">分类管理</span>
         </el-menu-item>
-        <el-menu-item index="3" :route="{ path: '/books' }">
+        <el-menu-item index="/books">
           <i class="icon fbookfont ic-books"></i>
           <span slot="title">图书管理</span>
         </el-menu-item>
-        <el-menu-item index="4" :route="{ path: '/orders' }">
+        <el-menu-item index="/orders">
           <i class="icon fbookfont ic-order-2"></i>
           <span slot="title">订单管理</span>
         </el-menu-item>
-        <el-menu-item index="5" :route="{ path: '/shop' }">
+        <el-menu-item index="/shop">
           <i class="icon fbookfont ic-shop"></i>
           <span slot="title">店铺管理</span>
         </el-menu-item>
@@ -32,7 +32,19 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      pathIndex: '/employee'
+    };
+  },
+  watch: {
+    $route(val) {
+      // console.log('route =>', val);
+      this.pathIndex = val.meta.asideItemIndex;
+    }
+  }
+};
 </script>
 
 <style lang="less" scoped>
@@ -84,16 +96,20 @@ export default {};
         margin-bottom: 24px;
         line-height: 42px;
         border-radius: 0 21px 21px 0;
-        color: #bfcbd9;
+        color: var(--gray);
+        &:focus {
+          color: var(--gray);
+          background: none;
+        }
+        &:hover {
+          color: #fff;
+          background: none;
+        }
       }
       .el-menu-item.is-active,
       .el-menu-item.is-active:hover {
         color: #333;
         background-color: #83ccd2;
-      }
-      .el-menu-item:hover {
-        color: #fff;
-        background: none;
       }
     }
   }

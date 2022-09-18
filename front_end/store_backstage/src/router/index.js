@@ -6,6 +6,9 @@ import Cate from '@/views/Cate/Cate.vue';
 import Books from '@/views/Books/Books.vue';
 import Orders from '@/views/Orders/Orders.vue';
 import Shop from '@/views/Shop/Shop.vue';
+import AddEmployee from '@/views/Employee/AddEmployee';
+import AddCate from '@/views/Cate/AddCate';
+import AddBook from '@/views/Books/AddBook';
 
 Vue.use(VueRouter)
 
@@ -16,7 +19,21 @@ const routes = [
     component: Employee,
     alias: ['/', '/home'],
     meta: {
-      title: '商家后台-员工管理'
+      title: '商家后台-员工管理',
+      head: '员工管理',
+      asideItemIndex: '/employee',
+      returnFlag: false
+    }
+  },
+  {
+    path: '/employee/add',
+    name: 'addEmployee',
+    component: AddEmployee,
+    meta: {
+      title: '商家后台-添加员工',
+      head: '添加员工',
+      asideItemIndex: '/employee',
+      returnFlag: true
     }
   },
   {
@@ -24,7 +41,21 @@ const routes = [
     name: 'cate',
     component: Cate,
     meta: {
-      title: '商家后台-分类管理'
+      title: '商家后台-分类管理',
+      head: '分类管理',
+      asideItemIndex: '/cate',
+      returnFlag: false
+    }
+  },
+  {
+    path: '/cate/add',
+    name: 'addCate',
+    component: AddCate,
+    meta: {
+      title: '商家后台-添加分类',
+      head: '添加分类',
+      asideItemIndex: '/cate',
+      returnFlag: true
     }
   },
   {
@@ -32,7 +63,21 @@ const routes = [
     name: 'books',
     component: Books,
     meta: {
-      title: '商家后台-图书管理'
+      title: '商家后台-图书管理',
+      head: '图书管理',
+      asideItemIndex: '/books',
+      returnFlag: false
+    }
+  },
+  {
+    path: '/books/add',
+    name: 'addName',
+    component: AddBook,
+    meta: {
+      title: '商家后台-添加图书',
+      head: '添加图书',
+      asideItemIndex: '/books',
+      returnFlag: true
     }
   },
   {
@@ -40,7 +85,10 @@ const routes = [
     name: 'orders',
     component: Orders,
     meta: {
-      title: '商家后台-订单管理'
+      title: '商家后台-订单管理',
+      head: '订单管理',
+      asideItemIndex: '/orders',
+      returnFlag: false
     }
   },
   {
@@ -48,7 +96,10 @@ const routes = [
     name: 'shop',
     component: Shop,
     meta: {
-      title: '商家后台-店铺管理'
+      title: '商家后台-店铺管理',
+      head: '店铺管理',
+      asideItemIndex: '/shop',
+      returnFlag: false
     }
   }
   // {

@@ -1,5 +1,5 @@
 <template>
-  <div class="employee">
+  <div class="main-box employee">
     <div class="bar">
       <el-input
         v-model="searchContent"
@@ -9,7 +9,7 @@
         @keyup.enter.native="handleSearch">
         <i slot="prefix" class="icon fbookfont ic-search" style="cursor: pointer" @click="handleSearch"></i>
       </el-input>
-      <el-button round icon="icon fbookfont ic-add">添加员工</el-button>
+      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="add">添加员工</el-button>
     </div>
     <el-table :data="tableData" stripe class="table">
       <el-table-column prop="name" label="员工姓名"></el-table-column>
@@ -28,10 +28,10 @@
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" class="edit-handle" @click="editMess()">编辑</el-button>
-          <el-button type="text" size="small" class="status-handle" @click="editStatus()">
-            {{ scope.row.status == '0' ? '启用' : '禁用' }}
+          <el-button type="text" size="small" class="status-handle" @click="editStatus(scope.row)">
+            {{ scope.row.status == '0' ? '禁用' : '启用' }}
           </el-button>
-          <el-button type="text" size="small" class="delete-handle" @click="deleteMess()"> 删除 </el-button>
+          <el-button type="text" size="small" class="delete-handle" @click="deleteMess(scope.row)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,6 +45,28 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange">
     </el-pagination>
+    <!-- 改变员工状态的提示框 -->
+    <el-dialog title="提示" :visible.sync="stateDialogVisible" width="30%" :modal-append-to-body="false">
+      <span>
+        <i class="icon fbookfont ic-info"></i>
+        您是否确认{{ checkedRow.status == '0' ? '禁用' : '启用' }}该员工？
+      </span>
+      <span slot="footer" class="dialog-footer state">
+        <el-button type="primary" @click="stateDialogVisible = false">确 认</el-button>
+        <el-button @click="stateDialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
+    <!-- 删除员工的提示框 -->
+    <el-dialog title="提示" :visible.sync="delDialogVisible" width="30%" :modal-append-to-body="false">
+      <span>
+        <i class="icon fbookfont ic-info"></i>
+        您是否确认删除该员工？<br />&nbsp;&nbsp;&nbsp;&nbsp;(注：该操作不可撤回)
+      </span>
+      <span slot="footer" class="dialog-footer delete">
+        <el-button type="primary" @click="delDialogVisible = false">确 认</el-button>
+        <el-button @click="delDialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -54,6 +76,9 @@ import { getEmployeesAPI } from '@/api/employeeAPI.js';
 export default {
   data() {
     return {
+      stateDialogVisible: false,
+      delDialogVisible: false,
+      checkedRow: '',
       searchContent: '',
       tableData: [],
       currentPage: 1,
@@ -70,17 +95,29 @@ export default {
      */
     handleSearch() {},
     /**
+     * 添加员工
+     */
+    add() {
+      this.$router.push('/employee/add');
+    },
+    /**
      * 编辑员工信息
      */
     editMess() {},
     /**
      * 修改员工账号状态
      */
-    editStatus() {},
+    editStatus(row) {
+      this.checkedRow = row;
+      this.stateDialogVisible = true;
+    },
     /**
      * 删除员工信息
      */
-    deleteMess() {},
+    deleteMess(row) {
+      this.checkedRow = row;
+      this.delDialogVisible = true;
+    },
     /**
      * 处理员工每页数量
      */
@@ -112,81 +149,4 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
-.employee {
-  background-color: var(--white);
-  border-radius: 12px;
-  padding: 32px 28px;
-  .bar {
-    display: flex;
-    justify-content: space-between;
-    height: 42px;
-    :deep(.el-input__inner) {
-      height: 42px;
-      &:focus {
-        border-color: var(--primary-border-f);
-      }
-    }
-    :deep(.el-input__prefix) {
-      left: 9px;
-      .icon {
-        height: 42px;
-        line-height: 42px;
-        width: 25px;
-        text-align: center;
-      }
-    }
-    .el-button {
-      color: var(--white);
-      border: none;
-      padding: 12px 40px;
-      background-color: var(--primary);
-      &:focus,
-      &:hover {
-        background-color: var(--primary-btn-h);
-      }
-      &:active {
-        background-color: var(--primary-btn-a);
-      }
-      :deep(.icon) {
-        margin-right: 8px;
-      }
-    }
-  }
-  .table {
-    overflow: hidden;
-    margin-top: 24px;
-    width: 100%;
-    border: solid 2px var(--primary-border);
-    border-radius: 8px;
-    box-sizing: border-box;
-    .edit-handle {
-      color: var(--edit);
-    }
-    .status-handle {
-      color: var(--disable);
-    }
-    .delete-handle {
-      color: var(--delete);
-    }
-  }
-  .el-table {
-    &::before {
-      height: 0;
-    }
-    :deep(thead) {
-      color: var(--primary-font);
-    }
-    :deep(.cell) {
-      padding: 0 12px;
-    }
-    :deep(.el-table__cell) {
-      padding: 11px 0;
-    }
-  }
-  .page {
-    text-align: center;
-    margin-top: 32px;
-  }
-}
-</style>
+<style lang="less" scoped></style>

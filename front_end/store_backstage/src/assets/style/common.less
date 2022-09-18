@@ -1,0 +1,157 @@
+/* 一些项目共享样式
+------------------- */
+
+.main-box {
+  min-width: 1200px;
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 32px 28px;
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    height: 42px;
+    .el-input__inner {
+      height: 42px;
+      &:focus {
+        border-color: var(--primary-border-f);
+      }
+    }
+    .el-input__prefix {
+      left: 9px;
+      .icon {
+        height: 42px;
+        line-height: 42px;
+        width: 25px;
+        text-align: center;
+      }
+    }
+  }
+  // 数据列表样式
+  .table {
+    overflow: hidden;
+    margin-top: 24px;
+    width: 100%;
+    border: solid 2px var(--primary-border);
+    border-radius: 8px;
+    box-sizing: border-box;
+    .edit-handle {
+      color: var(--edit);
+    }
+    .status-handle {
+      color: var(--disable);
+    }
+    .delete-handle {
+      color: var(--delete);
+    }
+  }
+  .el-table {
+    &::before {
+      height: 0;
+    }
+    :deep(thead) {
+      color: var(--primary-font);
+    }
+    :deep(.cell) {
+      padding: 0 12px;
+    }
+    :deep(.el-table__cell) {
+      padding: 11px 0;
+    }
+  }
+  .page {
+    text-align: center;
+    margin-top: 32px;
+  }
+}
+
+/* 添加按钮 */
+.el-button.add-btn {
+  color: var(--white);
+  border: none;
+  padding: 12px 40px;
+  background-color: var(--primary);
+  &:focus {
+    color: var(--white);
+    background-color: var(--primary);
+  }
+  &:hover {
+    color: var(--white);
+    background-color: var(--primary-btn-h);
+  }
+  &:active {
+    background-color: var(--primary-btn-a);
+  }
+  .icon {
+    margin-right: 8px;
+  }
+}
+
+/* Element-UI相关样式
+---------------------- */
+.el-dialog {
+  border-radius: 12px;
+  .icon {
+    color: var(--disable);
+  }
+}
+
+.el-dialog__footer {
+  .el-button {
+    border-radius: 5px;
+    &:focus,
+    &:hover {
+      color: var(--primary);
+      border-color: #c1eee1;
+      background-color: #e6f5f6;
+    }
+  }
+
+  .el-button--primary {
+    background-color: var(--primary-btn);
+    border-color: var(--primary-btn);
+    &:focus,
+    &:hover {
+      color: var(--white);
+      background-color: var(--primary-btn-h);
+      border-color: var(--primary-btn-h);
+    }
+  }
+  .state {
+    .el-button--primary {
+      background-color: var(--disable-btn);
+      border-color: var(--disable-btn);
+      &:focus,
+      &:hover {
+        color: var(--white);
+        background-color: var(--disable-btn-h);
+        border-color: var(--disable-btn-h);
+      }
+      &:active {
+        color: var(--white);
+        background-color: var(--disable-btn-a);
+        border-color: var(--disable-btn-a);
+      }
+    }
+  }
+  .delete {
+    .el-button--primary {
+      background-color: var(--delete-btn);
+      border-color: var(--delete-btn);
+      &:focus,
+      &:hover {
+        color: var(--white);
+        background-color: var(--delete-btn-h);
+        border-color: var(--delete-btn-h);
+      }
+      &:active {
+        color: var(--white);
+        background-color: var(--delete-btn-a);
+        border-color: var(--delete-btn-a);
+      }
+    }
+  }
+}
+
+.el-select-dropdown__item {
+  user-select: none;
+}

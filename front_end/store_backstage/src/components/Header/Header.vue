@@ -2,7 +2,7 @@
   <div class="header">
     <!-- 左边标题区域 -->
     <div class="left">
-      <span v-if="returnFlag" class="return-btn">
+      <span v-if="returnFlag" class="return-btn" @click="goBack">
         <i class="icon fbookfont ic-return"></i>
         返回
       </span>
@@ -16,8 +16,19 @@
       <!-- 登录人姓名 -->
       <span class="name">{{ name }}</span>
       <!-- 退出按钮 -->
-      <i class="icon fbookfont ic-exit"></i>
+      <i class="icon fbookfont ic-exit" @click="exitDialogVisible = true"></i>
     </div>
+    <!-- 点击退出的提示框 -->
+    <el-dialog title="提示" :visible.sync="exitDialogVisible" width="30%" :modal-append-to-body="false">
+      <span>
+        <i class="icon fbookfont ic-info"></i>
+        您是否确认退出登录？
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="exitDialogVisible = false">确 认</el-button>
+        <el-button @click="exitDialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -39,6 +50,20 @@ export default {
       type: String,
       default: '张三'
     }
+  },
+  data() {
+    return {
+      exitDialogVisible: false
+    };
+  },
+  methods: {
+    /**
+     * 返回上一级页面
+     */
+    goBack() {
+      this.$router.back();
+    },
+    exit() {}
   }
 };
 </script>
@@ -103,6 +128,21 @@ export default {
       margin-left: 6px;
       margin-right: 12px;
     }
+  }
+  .el-button--primary {
+    border-color: var(--delete);
+    background-color: var(--delete);
+  }
+  .el-button--primary:focus,
+  .el-button--primary:hover {
+    color: var(--white);
+    background-color: #f78989;
+    border-color: #f78989;
+  }
+  .ic-info {
+    font-size: 18px;
+    color: var(--disable);
+    margin-right: 5px;
   }
 }
 </style>

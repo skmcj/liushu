@@ -23,6 +23,8 @@ module.exports = {
     'vue/no-unused-components': 'off',
     'no-multiple-empty-lines': 'off',
     'no-multi-spaces': 'off',
-    'node/handle-callback-err': 'off'
+    'node/handle-callback-err': 'off',
+    'operator-linebreak': 'off',
+    'array-bracket-spacing': 'off'
   }
 }

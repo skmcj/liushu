@@ -1,0 +1,902 @@
+[
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13568735887",
+    "book_cate": "计算机",
+    "goods_cate": "那具平",
+    "author": "丁磊",
+    "status": 0,
+    "inventory": 1
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13589568635",
+    "book_cate": "计算机",
+    "goods_cate": "下法军如",
+    "author": "陈超",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18959234912",
+    "book_cate": "计算机",
+    "goods_cate": "性确各义",
+    "author": "姜超",
+    "status": 0,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13245423297",
+    "book_cate": "计算机",
+    "goods_cate": "南京及种",
+    "author": "谢超",
+    "status": 0,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13538242179",
+    "book_cate": "计算机",
+    "goods_cate": "后展候",
+    "author": "彭丽",
+    "status": 0,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13281793511",
+    "book_cate": "计算机",
+    "goods_cate": "小件消",
+    "author": "曾洋",
+    "status": 1,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18952857588",
+    "book_cate": "计算机",
+    "goods_cate": "小多战原",
+    "author": "苏芳",
+    "status": 1,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13525756184",
+    "book_cate": "计算机",
+    "goods_cate": "问却么身",
+    "author": "萧明",
+    "status": 1,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18911775422",
+    "book_cate": "计算机",
+    "goods_cate": "金领",
+    "author": "陆娟",
+    "status": 0,
+    "inventory": 13
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13588720233",
+    "book_cate": "计算机",
+    "goods_cate": "安我战",
+    "author": "何涛",
+    "status": 0,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18952493121",
+    "book_cate": "计算机",
+    "goods_cate": "始经因",
+    "author": "冯强",
+    "status": 1,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13226271180",
+    "book_cate": "计算机",
+    "goods_cate": "群情团",
+    "author": "吕娜",
+    "status": 1,
+    "inventory": 5
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13271883908",
+    "book_cate": "计算机",
+    "goods_cate": "型些办查济",
+    "author": "邹强",
+    "status": 1,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13270362123",
+    "book_cate": "计算机",
+    "goods_cate": "级好斯",
+    "author": "蒋敏",
+    "status": 1,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18924446523",
+    "book_cate": "计算机",
+    "goods_cate": "接知",
+    "author": "姜平",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13598485684",
+    "book_cate": "计算机",
+    "goods_cate": "拉面程容",
+    "author": "黄明",
+    "status": 0,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18914285807",
+    "book_cate": "计算机",
+    "goods_cate": "件元压力",
+    "author": "黎勇",
+    "status": 0,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18906655467",
+    "book_cate": "计算机",
+    "goods_cate": "满公具音",
+    "author": "郑敏",
+    "status": 1,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13521955995",
+    "book_cate": "计算机",
+    "goods_cate": "相边记包",
+    "author": "罗勇",
+    "status": 0,
+    "inventory": 0
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18933268444",
+    "book_cate": "计算机",
+    "goods_cate": "查省格何展",
+    "author": "程敏",
+    "status": 1,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13534591663",
+    "book_cate": "计算机",
+    "goods_cate": "区命并就际",
+    "author": "谭秀兰",
+    "status": 1,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13541333716",
+    "book_cate": "计算机",
+    "goods_cate": "车家",
+    "author": "苏丽",
+    "status": 1,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13243298466",
+    "book_cate": "计算机",
+    "goods_cate": "压最目院流",
+    "author": "汪刚",
+    "status": 0,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18918554703",
+    "book_cate": "计算机",
+    "goods_cate": "本类精",
+    "author": "文超",
+    "status": 0,
+    "inventory": 3
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13573556404",
+    "book_cate": "计算机",
+    "goods_cate": "还的规",
+    "author": "程芳",
+    "status": 1,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13590905304",
+    "book_cate": "计算机",
+    "goods_cate": "性很专传",
+    "author": "姜勇",
+    "status": 0,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18967663657",
+    "book_cate": "计算机",
+    "goods_cate": "些金大",
+    "author": "许平",
+    "status": 0,
+    "inventory": 13
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18926444588",
+    "book_cate": "计算机",
+    "goods_cate": "种消造基",
+    "author": "廖军",
+    "status": 1,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18953558236",
+    "book_cate": "计算机",
+    "goods_cate": "新习会战处",
+    "author": "曾娜",
+    "status": 0,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18987543259",
+    "book_cate": "计算机",
+    "goods_cate": "自子取还如",
+    "author": "易超",
+    "status": 1,
+    "inventory": 13
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18923070774",
+    "book_cate": "计算机",
+    "goods_cate": "段持取员传",
+    "author": "赖霞",
+    "status": 1,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13538422662",
+    "book_cate": "计算机",
+    "goods_cate": "么目为教百",
+    "author": "张涛",
+    "status": 1,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18971855271",
+    "book_cate": "计算机",
+    "goods_cate": "平素",
+    "author": "卢杰",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13514263614",
+    "book_cate": "计算机",
+    "goods_cate": "斯农族",
+    "author": "尹磊",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18961875855",
+    "book_cate": "计算机",
+    "goods_cate": "酸特多空",
+    "author": "廖磊",
+    "status": 0,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13501617209",
+    "book_cate": "计算机",
+    "goods_cate": "几斗志",
+    "author": "邓敏",
+    "status": 0,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18972942538",
+    "book_cate": "计算机",
+    "goods_cate": "七务土九治",
+    "author": "袁洋",
+    "status": 0,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13575477246",
+    "book_cate": "计算机",
+    "goods_cate": "进因却三",
+    "author": "薛秀英",
+    "status": 0,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13536332624",
+    "book_cate": "计算机",
+    "goods_cate": "形们研这际",
+    "author": "邵刚",
+    "status": 0,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18927553533",
+    "book_cate": "计算机",
+    "goods_cate": "节问体无",
+    "author": "苏磊",
+    "status": 1,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18912663428",
+    "book_cate": "计算机",
+    "goods_cate": "更联",
+    "author": "孔静",
+    "status": 1,
+    "inventory": 0
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18916569835",
+    "book_cate": "计算机",
+    "goods_cate": "传石",
+    "author": "邵敏",
+    "status": 0,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13576863521",
+    "book_cate": "计算机",
+    "goods_cate": "压用事事",
+    "author": "萧刚",
+    "status": 0,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13557072258",
+    "book_cate": "计算机",
+    "goods_cate": "是建车",
+    "author": "叶杰",
+    "status": 0,
+    "inventory": 3
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13215234608",
+    "book_cate": "计算机",
+    "goods_cate": "七改完转族",
+    "author": "潘明",
+    "status": 0,
+    "inventory": 13
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13527366122",
+    "book_cate": "计算机",
+    "goods_cate": "使志温民",
+    "author": "谢桂英",
+    "status": 1,
+    "inventory": 5
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13505735461",
+    "book_cate": "计算机",
+    "goods_cate": "热手原正由",
+    "author": "梁桂英",
+    "status": 0,
+    "inventory": 1
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13271338556",
+    "book_cate": "计算机",
+    "goods_cate": "红常定",
+    "author": "侯超",
+    "status": 0,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13549781184",
+    "book_cate": "计算机",
+    "goods_cate": "研从头收",
+    "author": "江超",
+    "status": 1,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13566038168",
+    "book_cate": "计算机",
+    "goods_cate": "真家立技",
+    "author": "贺娟",
+    "status": 1,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13531359815",
+    "book_cate": "计算机",
+    "goods_cate": "度无持",
+    "author": "林超",
+    "status": 0,
+    "inventory": 0
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18912705997",
+    "book_cate": "计算机",
+    "goods_cate": "意军下",
+    "author": "曾秀英",
+    "status": 1,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13541248467",
+    "book_cate": "计算机",
+    "goods_cate": "而家太会利",
+    "author": "龙娟",
+    "status": 0,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13542256816",
+    "book_cate": "计算机",
+    "goods_cate": "军没具",
+    "author": "毛杰",
+    "status": 0,
+    "inventory": 5
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13269747421",
+    "book_cate": "计算机",
+    "goods_cate": "应接好",
+    "author": "吴涛",
+    "status": 1,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13551434899",
+    "book_cate": "计算机",
+    "goods_cate": "老过只",
+    "author": "黎洋",
+    "status": 1,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13558427284",
+    "book_cate": "计算机",
+    "goods_cate": "日战前时",
+    "author": "万强",
+    "status": 0,
+    "inventory": 1
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13555277401",
+    "book_cate": "计算机",
+    "goods_cate": "什反",
+    "author": "秦艳",
+    "status": 0,
+    "inventory": 3
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13540154422",
+    "book_cate": "计算机",
+    "goods_cate": "内复",
+    "author": "夏娟",
+    "status": 1,
+    "inventory": 5
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13271954394",
+    "book_cate": "计算机",
+    "goods_cate": "联题领",
+    "author": "戴秀英",
+    "status": 1,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18964348593",
+    "book_cate": "计算机",
+    "goods_cate": "斗声细",
+    "author": "余勇",
+    "status": 0,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13503661916",
+    "book_cate": "计算机",
+    "goods_cate": "个接白列",
+    "author": "白霞",
+    "status": 0,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13295918382",
+    "book_cate": "计算机",
+    "goods_cate": "山经始",
+    "author": "于娜",
+    "status": 0,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13542420228",
+    "book_cate": "计算机",
+    "goods_cate": "和制学",
+    "author": "罗勇",
+    "status": 0,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13514233313",
+    "book_cate": "计算机",
+    "goods_cate": "家装被式",
+    "author": "白平",
+    "status": 0,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13570801801",
+    "book_cate": "计算机",
+    "goods_cate": "分七消",
+    "author": "段霞",
+    "status": 0,
+    "inventory": 2
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13223131649",
+    "book_cate": "计算机",
+    "goods_cate": "亲张",
+    "author": "陆刚",
+    "status": 1,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18949855285",
+    "book_cate": "计算机",
+    "goods_cate": "几许往思么",
+    "author": "钱明",
+    "status": 0,
+    "inventory": 13
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13264287710",
+    "book_cate": "计算机",
+    "goods_cate": "关给转效",
+    "author": "林磊",
+    "status": 0,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18921554089",
+    "book_cate": "计算机",
+    "goods_cate": "类只研属",
+    "author": "陆芳",
+    "status": 1,
+    "inventory": 6
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13277953469",
+    "book_cate": "计算机",
+    "goods_cate": "具自道",
+    "author": "程秀兰",
+    "status": 1,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18921886872",
+    "book_cate": "计算机",
+    "goods_cate": "白铁阶",
+    "author": "贺霞",
+    "status": 0,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13221357374",
+    "book_cate": "计算机",
+    "goods_cate": "设称么清场",
+    "author": "乔艳",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13216651728",
+    "book_cate": "计算机",
+    "goods_cate": "说放运住",
+    "author": "张明",
+    "status": 1,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13518424225",
+    "book_cate": "计算机",
+    "goods_cate": "增存人",
+    "author": "李敏",
+    "status": 1,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18920347676",
+    "book_cate": "计算机",
+    "goods_cate": "众清自",
+    "author": "彭娟",
+    "status": 1,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18946868636",
+    "book_cate": "计算机",
+    "goods_cate": "也分",
+    "author": "李霞",
+    "status": 1,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13557149083",
+    "book_cate": "计算机",
+    "goods_cate": "住六何带",
+    "author": "叶秀兰",
+    "status": 0,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13514825518",
+    "book_cate": "计算机",
+    "goods_cate": "习色即路",
+    "author": "刘洋",
+    "status": 0,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13578363567",
+    "book_cate": "计算机",
+    "goods_cate": "造儿许",
+    "author": "方强",
+    "status": 0,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13514716386",
+    "book_cate": "计算机",
+    "goods_cate": "照格权确",
+    "author": "梁明",
+    "status": 0,
+    "inventory": 12
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18942472734",
+    "book_cate": "计算机",
+    "goods_cate": "解交",
+    "author": "卢超",
+    "status": 1,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13538948111",
+    "book_cate": "计算机",
+    "goods_cate": "就克科矿又",
+    "author": "余强",
+    "status": 0,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13598537272",
+    "book_cate": "计算机",
+    "goods_cate": "并根",
+    "author": "黎娟",
+    "status": 1,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18966244438",
+    "book_cate": "计算机",
+    "goods_cate": "元门",
+    "author": "黄强",
+    "status": 0,
+    "inventory": 9
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13251387895",
+    "book_cate": "计算机",
+    "goods_cate": "写产局必",
+    "author": "吕芳",
+    "status": 1,
+    "inventory": 10
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13266536755",
+    "book_cate": "计算机",
+    "goods_cate": "置立什复",
+    "author": "钱军",
+    "status": 1,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13278877506",
+    "book_cate": "计算机",
+    "goods_cate": "方农",
+    "author": "龙军",
+    "status": 0,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18953724464",
+    "book_cate": "计算机",
+    "goods_cate": "究可去",
+    "author": "邵涛",
+    "status": 1,
+    "inventory": 7
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18901267824",
+    "book_cate": "计算机",
+    "goods_cate": "此油色",
+    "author": "范超",
+    "status": 0,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18964479044",
+    "book_cate": "计算机",
+    "goods_cate": "老带向",
+    "author": "袁艳",
+    "status": 1,
+    "inventory": 6
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13577625433",
+    "book_cate": "计算机",
+    "goods_cate": "不五经单",
+    "author": "袁刚",
+    "status": 0,
+    "inventory": 8
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13273613479",
+    "book_cate": "计算机",
+    "goods_cate": "列民才众阶",
+    "author": "范丽",
+    "status": 1,
+    "inventory": 15
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18932574824",
+    "book_cate": "计算机",
+    "goods_cate": "置展布体派",
+    "author": "魏静",
+    "status": 0,
+    "inventory": 6
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "18971194267",
+    "book_cate": "计算机",
+    "goods_cate": "张治周知",
+    "author": "贾秀兰",
+    "status": 1,
+    "inventory": 5
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13587345123",
+    "book_cate": "计算机",
+    "goods_cate": "件完入",
+    "author": "邓娟",
+    "status": 1,
+    "inventory": 4
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13288263612",
+    "book_cate": "计算机",
+    "goods_cate": "很个道线",
+    "author": "赵平",
+    "status": 1,
+    "inventory": 14
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13264346633",
+    "book_cate": "计算机",
+    "goods_cate": "林消九几关",
+    "author": "毛敏",
+    "status": 0,
+    "inventory": 11
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13571415443",
+    "book_cate": "计算机",
+    "goods_cate": "而走才",
+    "author": "周秀英",
+    "status": 0,
+    "inventory": 6
+  },
+  {
+    "cover": "https:/s1.328888.xyz/2022/09/16/ol4Dh.jpg",
+    "name": "13512481743",
+    "book_cate": "计算机",
+    "goods_cate": "治党西见",
+    "author": "乔秀兰",
+    "status": 1,
+    "inventory": 15
+  }
+]
