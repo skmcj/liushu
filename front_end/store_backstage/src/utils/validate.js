@@ -25,7 +25,7 @@ function isCellPhone(val) {
 }
 
 /**
- * 检查身份证号的校验码是否正确
+ * 检查18位身份证号的校验码是否正确
  * @param {String} val 身份证号
  */
 function validateCheckNumber(val) {
@@ -33,7 +33,7 @@ function validateCheckNumber(val) {
   let idArr = val.split('');
   for(let i = 0; i < idArr.length; i++) {
     if(idArr[i] !== 'x' || idArr !== 'X') {
-      sum += idArr[i] * wArr[i % 10];
+      sum += parseInt(idArr[i]) * wArr[i % 10];
     } else {
       sum += 10 * wArr[i];
     }
@@ -43,6 +43,35 @@ function validateCheckNumber(val) {
   } else {
     return false;
   }
+}
+
+/**
+ * 检查ISBN码是否有效
+ * @param {*} val ISBN码
+ */
+function validateCheckISBN(val) {
+  let sum = 0;
+  let numArr = val.split('');
+  let flag = false;
+  if(val.length === 10) {
+    // 10位
+    for(let i = 0; i < numArr.length; i++) {
+      if(numArr[i] === 'x' || numArr[i] === 'X') {
+        sum += 10 * (10 - i);
+      }else {
+        sum += parseInt(numArr[i]) * (10 - i);
+      }
+    }
+    flag = (sum % 11 === 0);
+  }else if(val.length === 13) {
+    // 13位
+    for(let i = 0; i < numArr.length - 1; i += 2) {
+      sum += parseInt(numArr[i]) + parseInt(numArr[i + 1]) * 3;
+    }
+    sum += parseInt(numArr[numArr.length - 1]);
+    flag = (sum % 10 === 0);
+  }
+  return flag;
 }
 
 /**
@@ -82,7 +111,28 @@ const checkIDNumber = function(rule, value, callback) {
   }
 }
 
+/**
+ * 自定义规则-检验ISBN的格式
+ * @param {Object} rule 源对象规则
+ * @param {String} value 用户输入ISBN号
+ * @param {Function} callback 验证完成的回调函数
+ */
+const checkISBN = function(rule, value, callback) {
+  value = value.replace(/-/g, '');
+  if(value === '') {
+    callback(new Error('请输入图书ISBN码'));
+  }else if(value.length !== 10 && value.length !== 13) {
+    console.log('length', value, value.length);
+    callback(new Error('请输入10位或13位的ISBN码'));
+  }else if(!validateCheckISBN(value)) {
+    callback(new Error('请输入正确的ISBN码'));
+  }else {
+    callback();
+  }
+}
+
 export default {
   checkPhone,
-  checkIDNumber
+  checkIDNumber,
+  checkISBN
 }

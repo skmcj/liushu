@@ -1,7 +1,9 @@
 <template>
   <div class="main-box cate">
     <div class="bar">
-      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="add">添加分类</el-button>
+      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="addDialogVisible = true"
+        >添加分类</el-button
+      >
     </div>
     <el-table :data="tableData" stripe class="table">
       <el-table-column prop="name" label="分类名称" min-width="20%"></el-table-column>
@@ -46,6 +48,40 @@
         <el-button @click="delDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
+    <!-- 新增分类弹框 -->
+    <el-dialog
+      title="新增分类"
+      :visible.sync="addDialogVisible"
+      width="30%"
+      :modal-append-to-body="false"
+      class="add-box blod-title">
+      <el-form :model="formData" :rules="rules" ref="form" label-width="108px" class="form">
+        <el-form-item label="分类名称：" prop="name">
+          <el-input v-model="formData.name" placeholder="请输入分类名称" style="width: 300px"></el-input>
+        </el-form-item>
+        <el-form-item label="排序：" prop="sort">
+          <el-input v-model.number="formData.sort" placeholder="请输入排序" style="width: 300px"></el-input>
+        </el-form-item>
+        <el-form-item label="分类描述" prop="desc">
+          <el-input
+            type="textarea"
+            v-model="formData.description"
+            placeholder="请输入分类描述"
+            resize="none"
+            style="width: 300px"
+            class="h-75"></el-input>
+        </el-form-item>
+        <div class="btns">
+          <el-form-item label-width="0">
+            <el-button @click="goBack('form')">取消</el-button>
+            <el-button type="primary" @click="submitForm('form', false)">保存</el-button>
+            <el-button v-if="actionType == 'add'" type="primary" class="continue" @click="submitForm('form', true)"
+              >保存并继续添加</el-button
+            >
+          </el-form-item>
+        </div>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,7 +92,18 @@ export default {
   data() {
     return {
       delDialogVisible: false,
+      addDialogVisible: false,
+      actionType: 'add',
       tableData: [],
+      formData: {
+        name: '',
+        description: '',
+        sort: ''
+      },
+      rules: {
+        name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
+        sort: [{ required: true, message: '请输入排序', trigger: 'blur' }]
+      },
       currentPage: 1,
       pageSize: 5,
       total: 36
@@ -67,10 +114,41 @@ export default {
   },
   methods: {
     /**
-     * 添加分类
+     * 关闭添加框
      */
-    add() {
-      this.$router.push('/cate/add');
+    goBack(formName) {
+      this.addDialogVisible = false;
+      this.resetForm(formName);
+    },
+    /**
+     * 提交表单
+     * @param {String} formName - 表单的ref属性值
+     * @param {Boolean} st - 是否保存并继续
+     */
+    submitForm(formName, st) {
+      // 表单验证
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          // 验证通过
+          if (this.actionType === 'add') {
+            // 添加操作
+            // 添加成功后判断 st - 返回还是继续添加
+            this.goBack();
+          } else {
+            // 修改操作
+            // 修改成功后返回 - this.goBack()
+            this.goBack();
+          }
+        } else {
+          // 验证失败
+        }
+      });
+    },
+    /**
+     * 重置表单
+     */
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     },
     /**
      * 编辑分类信息

@@ -35,7 +35,9 @@
 <script>
 export default {
   props: {
-    // 是否显示返回图标
+    /**
+     * 是否显示返回图标
+     */
     returnFlag: {
       type: Boolean,
       default: false

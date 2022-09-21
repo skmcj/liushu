@@ -13,6 +13,7 @@
     --regular-font: #818693;
     --secondary-font: #999999;
     --gray: #BFCBD9;
+    --tip-icon: #BAC0CD;
     --light-gray: #D4DDE1;
     /* 背景色 */
     --primary-bg: #FFFFFF;
@@ -20,6 +21,7 @@
     /* border色 */
     --primary-border: #F3F4F7;
     --regular-border: #D8DDE3;
+    --secondary-border: #D8D8D8;
     --primary-border-f: var(--primary);
     /* 列表背景色 */
     --primary-tb-bg: #F1F1F1;

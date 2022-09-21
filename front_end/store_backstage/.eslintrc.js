@@ -25,6 +25,8 @@ module.exports = {
     'no-multi-spaces': 'off',
     'node/handle-callback-err': 'off',
     'operator-linebreak': 'off',
-    'array-bracket-spacing': 'off'
+    'array-bracket-spacing': 'off',
+    'space-before-function-paren': 'off',
+    'padded-blocks': 'off'
   }
 }

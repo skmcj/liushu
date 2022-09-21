@@ -7,7 +7,6 @@ import Books from '@/views/Books/Books.vue';
 import Orders from '@/views/Orders/Orders.vue';
 import Shop from '@/views/Shop/Shop.vue';
 import AddEmployee from '@/views/Employee/AddEmployee';
-import AddCate from '@/views/Cate/AddCate';
 import AddBook from '@/views/Books/AddBook';
 
 Vue.use(VueRouter)
@@ -45,17 +44,6 @@ const routes = [
       head: '分类管理',
       asideItemIndex: '/cate',
       returnFlag: false
-    }
-  },
-  {
-    path: '/cate/add',
-    name: 'addCate',
-    component: AddCate,
-    meta: {
-      title: '商家后台-添加分类',
-      head: '添加分类',
-      asideItemIndex: '/cate',
-      returnFlag: true
     }
   },
   {
