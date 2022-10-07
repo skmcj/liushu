@@ -14,3 +14,10 @@ export const getBookCateAPI = function() {
 export const getBooksAPI = function() {
   return request.get('/mockdata/books.json');
 }
+
+/**
+ * 获取图书借阅榜信息
+ */
+export const getBookRankAPI = function() {
+  return request.get('/mockdata/bookrank.json');
+}

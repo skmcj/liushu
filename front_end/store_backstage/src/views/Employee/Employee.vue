@@ -103,7 +103,9 @@ export default {
     /**
      * 编辑员工信息
      */
-    editMess() {},
+    editMess() {
+      this.$router.push({ path: '/employee/edit', query: { id: '456789123' } });
+    },
     /**
      * 修改员工账号状态
      */

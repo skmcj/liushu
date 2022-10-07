@@ -208,6 +208,11 @@
         }
       }
     }
+    .el-date-editor {
+      &.is-active {
+        border-color: var(--primary-border-f);
+      }
+    }
     // 输入框前标签样式
     :deep(.el-form-item__label) {
       line-height: 42px;
@@ -514,6 +519,16 @@
             color: var(--primary);
           }
         }
+      }
+    }
+  }
+}
+
+.el-time-range-picker {
+  .el-time-panel__footer {
+    .el-time-panel__btn {
+      &.confirm {
+        color: var(--primary);
       }
     }
   }

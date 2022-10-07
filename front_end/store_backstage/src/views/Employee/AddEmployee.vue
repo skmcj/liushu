@@ -69,6 +69,7 @@ export default {
   },
   created() {
     // this.id = requestUrlParam('id');
+    this.id = this.$route.query.id;
     this.actionType = this.id ? 'edit' : 'add';
   },
   methods: {

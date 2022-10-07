@@ -1,8 +1,8 @@
 @font-face {
   font-family: "fbookfont"; /* Project id 3567073 */
-  src: url('//at.alicdn.com/t/c/font_3567073_baqkd9uybuk.woff2?t=1663050145401') format('woff2'),
-       url('//at.alicdn.com/t/c/font_3567073_baqkd9uybuk.woff?t=1663050145401') format('woff'),
-       url('//at.alicdn.com/t/c/font_3567073_baqkd9uybuk.ttf?t=1663050145401') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_3567073_vivsbdz7o5.woff2?t=1664699510843') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3567073_vivsbdz7o5.woff?t=1664699510843') format('woff'),
+       url('//at.alicdn.com/t/c/font_3567073_vivsbdz7o5.ttf?t=1664699510843') format('truetype');
 }
 
 .fbookfont {
@@ -11,6 +11,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.ic-fail:before {
+  content: "\e638";
+}
+
+.ic-preview:before {
+  content: "\e637";
+}
+
+.ic-money:before {
+  content: "\e66f";
 }
 
 .ic-password:before {
@@ -256,4 +268,3 @@
 .ic-logo:before {
   content: "\e602";
 }
-

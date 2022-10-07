@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Aside width="196px" />
+    <Aside width="196px" cover-url="https://s1.328888.xyz/2022/09/22/IwkOh.jpg" />
     <div class="right">
       <Header :returnFlag="blackFlag" :headTitle="title" :name="nickname" />
       <Main />

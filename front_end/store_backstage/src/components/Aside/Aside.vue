@@ -1,7 +1,7 @@
 <template>
   <div class="aside">
     <div class="cover">
-      <img alt="门脸图片" src="@/assets/images/bookshop_cover.jpg" />
+      <img alt="门脸图片" :src="coverUrl" />
       <p class="title">片刻书店</p>
     </div>
     <div class="menu">
@@ -33,6 +33,12 @@
 
 <script>
 export default {
+  props: {
+    coverUrl: {
+      type: String,
+      default: '/static/images/no-cover.jpg'
+    }
+  },
   data() {
     return {
       pathIndex: '/employee'

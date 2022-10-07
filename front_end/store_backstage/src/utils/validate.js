@@ -8,6 +8,9 @@ const REGEX_ID_18 = new RegExp('^'
                             + '[0-9Xx]'                    // 校验码
                             + '$');
 
+// 正则匹配邮箱
+const REGEX_EMAIL = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+
 // 身份证号验证过程的系数
 const wArr = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3 ];
 
@@ -16,11 +19,23 @@ const wArr = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3 ];
  * @param {*} val
  * @returns
  */
-function isCellPhone(val) {
+const isCellPhone = function(val) {
   if (!/^1(3|4|5|6|7|8)\d{9}$/.test(val)) {
     return false
   } else {
     return true
+  }
+}
+
+/**
+ * 验证邮箱格式是否正确
+ * @param {String} val
+ */
+const isEmail = function(val) {
+  if(REGEX_EMAIL.test(val)) {
+    return true;
+  }else {
+    return false;
   }
 }
 
@@ -132,6 +147,8 @@ const checkISBN = function(rule, value, callback) {
 }
 
 export default {
+  isEmail,
+  isCellPhone,
   checkPhone,
   checkIDNumber,
   checkISBN

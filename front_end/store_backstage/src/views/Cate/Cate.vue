@@ -1,9 +1,7 @@
 <template>
   <div class="main-box cate">
     <div class="bar">
-      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="addDialogVisible = true"
-        >添加分类</el-button
-      >
+      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="addCate">添加分类</el-button>
     </div>
     <el-table :data="tableData" stripe class="table">
       <el-table-column prop="name" label="分类名称" min-width="20%"></el-table-column>
@@ -23,8 +21,10 @@
       </el-table-column>
       <el-table-column prop="time" label="操作时间" min-width="20%"></el-table-column>
       <el-table-column label="操作" width="160" align="center">
-        <el-button type="text" size="small" class="edit-handle" @click="editMess()">编辑</el-button>
-        <el-button type="text" size="small" class="delete-handle" @click="deleteMess()"> 删除 </el-button>
+        <template slot-scope="scope">
+          <el-button type="text" size="small" class="edit-handle" @click="editMess(scope)">编辑</el-button>
+          <el-button type="text" size="small" class="delete-handle" @click="deleteMess()"> 删除 </el-button>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination
@@ -50,8 +50,8 @@
     </el-dialog>
     <!-- 新增分类弹框 -->
     <el-dialog
-      title="新增分类"
-      :visible.sync="addDialogVisible"
+      :title="dialogTitle"
+      :visible.sync="cateDialogVisible"
       width="30%"
       :modal-append-to-body="false"
       class="add-box blod-title">
@@ -91,9 +91,11 @@ import { getCatesAPI } from '@/api/cateApi';
 export default {
   data() {
     return {
-      delDialogVisible: false,
-      addDialogVisible: false,
+      id: '',
+      dialogTitle: '新增分类',
       actionType: 'add',
+      delDialogVisible: false,
+      cateDialogVisible: false,
       tableData: [],
       formData: {
         name: '',
@@ -114,10 +116,10 @@ export default {
   },
   methods: {
     /**
-     * 关闭添加框
+     * 关闭添加/编辑框
      */
     goBack(formName) {
-      this.addDialogVisible = false;
+      this.cateDialogVisible = false;
       this.resetForm(formName);
     },
     /**
@@ -151,9 +153,22 @@ export default {
       this.$refs[formName].resetFields();
     },
     /**
+     * 添加分类
+     */
+    addCate() {
+      this.actionType = 'add';
+      this.dialogTitle = '新增分类';
+      this.cateDialogVisible = true;
+    },
+    /**
      * 编辑分类信息
      */
-    editMess() {},
+    editMess(id) {
+      // this.id = id;
+      this.actionType = 'edit';
+      this.dialogTitle = '编辑分类';
+      this.cateDialogVisible = true;
+    },
     /**
      * 删除分类信息
      */

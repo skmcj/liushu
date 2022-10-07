@@ -5,22 +5,30 @@
     --disable: #FEDC5E;
     --delete: #F56C6C;
     --white: #FFFFFF;
+    --success: #98D98E;
     --black: #1E2732;
     --black-3: rgba(30, 39, 50, .3);
     --green: #B1D5C8;
     /* 字体色 */
     --primary-font: #333333;
     --regular-font: #818693;
+    --main-font: #666666;
     --secondary-font: #999999;
     --gray: #BFCBD9;
+    --disabled-font: #C0C4CC;
     --tip-icon: #BAC0CD;
     --light-gray: #D4DDE1;
+    --cost-title: #9FA0A0;
     /* 背景色 */
     --primary-bg: #FFFFFF;
     --default-bg: #F3F4F7;
+    --secondary-bg: #F7F7F7;
+    --gray-bg: #F5F3F2;
+    --pale: #EBECF0;
     /* border色 */
     --primary-border: #F3F4F7;
     --regular-border: #D8DDE3;
+    --routine-border: #E5E5E5;
     --secondary-border: #D8D8D8;
     --primary-border-f: var(--primary);
     /* 列表背景色 */
@@ -30,6 +38,7 @@
     --primary-btn: var(--primary);
     --primary-btn-h: #9CD6DB;
     --primary-btn-a: #73B2B8;
+    --primary-btn-d: #B5E0E4;
     --continue-btn: #343744;
     --continue-btn-h: #5D5F69;
     --continue-btn-a: #23252E;
@@ -39,4 +48,6 @@
     --delete-btn: var(--delete);
     --delete-btn-h: #F78989;
     --delete-btn-a: #E07C7C;
+    /* shadow阴影色 */
+    --grayish: #BABECC;
 }

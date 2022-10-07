@@ -251,6 +251,7 @@ export default {
   components: { FormBlock },
   data() {
     return {
+      id: '',
       formData: {
         // 基本信息
         baseInfo: {
@@ -328,6 +329,8 @@ export default {
     };
   },
   created() {
+    this.id = this.$route.query.id;
+    this.actionType = this.id ? 'edit' : 'add';
     this.getBookCate();
     this.getGoodsCate();
   },

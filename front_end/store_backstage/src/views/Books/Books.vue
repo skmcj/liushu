@@ -187,7 +187,9 @@ export default {
     /**
      * 编辑图书信息
      */
-    editMess() {},
+    editMess() {
+      this.$router.push({ path: '/books/edit', query: { id: '710000201303046072' } });
+    },
     /**
      * 修改图书状态
      */

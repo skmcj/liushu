@@ -1,5 +1,5 @@
 <template>
-  <div class="header">
+  <div class="header" @click="GoLogin">
     <!-- 左边标题区域 -->
     <div class="left">
       <span v-if="returnFlag" class="return-btn" @click="goBack">
@@ -25,7 +25,7 @@
         您是否确认退出登录？
       </span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="exitDialogVisible = false">确 认</el-button>
+        <el-button type="primary" @click="exit">确 认</el-button>
         <el-button @click="exitDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
@@ -59,13 +59,21 @@ export default {
     };
   },
   methods: {
+    GoLogin() {
+      console.log('login');
+      this.$router.push('/login');
+    },
     /**
      * 返回上一级页面
      */
     goBack() {
       this.$router.back();
     },
-    exit() {}
+    exit() {
+      window.localStorage.removeItem('lsBusinessInfo');
+      this.exitDialogVisible = false;
+      // this.$router.push('/login');
+    }
   }
 };
 </script>
@@ -105,9 +113,10 @@ export default {
     }
   }
   .right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     margin-right: 36px;
-    line-height: 64px;
-
     .ic-mess-1 {
       font-size: 14px;
       color: #bbbbbb;
@@ -117,17 +126,35 @@ export default {
       }
     }
     .ic-exit {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      text-align: center;
+      line-height: 36px;
+      border-radius: 50%;
       font-size: 24px;
-      color: #9296a2;
       cursor: pointer;
+      color: var(--primary);
+      background-color: var(--pale);
+      transition: all 0.2s ease-in-out;
+      text-shadow: 1px 1px 0 var(--white);
+      box-shadow: -5px -5px 12px var(--white), 5px 5px 12px var(--grayish);
       &:hover {
+        color: var(--primary);
+        box-shadow: -2px -2px 5px var(--white), 2px 2px 5px var(--grayish);
+      }
+      &:active {
+        color: var(--delete);
+        box-shadow: inset 1px 1px 2px var(--grayish), inset -1px -1px 2px var(--white);
+      }
+      &:focus {
         color: var(--delete);
       }
     }
     .name {
       font-size: 14px;
       color: var(--primary-font);
-      margin-left: 6px;
+      padding: 5px 12px;
       margin-right: 12px;
     }
   }

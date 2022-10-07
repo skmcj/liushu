@@ -1,6 +1,14 @@
 <template>
   <div id="app">
-    <Container />
+    <transition name="fade" mode="out-in">
+      <router-view name="index" />
+    </transition>
+    <!-- <router-view v-slot="{ Component }" name="index">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view> -->
+    <!-- <Container /> -->
   </div>
 </template>
 
@@ -10,6 +18,9 @@ import Container from '@/components/Container/Container.vue';
 export default {
   components: {
     Container
+  },
+  created() {
+    // this.$router.push('/login');
   },
   data() {
     return {
@@ -30,13 +41,25 @@ body {
 }
 // 选中时的背景色
 ::selection {
+  color: #fff;
   background: var(--primary);
 }
 ::-moz-selection {
+  color: #fff;
   background-color: var(--primary);
 }
 #app {
   width: 100%;
   height: 100%;
+}
+// 路由过渡
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
