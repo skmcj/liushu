@@ -23,4 +23,5 @@ pnpm-debug.log*
 *.sw?
 
 # front_end/store_backstage
+backend/
 

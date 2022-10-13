@@ -36,19 +36,15 @@ export default {
   props: {
     coverUrl: {
       type: String,
-      default: '/static/images/no-cover.jpg'
+      default: './static/images/no-cover.jpg'
+    },
+    pathIndex: {
+      type: String,
+      default: '/employee'
     }
   },
   data() {
-    return {
-      pathIndex: '/employee'
-    };
-  },
-  watch: {
-    $route(val) {
-      // console.log('route =>', val);
-      this.pathIndex = val.meta.asideItemIndex;
-    }
+    return {};
   }
 };
 </script>

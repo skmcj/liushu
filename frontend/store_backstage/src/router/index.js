@@ -14,6 +14,7 @@ import AddBook from '@/views/Books/AddBook';
 import EditBaseInfo from '@/views/Shop/EditBaseInfo';
 import EditAuthInfo from '@/views/Shop/EditAuthInfo';
 import Agreement from '@/views/Agreement/Agreement';
+import PrivacyPolicy from '@/views/Agreement/PrivacyPolicy';
 
 Vue.use(VueRouter);
 
@@ -60,9 +61,9 @@ const routes = [
   },
   {
     path: '/privacy_policy',
-    name: 'privacy_policy',
+    name: 'privacyPolicy',
     components: {
-      index: Agreement
+      index: PrivacyPolicy
     },
     meta: {
       title: '隐私政策',
@@ -213,7 +214,8 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
+  // base: process.env.BASE_URL,
+  base: process.env.NODE_ENV === 'development' ? process.env.BASE_URL : '/store/',
   routes
 });
 

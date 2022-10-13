@@ -33,14 +33,14 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="相关执照：" prop="license">
+          <el-form-item label="营业执照：" prop="business_license">
             <el-upload
               action="#"
               drag
               list-type="picture-card"
-              :file-list="formData.license"
-              :on-success="(response, file) => uploadImageSuccess(response, file, 'license')"
-              :on-error="(err, file) => uploadImageError(err, file, 'license')"
+              :file-list="formData.business_license"
+              :on-success="(response, file) => uploadImageSuccess(response, file, 'business_license')"
+              :on-error="(err, file) => uploadImageError(err, file, 'business_license')"
               :before-upload="beforeImageUpload">
               <i slot="default" class="icon fbookfont ic-add"></i>
               <div slot="file" slot-scope="{ file }" class="thumbnail-view">
@@ -49,7 +49,32 @@
                   <span class="tool preview-tool" @click="previewImage(file)">
                     <i class="ic-preview"></i>
                   </span>
-                  <span class="tool delete-pop" @click="deleteImage(file, 'license')">
+                  <span class="tool delete-pop" @click="deleteImage(file, 'business_license')">
+                    <i class="ic-delete"></i>
+                  </span>
+                </span>
+              </div>
+            </el-upload>
+          </el-form-item>
+        </div>
+        <div class="form-line">
+          <el-form-item label="出版物经营许可证：" prop="license_img">
+            <el-upload
+              action="#"
+              drag
+              list-type="picture-card"
+              :file-list="formData.license_img"
+              :on-success="(response, file) => uploadImageSuccess(response, file, 'license_img')"
+              :on-error="(err, file) => uploadImageError(err, file, 'license_img')"
+              :before-upload="beforeImageUpload">
+              <i slot="default" class="icon fbookfont ic-add"></i>
+              <div slot="file" slot-scope="{ file }" class="thumbnail-view">
+                <img class="upload-img-view" :src="file.url" alt="" />
+                <span class="upload-tools">
+                  <span class="tool preview-tool" @click="previewImage(file)">
+                    <i class="ic-preview"></i>
+                  </span>
+                  <span class="tool delete-pop" @click="deleteImage(file, 'license_img')">
                     <i class="ic-delete"></i>
                   </span>
                 </span>
@@ -185,7 +210,8 @@ export default {
         id_number: '440204198403073752',
         phone: '13456238956',
         email: '4564556123@qq.com',
-        license: [{ url: '/static/images/license1.jpg' }, { url: '/static/images/license2.jpg' }],
+        business_license: [{ url: '/static/images/license2.jpg' }],
+        license_img: [{ url: '/static/images/license1.jpg' }],
         env_imgs: [
           { url: '/static/images/ev1.jpg' },
           { url: '/static/images/ev2.jpg' },
@@ -193,7 +219,8 @@ export default {
         ]
       },
       rules: {
-        license: [{ required: true, message: '请上传相关执照', trigger: 'blur' }],
+        business_license: [{ required: true, message: '请上传营业执照', trigger: 'blur' }],
+        license_img: [{ required: true, message: '请上传出版物经营许可证', trigger: 'blur' }],
         env_imgs: [{ required: true, message: '请上传相关店内环境图', trigger: 'blur' }]
       },
       dialogImageVisible: false,
@@ -262,11 +289,15 @@ export default {
      * 删除图片失败
      */
     uploadImageError(res, file, st) {
-      console.log('uploadImageError', res, file, st);
+      // console.log('uploadImageError', res, file, st);
       this.$message.error('网络繁忙，请稍后再试！');
       // TODO: 后续删除
-      if (st === 'license') {
-        this.formData.license.push({
+      if (st === 'business_license') {
+        this.formData.business_license.push({
+          url: URL.createObjectURL(file.raw)
+        });
+      } else if (st === 'license_img') {
+        this.formData.license_img.push({
           url: URL.createObjectURL(file.raw)
         });
       } else if (st === 'env_imgs') {
@@ -301,8 +332,12 @@ export default {
      * 删除图片
      */
     deleteImage(file, st) {
-      if (st === 'license') {
-        this.formData.license = this.formData.license.filter(item => {
+      if (st === 'business_license') {
+        this.formData.business_license = this.formData.business_license.filter(item => {
+          return item.uid !== file.uid;
+        });
+      } else if (st === 'license_img') {
+        this.formData.license_img = this.formData.license_img.filter(item => {
           return item.uid !== file.uid;
         });
       } else if (st === 'env_imgs') {

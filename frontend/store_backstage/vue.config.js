@@ -4,7 +4,8 @@ const path = require('path');
 const stylePath = path.resolve(__dirname, './src/assets/style/common.less');
 
 module.exports = defineConfig({
-  publicPath: './',
+  // 部署到springboot项目的resource下的store
+  publicPath: process.env.NODE_ENV === 'development' ? './' : '/store/',
   transpileDependencies: true,
   configureWebpack: {
     externals: {
@@ -21,5 +22,8 @@ module.exports = defineConfig({
         stylePath
       ]
     }
+  },
+  devServer: {
+    port: 8081
   }
 })

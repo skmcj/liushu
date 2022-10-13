@@ -58,6 +58,42 @@
           </el-form-item>
         </div>
         <div class="form-line">
+          <el-form-item label="首次借阅天数：" prop="borrow_day" style="width: 488px">
+            <el-input
+              v-model.number="formData.borrow_day"
+              placeholder="请输入首次可借阅时长"
+              style="width: 210px"></el-input>
+            <span class="unit">天</span>
+            <el-popover
+              class="absolute-tip"
+              placement="bottom-start"
+              width="210"
+              trigger="hover"
+              content="用户借阅图书时，不可超过这一设置时长">
+              <span class="input-tip" slot="reference">
+                <i class="icon fbookfont ic-explain"></i>
+              </span>
+            </el-popover>
+          </el-form-item>
+          <el-form-item label="默认可续借天数：" prop="renew_day" style="width: 488px">
+            <el-input
+              v-model.number="formData.renew_day"
+              placeholder="请输入默认可续借时长"
+              style="width: 210px"></el-input>
+            <span class="unit">天</span>
+            <el-popover
+              class="absolute-tip"
+              placement="bottom-start"
+              width="210"
+              trigger="hover"
+              content="用户续借时，默认不可超过这一时长，后续可在相应订单详情页进行修改">
+              <span class="input-tip" slot="reference">
+                <i class="icon fbookfont ic-explain"></i>
+              </span>
+            </el-popover>
+          </el-form-item>
+        </div>
+        <div class="form-line">
           <el-form-item label="配送服务：" prop="distribution" style="width: 488px">
             <el-radio-group v-model="formData.distribution">
               <el-radio :label="0">由 商家 配送</el-radio>
@@ -146,6 +182,8 @@ export default {
         cover: 'https://s1.328888.xyz/2022/09/22/IwkOh.jpg',
         address: '广东省韶关市浈江区大学路918号',
         business_hours: ['9:00', '20:00'],
+        borrow_day: '',
+        renew_day: '',
         distribution: 0,
         distributionStr: '由 商家 配送',
         deliver_fee: 3,
@@ -158,6 +196,8 @@ export default {
         cover: [{ required: true, message: '请选择门脸图片', trigger: 'blur' }],
         address: [{ required: true, message: '请输入店铺地址', trigger: 'blur' }],
         business_hours: [{ required: true, message: '请输入营业时间', trigger: 'blur' }],
+        borrow_day: [{ required: true, message: '请输入首次可借阅时长', trigger: 'blur' }],
+        renew_day: [{ required: true, message: '请输入默认可续借时长', trigger: 'blur' }],
         distribution: [{ required: true, message: '请选择配送服务', trigger: 'blur' }],
         deliver_fee: [{ required: true, message: '请输入配送费', trigger: 'blur' }]
       },

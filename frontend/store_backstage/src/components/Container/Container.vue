@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Aside width="196px" cover-url="https://s1.328888.xyz/2022/09/22/IwkOh.jpg" />
+    <Aside width="196px" cover-url="https://s1.328888.xyz/2022/09/22/IwkOh.jpg" :pathIndex="pathName" />
     <div class="right">
       <Header :returnFlag="blackFlag" :headTitle="title" :name="nickname" />
       <Main />
@@ -23,6 +23,7 @@ export default {
     return {
       blackFlag: false,
       title: '员工管理',
+      pathName: '/employee',
       nickname: '张三'
     };
   },
@@ -32,6 +33,7 @@ export default {
       immediate: true,
       handler(val) {
         this.title = val.meta.head;
+        this.pathName = val.meta.asideItemIndex;
         this.blackFlag = val.meta.returnFlag;
       }
     }
