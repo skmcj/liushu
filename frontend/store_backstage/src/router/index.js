@@ -251,6 +251,8 @@ router.beforeEach((to, from, next) => {
       next();
     } else if(isLogin && from.meta.title === '404 NotFound') {
       next('/');
+    } else if(isLogin && JSON.stringify(from.meta) === '{}') {
+      next('/');
     } else {
       document.title = from.meta.title;
     }

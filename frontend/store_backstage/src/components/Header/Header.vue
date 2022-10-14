@@ -68,7 +68,7 @@ export default {
     exit() {
       window.localStorage.removeItem('lsBusinessInfo');
       this.exitDialogVisible = false;
-      // this.$router.push('/login');
+      this.$router.push('/login');
     }
   }
 };
