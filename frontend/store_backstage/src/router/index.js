@@ -251,13 +251,16 @@ router.beforeEach((to, from, next) => {
       next();
     } else if(isLogin && from.meta.title === '404 NotFound') {
       next('/');
+    } else {
+      document.title = from.meta.title;
     }
-    console.log('from', from);
   } else {
     // 如果访问其它页面，判断是否登录，登录放行，未登录则跳转到登录页
     const isLogin = window.localStorage.getItem('lsBusinessInfo');
     if(isLogin) {
       next();
+    } else {
+      next('/login');
     }
   }
 });

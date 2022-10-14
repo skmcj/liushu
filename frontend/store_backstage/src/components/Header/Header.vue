@@ -1,5 +1,5 @@
 <template>
-  <div class="header" @click="GoLogin">
+  <div class="header">
     <!-- 左边标题区域 -->
     <div class="left">
       <span v-if="returnFlag" class="return-btn" @click="goBack">
@@ -59,10 +59,6 @@ export default {
     };
   },
   methods: {
-    GoLogin() {
-      console.log('login');
-      this.$router.push('/login');
-    },
     /**
      * 返回上一级页面
      */
