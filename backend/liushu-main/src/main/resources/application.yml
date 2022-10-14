@@ -1,0 +1,53 @@
+# 端口
+server:
+  port: 8080
+#  servlet:
+#    context-path: /api
+
+# 使用 smtp 协议
+spring:
+  application:
+    name: liushu
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/liushu?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: admin
+      password: pwd84537
+  freemarker:
+    template-loader-path: classpath:/templates/
+  main:
+    banner-mode: off
+  mail:
+    protocol: smtp
+    host: smtp.qq.com
+    # 端口号465或587
+    port: 587
+    nickname: 流书网-图书外卖
+    username: 1125486461@qq.com
+    password: yljytdhipqmpfjfc    # 授权码
+    test-connection: false
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          ssl:
+            # 本地测试，先放开ssl
+            enable: false
+            required: false
+          auth: false
+        # 开启debug模式，这样邮件发送过程的日志会在控制台打印出来，方便排查错误
+        debug: false
+        mime:
+          splitlongparameters: false
+
+# Mybatis-Plus 配置
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+    banner: false
