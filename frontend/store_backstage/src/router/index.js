@@ -15,6 +15,7 @@ import EditBaseInfo from '@/views/Shop/EditBaseInfo';
 import EditAuthInfo from '@/views/Shop/EditAuthInfo';
 import Agreement from '@/views/Agreement/Agreement';
 import PrivacyPolicy from '@/views/Agreement/PrivacyPolicy';
+import NotFound from '@/views/Common/NotFound';
 
 Vue.use(VueRouter);
 
@@ -69,6 +70,20 @@ const routes = [
       title: '隐私政策',
       head: '隐私政策',
       asideItemIndex: '/privacy_policy',
+      returnFlag: false,
+      noVerify: true
+    }
+  },
+  {
+    path: '*',
+    name: 'notFound',
+    components: {
+      index: NotFound
+    },
+    meta: {
+      title: '404 NotFound',
+      head: 'NotFound',
+      asideItemIndex: '/404',
       returnFlag: false,
       noVerify: true
     }
@@ -234,14 +249,15 @@ router.beforeEach((to, from, next) => {
     const isLogin = window.localStorage.getItem('lsBusinessInfo');
     if(!isLogin) {
       next();
+    } else if(isLogin && from.meta.title === '404 NotFound') {
+      next('/');
     }
+    console.log('from', from);
   } else {
     // 如果访问其它页面，判断是否登录，登录放行，未登录则跳转到登录页
     const isLogin = window.localStorage.getItem('lsBusinessInfo');
     if(isLogin) {
       next();
-    }else {
-      next('/login');
     }
   }
 });

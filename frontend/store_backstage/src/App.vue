@@ -20,7 +20,7 @@ export default {
     Container
   },
   created() {
-    // this.$router.push('/login');
+    // this.$router.push('/emo');
   },
   data() {
     return {
