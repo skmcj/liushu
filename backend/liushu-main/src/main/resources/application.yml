@@ -1,6 +1,8 @@
 # 端口
 server:
   port: 8080
+  servlet:
+    context-path: /api
 #  servlet:
 #    context-path: /api
 
@@ -12,34 +14,41 @@ spring:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/liushu?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: admin
-      password: pwd84537
+      username: MySQL用户名
+      password: MySQL密码
   freemarker:
     template-loader-path: classpath:/templates/
   main:
     banner-mode: off
   mail:
     protocol: smtp
-    host: smtp.qq.com
+    host: 邮箱smtp域名
     # 端口号465或587
     port: 587
     nickname: 流书网-图书外卖
-    username: 1125486461@qq.com
-    password: yljytdhipqmpfjfc    # 授权码
+    username: 邮箱账号
+    password: 邮箱授权码
     test-connection: false
     default-encoding: UTF-8
     properties:
       mail:
         smtp:
-          ssl:
-            # 本地测试，先放开ssl
-            enable: false
-            required: false
-          auth: false
+          timeout: 10000
+#          ssl:
+#            # 打开ssl安全验证
+#            enable: true
+#            required: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+          # 如果设置false，可以不设置用户名和密码，当然也得看你的对接的平台是否支持无密码进行访问的。
+          auth: true
+          starttls:
+            enable: true
+            required: true
         # 开启debug模式，这样邮件发送过程的日志会在控制台打印出来，方便排查错误
         debug: false
-        mime:
-          splitlongparameters: false
+  #        mime:
+  #          splitlongparameters: false
 
 # Mybatis-Plus 配置
 mybatis-plus:
@@ -51,3 +60,7 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
     banner: false
+
+# 项目自定义配置项
+liushu:
+  oss: G:/data/oss/liushu-oss/
