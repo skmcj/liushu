@@ -56,7 +56,12 @@ public enum StatusCodeEnum {
      * 用户相关状态
      */
     USERNAME_EXIST(52101, "用户名已存在"),
-    USERNAME_NOT_EXIST(52102, "用户名不存在")
+    USERNAME_NOT_EXIST(52102, "用户名不存在"),
+    /**
+     * 图片上传状态
+     */
+    IMAGE_UPLOAD_OK(21011, "图片上传成功"),
+    IMAGE_UPLOAD_ERR(21010, "图片上传失败")
     ;
 
     // 状态码

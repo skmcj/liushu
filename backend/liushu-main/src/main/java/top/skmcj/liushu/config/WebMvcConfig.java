@@ -3,8 +3,10 @@ package top.skmcj.liushu.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import top.skmcj.liushu.annotation.Unprefix;
 import top.skmcj.liushu.common.JacksonObjectMapper;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/store/**").addResourceLocations("classpath:/store/");
         // 配置用户前台访问路径映射资源
         // registry.addResourceHandler("/**").addResourceLocations("classpath:/front/");
+        // 配置其它路径映射资源
+        registry.addResourceHandler("/other/**").addResourceLocations("classpath:/other/");
     }
 
     /**
@@ -36,5 +40,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         messageConverter.setObjectMapper(new JacksonObjectMapper());
         // 将上面的转换器添加到mvc消息转换器的集合中
         converters.add(0, messageConverter);
+    }
+
+    @Override
+    protected void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.addPathPrefix("/api", c -> !c.isAnnotationPresent(Unprefix.class));
     }
 }
