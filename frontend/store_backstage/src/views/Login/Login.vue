@@ -3,7 +3,7 @@
     <div class="login-main">
       <!-- 左边展示图 -->
       <div class="cover">
-        <img src="/static/images/backend_login_cover.jpg" alt="cover" />
+        <img :src="baseUrl + '/api/img/com-backend-page.jpg'" alt="cover" />
       </div>
       <!-- 右边主要信息 -->
       <div class="login-content">
@@ -42,9 +42,12 @@
 </template>
 
 <script>
+import { loginEmployeeApi } from '@/api/shopApi';
+
 export default {
   data() {
     return {
+      baseUrl: this.$staticUrl,
       loginForm: {
         username: '',
         password: ''
@@ -55,17 +58,72 @@ export default {
       }
     };
   },
+  created() {
+    // this.$router.push('/auth');
+  },
   methods: {
-    login() {
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          window.localStorage.setItem('lsBusinessInfo', 'zhangsan');
-          this.$router.push('/');
+    async login() {
+      const flag = await this.validate('form');
+      // 如果以提交审核信息，且审核通过，直接登录，进入后台
+      if (flag) {
+        // 表单验证通过
+        let res = await loginEmployeeApi(this.loginForm.username, this.$md5(this.loginForm.password));
+        console.log('res =>', res);
+        if (res.status === 200) {
+          if (res.data.code === 21041) {
+            // 登录成功
+            window.localStorage.setItem('businessToken', res.data.data.token);
+            this.$showMsg('登录成功', 'success', {
+              closeFunc: () => {
+                this.$router.replace('/');
+              }
+            });
+          } else if (res.data.code === 21052) {
+            // 前往完善审核信息
+            this.$showMsg('当前店铺审核资料尚未完善，准备前往完善', 'warning', {
+              closeFunc: () => {
+                this.$router.push('/auth');
+              }
+            });
+          } else if (res.data.code === 21050) {
+            // 审核不通过
+            this.$showMsg(res.data.msg, 'error');
+          } else {
+            // 其它情况
+            this.$showMsg(res.data.msg, 'warning');
+          }
+        } else {
+          this.$showMsg('网络繁忙，请稍后再试', 'error');
         }
+      }
+    },
+    /**
+     * 检查表单
+     * @param {String} formName - 表单的ref属性值
+     */
+    validate(formName) {
+      return new Promise(resolve => {
+        this.$refs[formName].validate(valid => {
+          resolve(valid);
+        });
       });
     },
+    /**
+     * 注册
+     */
     gotoLogon() {
       this.$router.push('/logon');
+    },
+    /**
+     * 展示信息
+     */
+    $showMsg(message, type = 'info', { close = true, closeFunc = () => {} } = {}) {
+      this.$message({
+        showClose: close,
+        type: type,
+        message: message,
+        onClose: closeFunc
+      });
     }
   }
 };

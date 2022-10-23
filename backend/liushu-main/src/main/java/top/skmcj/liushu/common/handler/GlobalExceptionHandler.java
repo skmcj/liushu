@@ -1,26 +1,75 @@
 package top.skmcj.liushu.common.handler;
 
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
+import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.common.exception.BusinessException;
 
 /**
  * 全局异常处理
  */
 @Slf4j
-@ResponseBody
-@ControllerAdvice(annotations = {RestController.class, ControllerAdvice.class})
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
-     * 异常处理方法
+     * 业务异常处理方法
      */
     @ExceptionHandler(BusinessException.class)
     public Result<String> exceptionHandler(BusinessException ex) {
         log.error(ex.getMessage());
         return Result.error(ex.getMessage());
     }
+
+    /**
+     * JWT相关异常处理
+     * JWTDecodeException：header、payload被修改会出现的异常
+     * SignatureVerificationException：签名不匹配异常
+     * TokenExpiredException：令牌过期异常
+     * AlgorithmMismatchException：算法不匹配异常
+    */
+    @ExceptionHandler(JWTDecodeException.class)
+    public Result<String> jwtExceptionHandler(JWTDecodeException ex) {
+        log.error(ex.getMessage());
+        return Result.error(ex.getMessage(), StatusCodeEnum.JWT_ERR);
+    }
+    @ExceptionHandler(SignatureVerificationException.class)
+    public Result<String> jwtExceptionHandler(SignatureVerificationException ex) {
+        log.error(ex.getMessage());
+        return Result.error(ex.getMessage(), StatusCodeEnum.JWT_ERR);
+    }
+    @ExceptionHandler(TokenExpiredException.class)
+    public Result<String> jwtExceptionHandler(TokenExpiredException ex) {
+        log.error(ex.getMessage());
+        return Result.error("token已过期", StatusCodeEnum.JWT_ERR);
+    }
+    @ExceptionHandler(AlgorithmMismatchException.class)
+    public Result<String> jwtExceptionHandler(AlgorithmMismatchException ex) {
+        log.error(ex.getMessage());
+        return Result.error(ex.getMessage(), StatusCodeEnum.JWT_ERR);
+    }
+
+
+    /**
+     * 处理所有RuntimeException异常
+     */
+    @ExceptionHandler({RuntimeException.class})
+    public Result<String> allRuntimeException(RuntimeException ex) {
+        log.error(ex.getMessage());
+        return Result.error(ex.getMessage(), StatusCodeEnum.SYSTEM_RUNTIME_ERR);
+    }
+
+    /**
+     * 处理所有Exception异常
+     */
+    @ExceptionHandler({Exception.class})
+    public Result<String> allException(Exception ex) {
+        log.error(ex.getMessage());
+        return Result.error(ex.getMessage(), StatusCodeEnum.SYSTEM_UNKNOW_ERR);
+    }
+
 }

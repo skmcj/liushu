@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { getCatesAPI } from '@/api/cateApi';
+import { getCatesApi } from '@/api/cateApi';
 
 export default {
   data() {
@@ -195,7 +195,7 @@ export default {
     getCateByPage() {
       let start = (this.currentPage - 1) * this.pageSize;
       let end = this.currentPage * this.pageSize;
-      getCatesAPI().then(
+      getCatesApi().then(
         res => {
           this.tableData = res.data.slice(start, end);
         },

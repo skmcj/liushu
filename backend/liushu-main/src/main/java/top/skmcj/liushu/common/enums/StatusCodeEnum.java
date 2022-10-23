@@ -18,6 +18,8 @@ public enum StatusCodeEnum {
      * 请求失败
      */
     FAIL(51000, "请求失败"),
+
+    UNKNOW(50010, "未知错误"),
     /**
      * 保存成功、失败
      */
@@ -43,11 +45,18 @@ public enum StatusCodeEnum {
      */
     SYSTEM_ERR(52001, "系统异常"),
     SYSTEM_TIMEOUT_ERR(52002, "系统繁忙，请稍后再试！"),
-    SYSTEM_UNKNOW_ERR(52003, "未知错误"),
+    SYSTEM_RUNTIME_ERR(52003, "系统异常，请检查传参是否有误或稍后重试"),
+    SYSTEM_UNKNOW_ERR(52009, "未知错误"),
+    /**
+     * JWT异常
+     */
+    JWT_ERR(52901, "Token校验异常"),
     /**
      * 未登录
      */
     NO_LOGIN(40101, "用户未登录"),
+    LOGIN_USER_ERR(40102, "用户名错误"),
+    LOGIN_PASS_ERR(40103, "密码错误"),
     /**
      * 无权限
      */
@@ -60,8 +69,40 @@ public enum StatusCodeEnum {
     /**
      * 图片上传状态
      */
-    IMAGE_UPLOAD_OK(21011, "图片上传成功"),
-    IMAGE_UPLOAD_ERR(21010, "图片上传失败")
+    IMAGE_UPLOAD_OK(21001, "图片上传成功"),
+    IMAGE_UPLOAD_ERR(21000, "图片上传失败"),
+    /**
+     * 邮件发送状态
+     */
+    MAIL_SEND_OK(21011, "邮件发送成功"),
+    MAIL_SEND_ERR(21010, "邮件发送失败"),
+    /**
+     * 验证码校验状态
+     */
+    CHECK_CODE_OK(21021, "验证码校验成功"),
+    CHECK_CODE_ERR(21020, "验证码校验失败"),
+    CHECK_CODE_EXPIRED(21022, "验证码已过期"),
+    /**
+     * 商家注册状态
+     */
+    BUSINESS_LOGON_OK(21031, "商家注册成功"),
+    BUSINESS_LOGON_ERR(21030, "商家注册失败"),
+    BUSINESS_LOGON_EXISTS(21032, "商家已注册"),
+    /**
+     * 商家登录状态
+     */
+    BUSINESS_LOGIN_OK(21041, "商家登录成功"),
+    BUSINESS_LOGIN_ERR(21040, "商家登录失败"),
+    /**
+     * 店铺状态
+     */
+    STORE_PROCESS_ONS(21052, "店铺审核信息未提交，请前往完善提交"),
+    STORE_PROCESS_ENS(21053, "店铺审核信息未提交，请联系店长完善提交"),
+    STORE_PROCESS_NP(21054, "店铺审核信息审核未通过"),
+    STORE_PROCESS_FP(21050, "店铺审核信息审核不通过"),
+    STORE_PROCESS_OK(21051, "店铺审核信息审核通过"),
+    STORE_PROCESS_SERR(21055, "店铺审核信息提交成功"),
+    STORE_PROCESS_SOK(21056, "店铺审核信息提交失败"),
     ;
 
     // 状态码

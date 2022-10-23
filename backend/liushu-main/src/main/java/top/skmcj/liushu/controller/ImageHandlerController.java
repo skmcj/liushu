@@ -94,8 +94,11 @@ public class ImageHandlerController {
             case "sta":
                 name = "store_about/";
                 break;
+            case "com":
+                name = "common/";
+                break;
             default:
-                name = "";
+                name = "other/";
                 break;
         }
         return name;
@@ -125,6 +128,9 @@ public class ImageHandlerController {
                 break;
             case "sta":
                 imgPath = rootPath + "store_about/";
+                break;
+            case "com":
+                imgPath = rootPath + "common/";
                 break;
             default:
                 imgPath = rootPath + "other/";

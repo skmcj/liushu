@@ -16,6 +16,7 @@ import EditAuthInfo from '@/views/Shop/EditAuthInfo';
 import Agreement from '@/views/Agreement/Agreement';
 import PrivacyPolicy from '@/views/Agreement/PrivacyPolicy';
 import NotFound from '@/views/Common/NotFound';
+import AuthMess from '@/views/Login/AuthMess';
 
 Vue.use(VueRouter);
 
@@ -44,6 +45,20 @@ const routes = [
       head: '注册',
       asideItemIndex: '/logon',
       returnFlag: false
+    }
+  },
+  {
+    path: '/auth',
+    name: 'auth',
+    components: {
+      index: AuthMess
+    },
+    meta: {
+      title: '提交审核信息',
+      head: '审核信息',
+      asideItemIndex: '/auth',
+      returnFlag: false,
+      noVerify: true
     }
   },
   {
@@ -258,7 +273,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     // 如果访问其它页面，判断是否登录，登录放行，未登录则跳转到登录页
-    const isLogin = window.localStorage.getItem('lsBusinessInfo');
+    const isLogin = window.localStorage.getItem('businessToken');
     if(isLogin) {
       next();
     } else {

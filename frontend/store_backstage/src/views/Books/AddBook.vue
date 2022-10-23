@@ -243,8 +243,8 @@
 
 <script>
 import FormBlock from '@/components/Form/FormBlock';
-import { getBookCateAPI } from '@/api/bookAPI';
-import { getGoodsCateAPI } from '@/api/shopAPI';
+import { getBookCateApi } from '@/api/bookApi';
+import { getGoodsCateApi } from '@/api/shopApi';
 import rules from '@/utils/validate';
 
 export default {
@@ -339,7 +339,7 @@ export default {
      * 获取图书类别信息
      */
     getBookCate() {
-      getBookCateAPI().then(
+      getBookCateApi().then(
         res => {
           this.book_cate = res.data;
         },
@@ -350,7 +350,7 @@ export default {
      * 获取店内分类信息
      */
     getGoodsCate() {
-      getGoodsCateAPI().then(
+      getGoodsCateApi().then(
         res => {
           this.goods_cate = res.data;
         },

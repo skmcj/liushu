@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { getEmployeesAPI } from '@/api/employeeAPI.js';
+import { getEmployeesApi } from '@/api/shopApi';
 
 export default {
   data() {
@@ -140,7 +140,7 @@ export default {
     getEmployeeByPage() {
       let start = (this.currentPage - 1) * this.pageSize;
       let end = this.currentPage * this.pageSize;
-      getEmployeesAPI().then(
+      getEmployeesApi().then(
         res => {
           this.tableData = res.data.slice(start, end);
         },

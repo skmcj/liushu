@@ -66,7 +66,7 @@ export default {
       this.$router.back();
     },
     exit() {
-      window.localStorage.removeItem('lsBusinessInfo');
+      window.localStorage.removeItem('businessToken');
       this.exitDialogVisible = false;
       this.$router.push('/login');
     }

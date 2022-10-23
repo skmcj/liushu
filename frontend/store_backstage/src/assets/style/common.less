@@ -339,6 +339,28 @@
         }
       }
     }
+    .cover-uploader {
+      :deep(.el-upload-list) {
+        .el-upload-list__item {
+          &.is-ready {
+            display: none;
+          }
+          &.is-uploading {
+            display: none;
+          }
+        }
+        &.el-upload-list--picture-card {
+          .el-upload-list__item {
+            &.is-ready {
+              display: none;
+            }
+            &.is-uploading {
+              display: none;
+            }
+          }
+        }
+      }
+    }
 
     .cover {
       width: 200px;

@@ -54,6 +54,16 @@ public class Result<T> {
     }
 
     /**
+     * 成功结果 - statusEnum
+     * @param codeEnum
+     * @param <T>
+     * @return
+     */
+    public static <T> Result<T> success(StatusCodeEnum codeEnum) {
+        return buildResult(true, null, codeEnum.getCode(), codeEnum.getMsg());
+    }
+
+    /**
      * 成功结果 - data, status
      * @param data
      * @param codeEnum
@@ -103,6 +113,16 @@ public class Result<T> {
      */
     public static <T> Result<T> error(T data) {
         return buildResult(false, data, SUCCESS.getCode(), SUCCESS.getMsg());
+    }
+
+    /**
+     * 失败结果 - statusEnum
+     * @param codeEnum
+     * @param <T>
+     * @return
+     */
+    public static <T> Result<T> error(StatusCodeEnum codeEnum) {
+        return buildResult(false, null, codeEnum.getCode(), codeEnum.getMsg());
     }
 
     /**

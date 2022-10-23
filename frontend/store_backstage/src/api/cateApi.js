@@ -1,5 +1,5 @@
 import request from '@/utils/request.js';
 
-export const getCatesAPI = function() {
+export const getCatesApi = function() {
   return request.get('/mockdata/cate.json');
 }

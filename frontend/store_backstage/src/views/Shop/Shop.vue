@@ -131,8 +131,8 @@
 <script>
 import BarChart from '@/components/Chart/BarChart';
 import ToolBox from '@/components/Common/ToolBox';
-import { getOrderQuantityAPI } from '@/api/orderAPI';
-import { getBookRankAPI } from '@/api/bookAPI';
+import { getOrderQuantityApi } from '@/api/orderApi';
+import { getBookRankApi } from '@/api/bookApi';
 import chartHandler from '@/utils/chartDataHandler';
 
 export default {
@@ -208,7 +208,7 @@ export default {
      * 获取近14天订单图表数据
      */
     getOrderChartOption() {
-      getOrderQuantityAPI().then(res => {
+      getOrderQuantityApi().then(res => {
         this.orderOption = chartHandler.packingOrderData(res.data);
       });
     },
@@ -216,7 +216,7 @@ export default {
      * 刷新订单图表数据
      */
     refreshOrderChart() {
-      getOrderQuantityAPI().then(res => {
+      getOrderQuantityApi().then(res => {
         res.data[3][1] -= 12;
         this.orderOption.dataset.source = res.data;
       });
@@ -225,7 +225,7 @@ export default {
      * 获取图书借阅榜信息
      */
     getBookRankChart() {
-      getBookRankAPI().then(res => {
+      getBookRankApi().then(res => {
         this.bookRankOption = chartHandler.packingBookRank(res.data);
       });
     },
@@ -234,7 +234,7 @@ export default {
      */
     refreshBookRankChart() {
       // vue的watch似乎无法监听嵌套对象的多维数组元素的值变化
-      getBookRankAPI().then(res => {
+      getBookRankApi().then(res => {
         res.data.data[4][1] += 50;
         this.bookRankOption.dataset.source = res.data.data;
       });

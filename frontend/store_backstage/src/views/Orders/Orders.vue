@@ -171,7 +171,7 @@
 </template>
 
 <script>
-import { getOrdersAPI } from '@/api/orderAPI';
+import { getOrdersApi } from '@/api/orderApi';
 
 export default {
   data() {
@@ -271,7 +271,7 @@ export default {
     getOrderByPage() {
       let start = (this.currentPage - 1) * this.pageSize;
       let end = this.currentPage * this.pageSize;
-      getOrdersAPI().then(
+      getOrdersApi().then(
         res => {
           this.tableData = res.data.slice(start, end);
         },

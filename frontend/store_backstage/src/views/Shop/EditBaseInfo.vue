@@ -172,7 +172,7 @@
 </template>
 
 <script>
-import { getBookCateAPI } from '@/api/bookAPI';
+import { getBookCateApi } from '@/api/bookApi';
 
 export default {
   data() {
@@ -223,7 +223,7 @@ export default {
      * 获取图书类别信息
      */
     getBookCate() {
-      getBookCateAPI().then(
+      getBookCateApi().then(
         res => {
           this.book_cate = res.data;
         },

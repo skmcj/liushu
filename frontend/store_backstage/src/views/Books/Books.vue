@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import { getBooksAPI } from '@/api/bookAPI';
+import { getBooksApi } from '@/api/bookApi';
 
 export default {
   data() {
@@ -224,7 +224,7 @@ export default {
     getBookByPage() {
       let start = (this.currentPage - 1) * this.pageSize;
       let end = this.currentPage * this.pageSize;
-      getBooksAPI().then(
+      getBooksApi().then(
         res => {
           this.tableData = res.data.slice(start, end);
         },
