@@ -48,6 +48,11 @@ public enum StatusCodeEnum {
     SYSTEM_RUNTIME_ERR(52003, "系统异常，请检查传参是否有误或稍后重试"),
     SYSTEM_UNKNOW_ERR(52009, "未知错误"),
     /**
+     * 数据库操作异常
+     */
+    // 重复插入唯一值异常
+    SQL_UNEX_ERR(52101, "该用户已存在"),
+    /**
      * JWT异常
      */
     JWT_ERR(52901, "Token校验异常"),
@@ -93,6 +98,7 @@ public enum StatusCodeEnum {
      */
     BUSINESS_LOGIN_OK(21041, "商家登录成功"),
     BUSINESS_LOGIN_ERR(21040, "商家登录失败"),
+    BUSINESS_LOGIN_SERR(21042, "账号已被禁用"),
     /**
      * 店铺状态
      */
@@ -103,6 +109,17 @@ public enum StatusCodeEnum {
     STORE_PROCESS_OK(21051, "店铺审核信息审核通过"),
     STORE_PROCESS_SERR(21055, "店铺审核信息提交成功"),
     STORE_PROCESS_SOK(21056, "店铺审核信息提交失败"),
+    /**
+     * 商家功能相关
+     */
+    EMPLOYEE_ADD_OK(21061, "员工添加成功"),
+    EMPLOYEE_ADD_ERR(21062, "员工添加失败"),
+    EMPLOYEE_EDIT_OK(21063, "员工修改成功"),
+    EMPLOYEE_EDIT_ERR(21064, "员工修改失败"),
+    EMPLOYEE_DEL_OK(21065, "员工删除成功"),
+    EMPLOYEE_DEL_ERR(21066, "员工删除失败"),
+    EMPLOYEE_SEARCH_OK(21067, "员工搜索成功"),
+    EMPLOYEE_EXISTS(21068, "员工已存在")
     ;
 
     // 状态码

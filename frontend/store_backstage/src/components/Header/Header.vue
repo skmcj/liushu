@@ -50,7 +50,7 @@ export default {
     // 当前登录人姓名
     name: {
       type: String,
-      default: '张三'
+      default: '**'
     }
   },
   data() {
@@ -58,6 +58,7 @@ export default {
       exitDialogVisible: false
     };
   },
+  created() {},
   methods: {
     /**
      * 返回上一级页面
@@ -66,7 +67,7 @@ export default {
       this.$router.back();
     },
     exit() {
-      window.localStorage.removeItem('businessToken');
+      window.localStorage.removeItem('employeeInfo');
       this.exitDialogVisible = false;
       this.$router.push('/login');
     }

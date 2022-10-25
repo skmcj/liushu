@@ -72,7 +72,7 @@ export default {
         if (res.status === 200) {
           if (res.data.code === 21041) {
             // 登录成功
-            window.localStorage.setItem('businessToken', res.data.data.token);
+            window.localStorage.setItem('employeeInfo', JSON.stringify(res.data.data));
             this.$showMsg('登录成功', 'success', {
               closeFunc: () => {
                 this.$router.replace('/');

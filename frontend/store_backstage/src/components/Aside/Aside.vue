@@ -2,7 +2,7 @@
   <div class="aside">
     <div class="cover">
       <img alt="门脸图片" :src="coverUrl" />
-      <p class="title">片刻书店</p>
+      <p class="title">{{ title }}</p>
     </div>
     <div class="menu">
       <el-menu :default-active="pathIndex" :router="true">
@@ -37,6 +37,10 @@ export default {
     coverUrl: {
       type: String,
       default: './static/images/no-cover.jpg'
+    },
+    title: {
+      type: String,
+      default: '某某书店'
     },
     pathIndex: {
       type: String,

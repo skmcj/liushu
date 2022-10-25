@@ -9,29 +9,50 @@
         @keyup.enter.native="handleSearch">
         <i slot="prefix" class="icon fbookfont ic-search" style="cursor: pointer" @click="handleSearch"></i>
       </el-input>
-      <el-button class="add-btn" round icon="icon fbookfont ic-add" @click="add">添加员工</el-button>
+      <el-button class="add-btn" v-if="employeeCom < 2" round icon="icon fbookfont ic-add" @click="add"
+        >添加员工</el-button
+      >
     </div>
-    <el-table :data="tableData" stripe class="table">
+    <el-table :data="tableData" stripe class="table" empty-text="暂无员工或您权限不足">
       <el-table-column prop="name" label="员工姓名"></el-table-column>
       <el-table-column prop="username" label="账号"></el-table-column>
       <el-table-column prop="phone" label="手机号"></el-table-column>
       <el-table-column prop="competence" label="权限">
         <template slot-scope="scope">
-          {{ scope.row.competence == '0' ? '管理员' : '员工' }}
+          {{ scope.row.competence == '0' ? '店长' : scope.row.competence == '1' ? '管理员' : '员工' }}
         </template>
       </el-table-column>
       <el-table-column prop="status" label="账号状态">
         <template slot-scope="scope">
-          {{ scope.row.status == '0' ? '正常' : '禁用' }}
+          {{ scope.row.status == '1' ? '正常' : '禁用' }}
         </template>
       </el-table-column>
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small" class="edit-handle" @click="editMess()">编辑</el-button>
-          <el-button type="text" size="small" class="status-handle" @click="editStatus(scope.row)">
-            {{ scope.row.status == '0' ? '禁用' : '启用' }}
+          <el-button
+            v-if="employeeCom < scope.row.competence || employeeId === scope.row.id"
+            type="text"
+            size="small"
+            class="edit-handle"
+            @click="editMess(scope.row.id)"
+            >编辑</el-button
+          >
+          <el-button
+            v-if="employeeCom < scope.row.competence"
+            type="text"
+            size="small"
+            class="status-handle"
+            @click="editStatus(scope.row)">
+            {{ scope.row.status == '1' ? '禁用' : '启用' }}
           </el-button>
-          <el-button type="text" size="small" class="delete-handle" @click="deleteMess(scope.row)"> 删除 </el-button>
+          <el-button
+            v-if="employeeCom < scope.row.competence"
+            type="text"
+            size="small"
+            class="delete-handle"
+            @click="deleteMess(scope.row)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,10 +70,10 @@
     <el-dialog title="提示" :visible.sync="stateDialogVisible" width="30%" :modal-append-to-body="false">
       <span>
         <i class="icon fbookfont ic-info"></i>
-        您是否确认{{ checkedRow.status == '0' ? '禁用' : '启用' }}该员工？
+        您是否确认{{ checkedRow.status == '1' ? '禁用' : '启用' }}该员工？
       </span>
       <span slot="footer" class="dialog-footer state">
-        <el-button type="primary" @click="stateDialogVisible = false">确 认</el-button>
+        <el-button type="primary" @click="changeStatus">确 认</el-button>
         <el-button @click="stateDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
@@ -63,7 +84,7 @@
         您是否确认删除该员工？<br />&nbsp;&nbsp;&nbsp;&nbsp;(注：该操作不可撤回)
       </span>
       <span slot="footer" class="dialog-footer delete">
-        <el-button type="primary" @click="delDialogVisible = false">确 认</el-button>
+        <el-button type="primary" @click="delEmployee">确 认</el-button>
         <el-button @click="delDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
@@ -71,11 +92,14 @@
 </template>
 
 <script>
-import { getEmployeesApi } from '@/api/shopApi';
+import { getEmployeePageApi, editEmployeeStatusApi, delEmployeeApi } from '@/api/employeeApi';
 
 export default {
   data() {
     return {
+      storeId: '',
+      employeeId: '',
+      employeeCom: '',
       stateDialogVisible: false,
       delDialogVisible: false,
       checkedRow: '',
@@ -83,17 +107,53 @@ export default {
       tableData: [],
       currentPage: 1,
       pageSize: 5,
-      total: 100
+      total: 0
     };
   },
   created() {
-    this.getEmployeeByPage();
+    this.getCompetence();
+    this.init();
   },
   methods: {
     /**
+     * 初始化
+     */
+    init() {
+      const params = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        storeId: this.storeId,
+        name: this.searchContent ? this.searchContent : undefined
+      };
+      getEmployeePageApi(params)
+        .then(res => {
+          if (res.data.flag) {
+            this.tableData = res.data.data.records || [];
+            this.total = res.data.data.total;
+          }
+        })
+        .catch(err => {
+          this.$message.error('请求出错了：' + err);
+        });
+    },
+    /**
+     * 获取当前员工权限
+     */
+    getCompetence() {
+      const employeeInfo = JSON.parse(window.localStorage.getItem('employeeInfo'));
+      if (employeeInfo) {
+        this.employeeCom = employeeInfo.competence;
+        this.employeeId = employeeInfo.id;
+        this.storeId = employeeInfo.storeId;
+      }
+    },
+    /**
      * 搜索员工姓名
      */
-    handleSearch() {},
+    handleSearch() {
+      this.currentPage = 1;
+      this.init();
+    },
     /**
      * 添加员工
      */
@@ -103,8 +163,8 @@ export default {
     /**
      * 编辑员工信息
      */
-    editMess() {
-      this.$router.push({ path: '/employee/edit', query: { id: '456789123' } });
+    editMess(id) {
+      this.$router.push({ path: '/employee/edit', query: { id: id } });
     },
     /**
      * 修改员工账号状态
@@ -125,26 +185,54 @@ export default {
      */
     handleSizeChange(val) {
       this.pageSize = val;
-      this.getEmployeeByPage();
+      this.init();
     },
     /**
      * 处理员工当前页信息
      */
     handleCurrentChange(val) {
       this.currentPage = val;
-      this.getEmployeeByPage();
+      this.init();
     },
     /**
-     * 获取员工信息
+     * 改变员工状态
      */
-    getEmployeeByPage() {
-      let start = (this.currentPage - 1) * this.pageSize;
-      let end = this.currentPage * this.pageSize;
-      getEmployeesApi().then(
+    changeStatus() {
+      this.stateDialogVisible = false;
+      editEmployeeStatusApi({
+        id: this.checkedRow.id,
+        status: !this.checkedRow.status ? 1 : 0
+      }).then(
         res => {
-          this.tableData = res.data.slice(start, end);
+          if (res.data.flag) {
+            this.$showMsgs('状态修改成功', { type: 'success' });
+            this.handleSearch();
+          } else {
+            this.$showMsgs('状态修改失败', { type: 'error' });
+          }
         },
-        err => {}
+        err => {
+          console.log('changeEmployeeStatus err => ', err);
+        }
+      );
+    },
+    /**
+     * 删除员工
+     */
+    delEmployee() {
+      this.delDialogVisible = false;
+      delEmployeeApi(this.checkedRow.id).then(
+        res => {
+          if (res.data.flag) {
+            this.$showMsgs('员工删除成功', { type: 'success' });
+            this.handleSearch();
+          } else {
+            this.$showMsgs('员工删除失败', { type: 'error' });
+          }
+        },
+        err => {
+          console.log('deleteEmployee err => ', err);
+        }
       );
     }
   }

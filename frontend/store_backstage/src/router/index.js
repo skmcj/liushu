@@ -273,7 +273,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     // 如果访问其它页面，判断是否登录，登录放行，未登录则跳转到登录页
-    const isLogin = window.localStorage.getItem('businessToken');
+    const isLogin = JSON.parse(window.localStorage.getItem('employeeInfo'));
     if(isLogin) {
       next();
     } else {

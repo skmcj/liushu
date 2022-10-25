@@ -9,6 +9,19 @@ export const getGoodsCateApi = function() {
 }
 
 /**
+ * 获取书店名称及门脸图片
+ * @param {*} storeId
+ * @returns
+ */
+export const getStoreNameApi = function(storeId) {
+  return request.get('/business/name', {
+    params: {
+      storeId: storeId
+    }
+  });
+}
+
+/**
  * 注册商家账户
  * @param {*} email
  * @param {*} password

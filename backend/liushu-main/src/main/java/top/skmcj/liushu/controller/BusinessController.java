@@ -166,6 +166,12 @@ public class BusinessController {
                 }
                 if(bookstore.getAuditStatus() == 2) {
                     // 审核通过，登录
+                    // 判断账号状态是否正常
+                    if(dEmployee.getStatus() == 0) {
+                        // 账号被禁用
+                        return Result.error(employeeDTO, StatusCodeEnum.BUSINESS_LOGIN_SERR);
+                    }
+
                     String token = JwtUtil.getToken(dEmployee);
                     employeeDTO.setId(dEmployee.getId());
                     employeeDTO.setStoreId(dEmployee.getStoreId());
@@ -246,6 +252,25 @@ public class BusinessController {
         }
         session.removeAttribute("storeId");
         return Result.success(StatusCodeEnum.STORE_PROCESS_SERR);
+    }
+
+    /**
+     * 获取商家名称及门脸图
+     * @param storeId
+     * @param request
+     * @return
+     */
+    @GetMapping("/name")
+    public Result<Bookstore> getStoreName(Long storeId, HttpServletRequest request) {
+        String prefix = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/";
+        System.out.println("storeId => " + storeId + ", type => " + storeId.getClass().getName());
+        Bookstore store = storeService.getById(storeId);
+        store.setCover(prefix + store.getCover());
+        store.setPassword(null);
+        store.setCreateTime(null);
+        store.setAuditStatus(null);
+        store.setUpdateTime(null);
+        return Result.success(store);
     }
 
     /**

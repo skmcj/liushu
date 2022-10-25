@@ -14,6 +14,8 @@ const REGEX_EMAIL = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)
 // 身份证号验证过程的系数
 const wArr = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3 ];
 
+const EM_USER_REGEX = /^[a-zA-Z0-9_]{5,12}$/;
+
 /**
  * 判断手机号格式是否正确
  * @param {*} val
@@ -90,6 +92,18 @@ function validateCheckISBN(val) {
 }
 
 /**
+ * 检查员工用户名
+ * @param {*} val
+ */
+function validateCheckEmployeeUsername(val) {
+  if(EM_USER_REGEX.test(val)) {
+    return true;
+  }else {
+    return false;
+  }
+}
+
+/**
  * 自定义规则-检验手机号的格式
  * @param {Object} rule - 源描述符中与要验证的字段名称对应的验证规则。它始终分配有一个属性，其中包含要验证的字段的名称 -> field
  * @param {String} value 需验证的值，这里表示用户输入的手机号字符串
@@ -137,10 +151,27 @@ const checkISBN = function(rule, value, callback) {
   if(value === '') {
     callback(new Error('请输入图书ISBN码'));
   }else if(value.length !== 10 && value.length !== 13) {
-    console.log('length', value, value.length);
     callback(new Error('请输入10位或13位的ISBN码'));
   }else if(!validateCheckISBN(value)) {
     callback(new Error('请输入正确的ISBN码'));
+  }else {
+    callback();
+  }
+}
+
+/**
+ * 自定义规则-检验员工用户名格式
+ * @param {*} rule
+ * @param {*} value
+ * @param {*} callback
+ */
+const checkEmployeeUsername = function(rule, value, callback) {
+  if(value === '') {
+    callback(new Error('请输入员工用户名'));
+  }else if(value.length < 5 || value.length > 12) {
+    callback(new Error('请输入5位至12位的用户名'));
+  }else if(!validateCheckEmployeeUsername(value)) {
+    callback(new Error('用户名只能由数字、字母、下划线组成'));
   }else {
     callback();
   }
@@ -151,5 +182,6 @@ export default {
   isCellPhone,
   checkPhone,
   checkIDNumber,
-  checkISBN
+  checkISBN,
+  checkEmployeeUsername
 }

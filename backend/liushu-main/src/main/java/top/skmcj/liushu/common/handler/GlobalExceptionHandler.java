@@ -10,6 +10,8 @@ import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.common.exception.BusinessException;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+
 /**
  * 全局异常处理
  */
@@ -55,21 +57,34 @@ public class GlobalExceptionHandler {
 
 
     /**
+     * 数据库添加唯一值异常
+     */
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public Result<String> sqlUNExceptionHandler(SQLIntegrityConstraintViolationException ex) {
+        log.error(ex.getMessage());
+        return Result.error(StatusCodeEnum.SQL_UNEX_ERR);
+    }
+
+    /**
      * 处理所有RuntimeException异常
      */
-    @ExceptionHandler({RuntimeException.class})
+    @ExceptionHandler(RuntimeException.class)
     public Result<String> allRuntimeException(RuntimeException ex) {
         log.error(ex.getMessage());
-        return Result.error(ex.getMessage(), StatusCodeEnum.SYSTEM_RUNTIME_ERR);
+        Throwable cause = ex.getCause();
+        if(cause instanceof SQLIntegrityConstraintViolationException) {
+            return Result.error(StatusCodeEnum.SQL_UNEX_ERR);
+        }
+        return Result.error("运行时异常", StatusCodeEnum.SYSTEM_RUNTIME_ERR);
     }
 
     /**
      * 处理所有Exception异常
      */
-    @ExceptionHandler({Exception.class})
+    @ExceptionHandler(Exception.class)
     public Result<String> allException(Exception ex) {
         log.error(ex.getMessage());
-        return Result.error(ex.getMessage(), StatusCodeEnum.SYSTEM_UNKNOW_ERR);
+        return Result.error("未知异常", StatusCodeEnum.SYSTEM_UNKNOW_ERR);
     }
 
 }
