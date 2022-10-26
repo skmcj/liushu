@@ -8,6 +8,11 @@ Vue.use(Vuex);
 
 // 准备actions -> 用于响应组件中的动作
 const actions = {
+  // 发出设置employeeInfo的值的动作
+  setEmployeeInfo(context, value) {
+    // 'setBusinessInfo' 是mutations中相应操作的名称
+    context.commit('setEmployeeInfo', value);
+  },
   // 发出设置businessInfo的值的动作
   setBusinessInfo(context, value) {
     // 'setBusinessInfo' 是mutations中相应操作的名称
@@ -20,6 +25,10 @@ const actions = {
 };
 // 准备mutations -> 用于操作数据(state)
 const mutations = {
+  // 设置employeeInfo值
+  setEmployeeInfo(state, value) {
+    state.employeeInfo = value;
+  },
   // 设置businessInfo值
   setBusinessInfo(state, value) {
     state.businessInfo = value;
@@ -31,6 +40,7 @@ const mutations = {
 };
 // 准备state -> 用于存储数据
 const state = {
+  employeeInfo: {},
   businessInfo: {},
   businessDetail: {}
 };

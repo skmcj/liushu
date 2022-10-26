@@ -2,6 +2,7 @@ package top.skmcj.liushu.controller;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,14 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.dto.EmployeeDTO;
-import top.skmcj.liushu.entity.Bookstore;
-import top.skmcj.liushu.entity.BookstoreDetail;
-import top.skmcj.liushu.entity.Employee;
-import top.skmcj.liushu.entity.Statistical;
-import top.skmcj.liushu.service.BookstoreDetailService;
-import top.skmcj.liushu.service.BookstoreService;
-import top.skmcj.liushu.service.EmployeeService;
-import top.skmcj.liushu.service.StatisticalService;
+import top.skmcj.liushu.entity.*;
+import top.skmcj.liushu.service.*;
 import top.skmcj.liushu.util.BaseConvertUtil;
 import top.skmcj.liushu.util.JwtUtil;
 import top.skmcj.liushu.util.MailServerUtil;
@@ -27,6 +22,7 @@ import top.skmcj.liushu.vo.ExamineBusinessVo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +43,12 @@ public class BusinessController {
 
     @Autowired
     private StatisticalService statisticalService;
+
+    @Autowired
+    private GoodsCateService goodsCateService;
+
+    @Autowired
+    private BookService bookService;
 
     @Autowired
     private MailServerUtil mailServerUtil;
@@ -323,5 +325,128 @@ public class BusinessController {
             }
             return Result.error("邮件发送成功", StatusCodeEnum.STORE_PROCESS_FP);
         }
+    }
+
+    /**
+     * 商家店内分类
+     */
+    /**
+     * 分页获取店内分类信息
+     * @param page
+     * @param pageSize
+     * @param storeId
+     * @return
+     */
+    @GetMapping("/cate/page")
+    public Result<Page> getCatePage(int page, int pageSize, String storeId, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        Page pageInfo = new Page(page, pageSize);
+        LambdaQueryWrapper<GoodsCate> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(GoodsCate::getStoreId, storeId != null ? storeId : lEmployee.getStoreId());
+        queryWrapper.orderByDesc(GoodsCate::getSort);
+        queryWrapper.orderByDesc(GoodsCate::getUpdateTime);
+        goodsCateService.page(pageInfo, queryWrapper);
+        return Result.success(pageInfo);
+    }
+
+    /**
+     * 根据id获取指定分类
+     * @param id
+     * @return
+     */
+    @GetMapping("/cate")
+    public Result<GoodsCate> getCateById(Long id) {
+        GoodsCate goodsCate = goodsCateService.getById(id);
+        return Result.success(goodsCate);
+    }
+
+    /**
+     * 获取所有店内分类
+     * @param storeId
+     * @return
+     */
+    @GetMapping("/cate/all")
+    public Result<List<GoodsCate>> getAllCate(Long storeId, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        LambdaQueryWrapper<GoodsCate> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(GoodsCate::getStoreId, storeId != null ? storeId : lEmployee.getStoreId());
+        List<GoodsCate> list = goodsCateService.list(queryWrapper);
+        return Result.success(list);
+    }
+
+    /**
+     * 根据id修改指定分类
+     * @param cate
+     * @return
+     */
+    @PutMapping("/cate")
+    public Result<String> editCate(@RequestBody GoodsCate cate, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        if(lEmployee.getCompetence() > 1) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        cate.setStoreId(lEmployee.getStoreId());
+        cate.setUpdateUser(lEmployee.getId());
+        boolean isEdit = goodsCateService.updateById(cate);
+        if(!isEdit) {
+            return Result.error(StatusCodeEnum.UPDATE_ERR);
+        }
+        return Result.success(StatusCodeEnum.UPDATE_OK);
+    }
+
+    /**
+     * 根据id删除指定分类
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/cate")
+    public Result<String> delCate(Long id, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        if(lEmployee.getCompetence() > 1) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        // 判断该分类下有无相关书籍，有则不能删除
+        LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Book::getGoodsCateId, id);
+        long count = bookService.count(queryWrapper);
+        if(count > 0) {
+            return Result.error(StatusCodeEnum.GOODSCATE_DEL_ERR);
+        }
+        boolean isDel = goodsCateService.removeById(id);
+        if(!isDel) {
+            return Result.error(StatusCodeEnum.DELETE_ERR);
+        }
+        return Result.success(StatusCodeEnum.DELETE_OK);
+    }
+
+    /**
+     * 新增店内分类
+     * @param cate
+     * @return
+     */
+    @PostMapping("/cate")
+    public Result<String> saveCate(@RequestBody GoodsCate cate, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        if(lEmployee.getCompetence() > 1) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        cate.setStoreId(lEmployee.getStoreId());
+        cate.setCreateUser(lEmployee.getId());
+        cate.setUpdateUser(lEmployee.getId());
+        boolean isSave = goodsCateService.save(cate);
+        if(!isSave) {
+            return Result.error(StatusCodeEnum.SAVE_ERR);
+        }
+        return Result.success(StatusCodeEnum.SAVE_OK);
     }
 }

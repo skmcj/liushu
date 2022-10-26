@@ -119,7 +119,9 @@ public enum StatusCodeEnum {
     EMPLOYEE_DEL_OK(21065, "员工删除成功"),
     EMPLOYEE_DEL_ERR(21066, "员工删除失败"),
     EMPLOYEE_SEARCH_OK(21067, "员工搜索成功"),
-    EMPLOYEE_EXISTS(21068, "员工已存在")
+    EMPLOYEE_EXISTS(21068, "员工已存在"),
+
+    GOODSCATE_DEL_ERR(21071, "该分类下还有在售图书，不可删除")
     ;
 
     // 状态码

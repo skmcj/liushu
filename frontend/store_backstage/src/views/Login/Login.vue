@@ -73,6 +73,7 @@ export default {
           if (res.data.code === 21041) {
             // 登录成功
             window.localStorage.setItem('employeeInfo', JSON.stringify(res.data.data));
+            this.$store.dispatch('setEmployeeInfo', res.data.data);
             this.$showMsg('登录成功', 'success', {
               closeFunc: () => {
                 this.$router.replace('/');
