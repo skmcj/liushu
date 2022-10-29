@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
-import top.skmcj.liushu.dto.EmployeeDTO;
+import top.skmcj.liushu.dto.EmployeeDto;
 import top.skmcj.liushu.entity.*;
 import top.skmcj.liushu.service.*;
 import top.skmcj.liushu.util.BaseConvertUtil;
@@ -66,7 +66,7 @@ public class BusinessController {
      * @return
      */
     @PostMapping("/logon")
-    public Result<String> logon(@RequestBody EmployeeDTO employeeDTO, HttpServletRequest request) {
+    public Result<String> logon(@RequestBody EmployeeDto employeeDTO, HttpServletRequest request) {
         // 获取验证码
         HttpSession session = request.getSession();
         Statistical statistical = statisticalService.getById(1);
@@ -126,11 +126,11 @@ public class BusinessController {
      * @return
      */
     @PostMapping("/login")
-    public Result<EmployeeDTO> login(@RequestBody Employee employee, HttpServletRequest request) throws JWTDecodeException {
+    public Result<EmployeeDto> login(@RequestBody Employee employee, HttpServletRequest request) throws JWTDecodeException {
         Employee dEmployee;
         String username = employee.getUsername();
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        EmployeeDTO employeeDTO = new EmployeeDTO();
+        EmployeeDto employeeDTO = new EmployeeDto();
         if(ValidateMessUtil.validateEmail(username)) {
             // 邮箱
             queryWrapper.eq(Employee::getEmail, username);

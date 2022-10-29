@@ -2,9 +2,12 @@ package top.skmcj.liushu.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -31,6 +34,12 @@ public class Book implements Serializable {
     private String cover;
 
     /**
+     * 封面URL
+     */
+    @TableField(exist = false)
+    private String coverUrl;
+
+    /**
      * 图书名称
      */
     private String name;
@@ -43,7 +52,7 @@ public class Book implements Serializable {
     /**
      * 图书所属类别
      */
-    private Long bookCateId;
+    private Integer bookCateId;
 
     /**
      * 所属店内分类
@@ -58,7 +67,8 @@ public class Book implements Serializable {
     /**
      * 出版时间
      */
-    private LocalDateTime pubDate;
+    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDate pubDate;
 
     /**
      * 开本
@@ -105,6 +115,7 @@ public class Book implements Serializable {
     /**
      * 是否删除，0-默认；1-删除
      */
+    @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
 
 }

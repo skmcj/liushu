@@ -48,6 +48,10 @@ public enum StatusCodeEnum {
     SYSTEM_RUNTIME_ERR(52003, "系统异常，请检查传参是否有误或稍后重试"),
     SYSTEM_UNKNOW_ERR(52009, "未知错误"),
     /**
+     * 业务异常
+     */
+    BUSINESS_HANDLE_ERR(52201, "业务处理异常"),
+    /**
      * 数据库操作异常
      */
     // 重复插入唯一值异常

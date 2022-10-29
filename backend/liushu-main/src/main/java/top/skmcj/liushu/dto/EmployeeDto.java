@@ -4,7 +4,7 @@ import lombok.Data;
 import top.skmcj.liushu.entity.Employee;
 
 @Data
-public class EmployeeDTO extends Employee {
+public class EmployeeDto extends Employee {
     /**
      * 验证码
      */

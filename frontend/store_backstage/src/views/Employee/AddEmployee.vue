@@ -149,6 +149,20 @@ export default {
       this.$router.back();
     },
     /**
+     * 重置表单
+     */
+    resetForm() {
+      this.formData = {
+        username: '',
+        password: '',
+        name: '',
+        phone: '',
+        sex: 0,
+        idNumber: '',
+        competence: ''
+      };
+    },
+    /**
      * 提交表单
      * @param {String} formName - form元素的ref属性值
      * @param {Boolean} st - 是否继续添加
@@ -198,7 +212,12 @@ export default {
                 });
               } else {
                 // 保存并继续添加
-                this.$showMsg(res.data.msg, { type: 'success' });
+                this.$showMsg(res.data.msg, {
+                  type: 'success',
+                  closeFunc: () => {
+                    this.resetForm();
+                  }
+                });
               }
             } else {
               // 业务出错

@@ -106,6 +106,17 @@ public class Result<T> {
     }
 
     /**
+     * 失败结果 - code, msg
+     * @param msg
+     * @param code
+     * @param <T>
+     * @return
+     */
+    public static <T> Result<T> error(Integer code, String msg) {
+        return buildResult(false, null, code, msg);
+    }
+
+    /**
      * 失败结果 - data
      * @param data
      * @param <T>

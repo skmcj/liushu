@@ -355,7 +355,7 @@ export default {
      * 图片上传成功后的操作
      */
     uploadImageSuccess(res, file, formMess) {
-      console.log('image res =>', res);
+      // console.log('image res =>', res);
       if (res.status === 200) {
         // 图片上传成功
         if (formMess.formName === 'base') {

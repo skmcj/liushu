@@ -16,7 +16,7 @@ public class BusinessException extends RuntimeException{
     // 错误信息
     private String message;
 
-    BusinessException(String message) {
+    public BusinessException(String message) {
         this.message = message;
     }
 
