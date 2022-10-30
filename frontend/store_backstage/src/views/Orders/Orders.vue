@@ -58,6 +58,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange">
     </el-pagination>
+    <!-- 订单详情 -->
     <el-dialog title="订单详情" width="72%" :visible.sync="dialogOrderVisible" class="order-data">
       <div class="order-mess">
         <div class="shop-list">
@@ -207,16 +208,44 @@ export default {
         phone: '请输入手机号',
         address: '请输入收货地址'
       },
-      stateStr: ['待付款', '待配送', '待归还', '待评价'],
+      stateStr: ['待配送', '待收货', '待归还', '待上门', '待评价', '已完成', '逾期中', '已逾期', '售后中'],
       inputFlag: false,
       cates: [
         {
-          value: '123456',
-          label: '计算机'
+          value: 0,
+          label: '待配送'
         },
         {
-          value: '123457',
-          label: '科学'
+          value: 1,
+          label: '待收货'
+        },
+        {
+          value: 2,
+          label: '待归还'
+        },
+        {
+          value: 3,
+          label: '待上门'
+        },
+        {
+          value: 4,
+          label: '待评价'
+        },
+        {
+          value: 5,
+          label: '已完成'
+        },
+        {
+          value: 6,
+          label: '逾期中'
+        },
+        {
+          value: 7,
+          label: '已逾期'
+        },
+        {
+          value: 8,
+          label: '售后中'
         }
       ],
       tableData: [],
@@ -289,6 +318,18 @@ export default {
         return desc;
       } else {
         return desc.substr(0, num - 1) + '···';
+      }
+    }
+  },
+  watch: {
+    /**
+     * 监听selectCate值的变化
+     */
+    selectCate(val) {
+      if (val === 'status') {
+        this.inputFlag = true;
+      } else {
+        this.inputFlag = false;
       }
     }
   }

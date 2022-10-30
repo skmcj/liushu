@@ -149,7 +149,4 @@ public class BookController {
         bookService.deleteBook(ids);
         return Result.success("图书删除成功");
     }
-
-
-
 }

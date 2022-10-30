@@ -30,7 +30,7 @@
         <el-button class="search-btn" round icon="icon fbookfont ic-search" @click="handleSearch">搜索</el-button>
       </div>
       <!-- 批量操作按钮 -->
-      <div class="right">
+      <div class="right" v-if="employeeCom < 2">
         <div class="batch-btns">
           <span class="btn del" @click="deleteMess('batch')">批量删除</span>
           <span class="btn" @click="editStatus('batch', 1)">批量启售</span>
@@ -79,13 +79,26 @@
       <el-table-column prop="inventory" label="库存"></el-table-column>
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small" class="edit-handle" @click="editMess(scope.row.id)">编辑</el-button>
-          <el-button type="text" size="small" class="status-handle" @click="editStatus('single', scope.row)">
+          <el-button v-if="employeeCom < 2" type="text" size="small" class="edit-handle" @click="editMess(scope.row.id)"
+            >编辑</el-button
+          >
+          <el-button
+            v-if="employeeCom < 2"
+            type="text"
+            size="small"
+            class="status-handle"
+            @click="editStatus('single', scope.row)">
             {{ scope.row.status == '1' ? '禁售' : '启售' }}
           </el-button>
-          <el-button type="text" size="small" class="delete-handle" @click="deleteMess('single', scope.row)"
+          <el-button
+            v-if="employeeCom < 2"
+            type="text"
+            size="small"
+            class="delete-handle"
+            @click="deleteMess('single', scope.row)"
             >删除</el-button
           >
+          <span v-if="employeeCom > 1" class="not-handle">无操作权限</span>
         </template>
       </el-table-column>
     </el-table>
@@ -137,6 +150,10 @@ import { getAllCateApi } from '@/api/cateApi';
 export default {
   data() {
     return {
+      /**
+       * 员工信息
+       */
+      employeeCom: '',
       stateDialogVisible: false,
       delDialogVisible: false,
       searchCate: [
@@ -189,11 +206,21 @@ export default {
     };
   },
   created() {
+    this.initEmployeeMess();
     this.getBookCate();
     this.getGoodsCate();
     this.getBookByPage();
   },
   methods: {
+    /**
+     * 初始化员工信息
+     */
+    initEmployeeMess() {
+      let employeeInfo = JSON.parse(window.localStorage.getItem('employeeInfo'));
+      if (employeeInfo) {
+        this.employeeCom = employeeInfo.competence;
+      }
+    },
     /**
      * 表格选择项改变时触发
      */
