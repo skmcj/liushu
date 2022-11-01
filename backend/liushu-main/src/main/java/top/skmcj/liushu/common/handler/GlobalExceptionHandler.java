@@ -18,6 +18,29 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * 处理所有RuntimeException异常
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public Result<String> allRuntimeException(RuntimeException ex) {
+        log.error(ex.getMessage());
+        Throwable cause = ex.getCause();
+        if(cause instanceof SQLIntegrityConstraintViolationException) {
+            return Result.error(StatusCodeEnum.SQL_UNEX_ERR);
+        }
+        return Result.error("运行时异常", StatusCodeEnum.SYSTEM_RUNTIME_ERR);
+    }
+
+    /**
+     * 处理所有Exception异常
+     */
+    @ExceptionHandler(Exception.class)
+    public Result<String> allException(Exception ex) {
+        log.error(ex.getMessage());
+        return Result.error("未知异常", StatusCodeEnum.SYSTEM_UNKNOW_ERR);
+    }
+
     /**
      * 业务异常处理方法
      */
@@ -63,28 +86,6 @@ public class GlobalExceptionHandler {
     public Result<String> sqlUNExceptionHandler(SQLIntegrityConstraintViolationException ex) {
         log.error(ex.getMessage());
         return Result.error(StatusCodeEnum.SQL_UNEX_ERR);
-    }
-
-    /**
-     * 处理所有RuntimeException异常
-     */
-    @ExceptionHandler(RuntimeException.class)
-    public Result<String> allRuntimeException(RuntimeException ex) {
-        log.error(ex.getMessage());
-        Throwable cause = ex.getCause();
-        if(cause instanceof SQLIntegrityConstraintViolationException) {
-            return Result.error(StatusCodeEnum.SQL_UNEX_ERR);
-        }
-        return Result.error("运行时异常", StatusCodeEnum.SYSTEM_RUNTIME_ERR);
-    }
-
-    /**
-     * 处理所有Exception异常
-     */
-    @ExceptionHandler(Exception.class)
-    public Result<String> allException(Exception ex) {
-        log.error(ex.getMessage());
-        return Result.error("未知异常", StatusCodeEnum.SYSTEM_UNKNOW_ERR);
     }
 
 }

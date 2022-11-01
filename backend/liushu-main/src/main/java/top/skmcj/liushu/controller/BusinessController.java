@@ -1,33 +1,36 @@
 package top.skmcj.liushu.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
+import top.skmcj.liushu.dto.BookstoreDto;
 import top.skmcj.liushu.dto.EmployeeDto;
 import top.skmcj.liushu.entity.*;
 import top.skmcj.liushu.service.*;
-import top.skmcj.liushu.util.BaseConvertUtil;
-import top.skmcj.liushu.util.JwtUtil;
-import top.skmcj.liushu.util.MailServerUtil;
-import top.skmcj.liushu.util.ValidateMessUtil;
+import top.skmcj.liushu.util.*;
 import top.skmcj.liushu.vo.BusinessAuthVo;
 import top.skmcj.liushu.vo.ExamineBusinessVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 商家相关接口
  */
+@Slf4j
 @RestController
 @RequestMapping("/business")
 public class BusinessController {
@@ -166,7 +169,8 @@ public class BusinessController {
                     // 已提交审核资料，但处于审核中
                     return Result.error(null, StatusCodeEnum.STORE_PROCESS_NP);
                 }
-                if(bookstore.getAuditStatus() == 2) {
+                // 审核通过或中途审核中(只有店长能登录)
+                if(bookstore.getAuditStatus() == 2 || (bookstore.getAuditStatus() == 4 && dEmployee.getCompetence() == 0)) {
                     // 审核通过，登录
                     // 判断账号状态是否正常
                     if(dEmployee.getStatus() == 0) {
@@ -257,6 +261,133 @@ public class BusinessController {
     }
 
     /**
+     * 修改认证信息
+     * @param request
+     * @return
+     */
+    @Transactional
+    @PutMapping("/auth")
+    public Result<String> updateAuthMess(@RequestBody BookstoreDetail detail, HttpServletRequest request) throws Exception {
+        log.info("edit detail ==> {}", detail);
+        // 校验权限
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        // 只有店长可以修改认证材料
+        if(lEmployee.getCompetence() > 0) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        Bookstore bookstore = storeService.getById(lEmployee.getStoreId());
+        Bookstore store = new Bookstore();
+        store.setId(lEmployee.getStoreId());
+        if(bookstore.getStatus() == 0) {
+            // 检测当前店铺状态，只有处于休息状态(status -> 0)才可以修改
+            // 且修改后，需再次审核(审核状态为4)，审核通过后才可以正常营业
+            // 在此期间，只有店长能登录查看信息
+            // 将不许修改字段置空
+            detail.setPhone(null);
+            store.setAuditStatus(4);
+            detailService.updateById(detail);
+            storeService.updateById(store);
+            return Result.success("材料提交成功，请耐心等待审核");
+        }else {
+            return Result.error("需先关闭店铺才可以修改认证材料");
+        }
+    }
+
+    /**
+     * 修改店铺基本信息
+     * @param store
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @PutMapping("/info")
+    public Result<String> updateStoreInfo(@RequestBody Bookstore store, HttpServletRequest request) throws Exception {
+        // 校验权限
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        // 只有店长可以修改认证材料
+        if(lEmployee.getCompetence() > 0) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        Bookstore bookstore = storeService.getById(store.getId());
+        if(bookstore.getStatus() == 0) {
+            // 将不许修改字段置为空，防止篡改
+            store.setPassword(null);
+            store.setStatus(null);
+            store.setAuditStatus(null);
+            store.setPrefix(null);
+            store.setEmail(null);
+            storeService.updateById(store);
+            return Result.success("店铺信息修改完成");
+        }else {
+            return Result.error("需先关闭店铺才可以修改店铺信息");
+        }
+    }
+
+    /**
+     * 修改商家邮箱
+     * @param authVo
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    @PutMapping("/email")
+    public Result<String> updateStoreEmail(@RequestBody BusinessAuthVo authVo, HttpServletRequest request) throws Exception {
+        // 校验权限
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        // 只有店长可以修改认证材料
+        if(lEmployee.getCompetence() > 0) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        // 修改
+        Bookstore bookstore = new Bookstore();
+        Employee employee = new Employee();
+        bookstore.setId(lEmployee.getStoreId());
+        bookstore.setEmail(authVo.getEmail());
+        employee.setId(lEmployee.getId());
+        employee.setEmail(authVo.getEmail());
+        storeService.updateById(bookstore);
+        employeeService.updateById(employee);
+        return Result.success("邮箱修改成功，现在可以使用新的邮箱登录了");
+    }
+
+    /**
+     * 修改商家手机号
+     * @param authVo
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    @PutMapping("/phone")
+    public Result<String> updateStorePhone(@RequestBody BusinessAuthVo authVo, HttpServletRequest request) throws Exception {
+        // 校验权限
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        // 只有店长可以修改认证材料
+        if(lEmployee.getCompetence() > 0) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        // 修改
+        BookstoreDetail detail = new BookstoreDetail();
+        Employee employee = new Employee();
+        detail.setId(lEmployee.getStoreId());
+        detail.setPhone(authVo.getPhone());
+        employee.setId(lEmployee.getId());
+        employee.setPhone(authVo.getPhone());
+        detailService.updateById(detail);
+        employeeService.updateById(employee);
+        return Result.success("手机号修改成功，现在可以使用新的手机号登录了");
+    }
+
+    /**
      * 获取商家名称及门脸图
      * @param storeId
      * @param request
@@ -265,14 +396,97 @@ public class BusinessController {
     @GetMapping("/name")
     public Result<Bookstore> getStoreName(Long storeId, HttpServletRequest request) {
         String prefix = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/";
-        System.out.println("storeId => " + storeId + ", type => " + storeId.getClass().getName());
+        // System.out.println("storeId => " + storeId + ", type => " + storeId.getClass().getName());
         Bookstore store = storeService.getById(storeId);
-        store.setCover(prefix + store.getCover());
+        store.setCoverUrl(prefix + store.getCover());
         store.setPassword(null);
         store.setCreateTime(null);
         store.setAuditStatus(null);
         store.setUpdateTime(null);
         return Result.success(store);
+    }
+
+    /**
+     * 获取商家完整信息
+     * @param storeId
+     * @param request
+     * @return
+     */
+    @GetMapping("/info")
+    public Result<BookstoreDto> getStoreInfo(Long storeId, HttpServletRequest request) {
+        BookstoreDto bookstoreDto = new BookstoreDto();
+        String prefix = CommonUtil.getImgDoMain(request);
+        // System.out.println("storeId => " + storeId + ", type => " + storeId.getClass().getName());
+        // 获取商家基本信息
+        Bookstore store = storeService.getById(storeId);
+        store.setCoverUrl(prefix + store.getCover());
+        store.setPassword(null);
+        // 获取单家详细信息
+        LambdaQueryWrapper<BookstoreDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BookstoreDetail::getStoreId, storeId);
+        BookstoreDetail detail = detailService.getOne(queryWrapper);
+        // 给相关图片添加协议前缀
+        List<String> businessLicense = detail.getBusinessLicenseList();
+        List<String> licenseImg = detail.getLicenseImgList();
+        List<String> envImgs = detail.getEnvImgsList();
+        List<String> businessLicenseUrl = businessLicense.stream().map(item -> {
+            item = prefix + item;
+            return item;
+        }).collect(Collectors.toList());
+        List<String> licenseImgUrl = licenseImg.stream().map(item -> {
+            item = prefix + item;
+            return item;
+        }).collect(Collectors.toList());
+        List<String> envImgsUrl = envImgs.stream().map(item -> {
+            item = prefix + item;
+            return item;
+        }).collect(Collectors.toList());
+        detail.setBusinessLicenseUrl(JSON.toJSONString(businessLicenseUrl));
+        detail.setLicenseImgUrl(JSON.toJSONString(licenseImgUrl));
+        detail.setEnvImgsUrl(JSON.toJSONString(envImgsUrl));
+        // 封装进dto里
+        bookstoreDto.setBookstore(store);
+        bookstoreDto.setBookstoreDetail(detail);
+        return Result.success(bookstoreDto);
+    }
+
+    /**
+     * 修改店铺经营状态
+     *   - 0 -> 休息
+     *   - 1 -> 营业
+     * @return
+     */
+    @GetMapping("/status")
+    public Result<String> updateStoreStatus(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        if(lEmployee.getCompetence() > 0) {
+            return Result.success(StatusCodeEnum.NO_ACCESS);
+        }
+        Long storeId = lEmployee.getStoreId();
+        Bookstore store = storeService.getById(storeId);
+        Integer status = store.getStatus();
+        if(status == 1) {
+            // 关店，status 1 -> 0
+            // 直接修改，无需校验
+            store.setStatus(0);
+            storeService.updateById(store);
+            return Result.success("店铺营业状态修改成功");
+        } else {
+            // 开店，status 0 -> 1
+            // 校验店铺信息是否完整，若不完整，需补充完整才可以提交
+            // 是否校验不通过
+            boolean flag = this.checkStoreMess(store);
+            if(flag) {
+                // 校验失败
+                return Result.error("店铺信息尚不完善，完善后才可以开店");
+            } else {
+                store.setStatus(1);
+                storeService.updateById(store);
+                return Result.success("店铺营业状态修改成功");
+            }
+        }
     }
 
     /**
@@ -448,5 +662,34 @@ public class BusinessController {
             return Result.error(StatusCodeEnum.SAVE_ERR);
         }
         return Result.success(StatusCodeEnum.SAVE_OK);
+    }
+
+    /**
+     * 校验书店基本信息
+     * @param store
+     * @return
+     */
+    private boolean checkStoreMess(Bookstore store) {
+        boolean flag = false;
+        if(store.getAuditStatus() != 2) {
+            flag = true;
+        }else if(store.getStoreName() == null) {
+            flag = true;
+        }else if(store.getCover() == null) {
+            flag = true;
+        }else if(store.getAddress() == null) {
+            flag = true;
+        }else if(store.getBusinessHours() == null) {
+            flag = true;
+        }else if(store.getDistribution() == null) {
+            flag = true;
+        }else if(store.getDeliverFee() == null) {
+            flag = true;
+        }else if(store.getBorrowDay() == null) {
+            flag = true;
+        }else if(store.getRenewDay() == null) {
+            flag = true;
+        }
+        return flag;
     }
 }

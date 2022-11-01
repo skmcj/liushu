@@ -21,10 +21,11 @@
           class="input">
           <i slot="prefix" class="icon fbookfont ic-search" style="cursor: pointer" @click="handleSearch"></i>
         </el-input>
-        <el-button class="search-btn" round icon="icon fbookfont ic-search">搜索</el-button>
+        <el-button class="search-btn" round icon="icon fbookfont ic-search" @click="handleSearch">搜索</el-button>
       </div>
     </div>
-    <el-table :data="tableData" stripe class="table">
+    <!-- 订单表格 -->
+    <el-table :data="tableData" stripe class="table" empty-text="暂无订单数据">
       <el-table-column prop="number" label="订单号"></el-table-column>
       <el-table-column prop="status" label="订单状态">
         <template slot-scope="scope">
@@ -33,13 +34,13 @@
       </el-table-column>
       <el-table-column label="借阅时长">
         <template slot-scope="scope">
-          {{ scope.row.borrow_time + '天' }}
+          {{ scope.row.borrowTime + '天' }}
         </template>
       </el-table-column>
       <el-table-column prop="consignee" label="联系人"></el-table-column>
       <el-table-column prop="phone" label="手机号"></el-table-column>
       <el-table-column prop="address" label="地址"></el-table-column>
-      <el-table-column prop="expected_time" label="期望时间"></el-table-column>
+      <el-table-column prop="expectedTime" label="期望时间"></el-table-column>
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="{ row }">
           <el-button type="text" size="small" class="edit-handle" @click="lookDetail(row)">查看</el-button>
@@ -172,7 +173,7 @@
 </template>
 
 <script>
-import { getOrdersApi } from '@/api/orderApi';
+import { getOrdersApi, getOrdersTestApi } from '@/api/orderApi';
 
 export default {
   data() {
@@ -265,7 +266,10 @@ export default {
     /**
      * 执行搜索
      */
-    handleSearch() {},
+    handleSearch() {
+      this.currentPage = 1;
+      this.getOrderByPage();
+    },
     /**
      * 查看订单详情
      */
@@ -298,13 +302,24 @@ export default {
      * 获取图书信息
      */
     getOrderByPage() {
-      let start = (this.currentPage - 1) * this.pageSize;
-      let end = this.currentPage * this.pageSize;
-      getOrdersApi().then(
+      let param = {
+        page: this.currentPage,
+        pageSize: this.pageSize
+      };
+      param[this.selectCate] = this.searchContent;
+      getOrdersApi(param).then(
         res => {
-          this.tableData = res.data.slice(start, end);
+          // console.log('order =>', res);
+          if (res.data.flag) {
+            this.tableData = res.data.data.records;
+            this.total = res.data.data.total;
+          } else {
+            this.$showMsgs('订单获取失败，请稍后重试', { type: 'error' });
+          }
         },
-        err => {}
+        err => {
+          console.log('get order err =>', err);
+        }
       );
     },
     /**
@@ -326,6 +341,7 @@ export default {
      * 监听selectCate值的变化
      */
     selectCate(val) {
+      this.searchContent = '';
       if (val === 'status') {
         this.inputFlag = true;
       } else {

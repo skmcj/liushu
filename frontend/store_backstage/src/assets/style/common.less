@@ -454,6 +454,30 @@
     }
   }
 }
+// confirm-box
+.confirm-box {
+  border-radius: 5px;
+  .el-message-box__btns {
+    .el-button {
+      &:focus,
+      &:hover {
+        color: var(--primary);
+        border-color: #c1eee1;
+        background-color: #e6f5f6;
+      }
+    }
+    .el-button--primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      &:focus,
+      &:hover {
+        color: var(--white);
+        border-color: var(--primary-btn-h);
+        background-color: var(--primary-btn-h);
+      }
+    }
+  }
+}
 
 // 选择器样式
 .el-picker-panel {

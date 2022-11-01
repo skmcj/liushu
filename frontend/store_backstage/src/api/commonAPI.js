@@ -16,6 +16,19 @@ export const sendValidateCodeApi = function(type, to) {
 }
 
 /**
+ * 校验验证码
+ * @param {*} code
+ * @returns
+ */
+export const checkValidateCodeApi = function(code) {
+  return request.get('/mail/checkCode', {
+    params: {
+      code
+    }
+  });
+}
+
+/**
  * 上传图片
  * @param {*} file
  * @param {*} type

@@ -35,7 +35,7 @@ const mutations = {
   },
   // 设置businessDetail的值
   setBusinessDetail(state, value) {
-    state.businessInfo = value;
+    state.businessDetail = value;
   }
 };
 // 准备state -> 用于存储数据

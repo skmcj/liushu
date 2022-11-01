@@ -68,7 +68,6 @@ export default {
       if (flag) {
         // 表单验证通过
         let res = await loginEmployeeApi(this.loginForm.username, this.$md5(this.loginForm.password));
-        console.log('res =>', res);
         if (res.status === 200) {
           if (res.data.code === 21041) {
             // 登录成功

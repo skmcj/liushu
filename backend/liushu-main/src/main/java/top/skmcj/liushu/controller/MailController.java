@@ -111,11 +111,19 @@ public class MailController {
     private String getMailCause(String type) {
         /**
          * slo - shop logon => 商家注册
+         * sce - shop change email => 商家修改邮箱
+         * sne - shop new email => 商家验证新邮箱
          */
         String cause;
         switch (type) {
             case "slo":
                 cause = "您正在注册成为流书网-图书外卖平台的入驻商家";
+                break;
+            case "sce":
+                cause = "您正在修改商家绑定邮箱，需验证当前绑定邮箱";
+                break;
+            case "sne":
+                cause = "您正在修改商家绑定邮箱，需验证新邮箱是否可用";
                 break;
             default:
                 cause = "您正在请求的业务需要验证码";

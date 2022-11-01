@@ -34,7 +34,6 @@ request.interceptors.response.use(
         switch(res.data.code) {
           case 52901:
             // token过期
-            console.log('token');
             Message({
               showClose: true,
               message: 'Token已过期，请重新进行登录',

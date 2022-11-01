@@ -72,4 +72,9 @@ public class BusinessAuthVo implements Serializable {
      * 法人手机号
      */
     private String phone;
+
+    /**
+     * 商家邮箱
+     */
+    private String email;
 }

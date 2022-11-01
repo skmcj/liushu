@@ -3,6 +3,7 @@ package top.skmcj.liushu.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  * 订单表
  */
 @Data
+@TableName("`order`")  // 解决表名 order 与 SQL关键字 order by 冲突问题
 public class Order implements Serializable {
 
     private static final long serialVersionUID = 1L;

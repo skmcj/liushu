@@ -4,8 +4,8 @@
       <div class="edit-auth" @click="editAuthInfo">认证信息编辑</div>
       <div class="block-content">
         <div class="form-line">
-          <el-form-item label="店铺名称：" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入店铺名称" style="width: 300px"></el-input>
+          <el-form-item label="店铺名称：" prop="storeName">
+            <el-input v-model="formData.storeName" placeholder="请输入店铺名称" style="width: 300px"></el-input>
           </el-form-item>
         </div>
         <div class="form-line">
@@ -13,14 +13,16 @@
             <el-upload
               class="cover-uploader"
               drag
-              action="#"
+              action=""
+              :http-request="uploadImagePlusApi"
+              :data="{ type: 'sta' }"
               :disabled="formData.cover != ''"
               :show-file-list="false"
               :on-success="uploadCoverSuccess"
               :on-error="uploadCoverError"
               :before-upload="beforeCoverUpload">
               <div v-if="formData.cover" class="cover">
-                <img :src="formData.cover" @click.stop="handlePreviewCover" />
+                <img :src="formData.coverUrl" @click.stop="handlePreviewCover" />
                 <span class="hover">
                   <i class="icon fbookfont ic-delete" @click.stop="handelDeleteCover"></i>
                 </span>
@@ -43,10 +45,10 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="营业时间：" prop="business_hours">
+          <el-form-item label="营业时间：" prop="businessHours">
             <el-time-picker
               is-range
-              v-model="formData.business_hours"
+              v-model="formData.businessHours"
               format="HH:mm"
               value-format="HH:mm"
               range-separator="-"
@@ -58,9 +60,9 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="首次借阅天数：" prop="borrow_day" style="width: 488px">
+          <el-form-item label="首次借阅天数：" prop="borrowDay" style="width: 488px">
             <el-input
-              v-model.number="formData.borrow_day"
+              v-model.number="formData.borrowDay"
               placeholder="请输入首次可借阅时长"
               style="width: 210px"></el-input>
             <span class="unit">天</span>
@@ -75,9 +77,9 @@
               </span>
             </el-popover>
           </el-form-item>
-          <el-form-item label="默认可续借天数：" prop="renew_day" style="width: 488px">
+          <el-form-item label="默认可续借天数：" prop="renewDay" style="width: 488px">
             <el-input
-              v-model.number="formData.renew_day"
+              v-model.number="formData.renewDay"
               placeholder="请输入默认可续借时长"
               style="width: 210px"></el-input>
             <span class="unit">天</span>
@@ -99,9 +101,9 @@
               <el-radio :label="0">由 商家 配送</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="配送费：" prop="deliver_fee" style="width: 488px">
+          <el-form-item label="配送费：" prop="deliverFee" style="width: 488px">
             <el-input-number
-              v-model="formData.deliver_fee"
+              v-model="formData.deliverFee"
               :precision="2"
               :min="0"
               class="deliver-fee"></el-input-number>
@@ -111,7 +113,7 @@
         <div class="form-line relative-line">
           <el-form-item label="标签：" prop="label">
             <el-select
-              v-model="formData.label"
+              v-model="formData.labelList"
               multiple
               filterable
               allow-create
@@ -120,7 +122,7 @@
               :popper-append-to-body="false"
               placeholder="请选择店铺标签"
               class="form-label">
-              <el-option v-for="item in book_cate" :key="item.id" :label="item.name" :value="item.name"></el-option>
+              <el-option v-for="item in bookCate" :key="item.id" :label="item.name" :value="item.name"></el-option>
             </el-select>
           </el-form-item>
           <el-popover
@@ -135,13 +137,13 @@
           </el-popover>
         </div>
         <div class="form-line">
-          <el-form-item label="商家服务：" prop="store_service">
+          <el-form-item label="商家服务：" prop="storeService">
             <el-input
               type="textarea"
               resize="none"
               show-word-limit
               maxlength="200"
-              v-model="formData.store_service"
+              v-model="formData.storeService"
               placeholder="请输入商家将提供的服务"
               style="width: 800px"
               class="h-82"></el-input>
@@ -173,36 +175,38 @@
 
 <script>
 import { getBookCateApi } from '@/api/bookApi';
+import { getStoreInfoApi, editStoreInfoApi } from '@/api/shopApi';
+import { uploadImagePlusApi } from '@/api/commonApi';
 
 export default {
   data() {
     return {
       formData: {
-        name: '片刻书店',
-        cover: 'https://s1.328888.xyz/2022/09/22/IwkOh.jpg',
-        address: '广东省韶关市浈江区大学路918号',
-        business_hours: ['9:00', '20:00'],
-        borrow_day: '',
-        renew_day: '',
+        storeName: '',
+        cover: '',
+        address: '',
+        businessHours: [],
+        borrowDay: '',
+        renewDay: '',
         distribution: 0,
         distributionStr: '由 商家 配送',
-        deliver_fee: 3,
-        store_service: '',
-        notice: '校内借阅30天内免借阅费',
-        label: ['哲学', '文学', '小说']
+        deliverFee: 3,
+        storeService: '',
+        notice: '',
+        label: []
       },
       rules: {
         name: [{ required: true, message: '请输入店铺名称', trigger: 'blur' }],
         cover: [{ required: true, message: '请选择门脸图片', trigger: 'blur' }],
         address: [{ required: true, message: '请输入店铺地址', trigger: 'blur' }],
-        business_hours: [{ required: true, message: '请输入营业时间', trigger: 'blur' }],
-        borrow_day: [{ required: true, message: '请输入首次可借阅时长', trigger: 'blur' }],
-        renew_day: [{ required: true, message: '请输入默认可续借时长', trigger: 'blur' }],
+        businessHours: [{ required: true, message: '请输入营业时间', trigger: 'blur' }],
+        borrowDay: [{ required: true, message: '请输入首次可借阅时长', trigger: 'blur' }],
+        renewDay: [{ required: true, message: '请输入默认可续借时长', trigger: 'blur' }],
         distribution: [{ required: true, message: '请选择配送服务', trigger: 'blur' }],
-        deliver_fee: [{ required: true, message: '请输入配送费', trigger: 'blur' }]
+        deliverFee: [{ required: true, message: '请输入配送费', trigger: 'blur' }]
       },
       // 图书类别
-      book_cate: [],
+      bookCate: [],
       // 已上传封面的预览图
       previewCoverUrl: '',
       // 是否显示已上传封面的预览图
@@ -210,9 +214,34 @@ export default {
     };
   },
   created() {
+    this.getStoreInfo();
     this.getBookCate();
   },
   methods: {
+    uploadImagePlusApi,
+    /**
+     * 获取店铺信息
+     */
+    getStoreInfo() {
+      let employeeInfo = JSON.parse(window.localStorage.getItem('employeeInfo'));
+      if (employeeInfo) {
+        this.storeId = employeeInfo.storeId;
+      }
+      getStoreInfoApi(this.storeId).then(
+        res => {
+          if (res.data.flag) {
+            this.formData = res.data.data.bookstore;
+            this.formData.businessHours = res.data.data.bookstore.businessHours.split('-');
+            // console.log('mess =>', this.formData);
+          } else {
+            this.$showMsgs('店铺信息获取失败', { type: 'error' });
+          }
+        },
+        err => {
+          console.log('get store err =>', err);
+        }
+      );
+    },
     /**
      * 前往编辑认证信息
      */
@@ -225,22 +254,33 @@ export default {
     getBookCate() {
       getBookCateApi().then(
         res => {
-          this.book_cate = res.data;
+          if (res.data.flag) {
+            this.bookCate = res.data.data;
+          } else {
+            this.$showMsgs('标签获取失败', { type: 'warning' });
+          }
         },
-        err => {}
+        err => {
+          console.log('get book cate err =>', err);
+        }
       );
     },
     /**
      * 图片上传成功后的操作
      */
     uploadCoverSuccess(res, file) {
-      this.formData.cover = URL.createObjectURL(file.raw);
+      if (res.status === 200) {
+        // 图片上传成功
+        this.formData.coverUrl = res.data.data.url;
+        this.formData.cover = res.data.data.uri;
+      } else {
+        // 图片上传失败
+        this.$message.error('图片上传失败，请稍后重试');
+      }
     },
     uploadCoverError(res, file) {
-      console.log(res, file);
+      // console.log(res, file);
       this.$message.error('网络繁忙，请稍后再试！');
-      // TODO: 后续删除
-      this.formData.cover = URL.createObjectURL(file.raw);
     },
     /**
      * 图片上传前的判断处理
@@ -262,12 +302,13 @@ export default {
      */
     handelDeleteCover() {
       this.formData.cover = '';
+      this.formData.coverUrl = '';
     },
     /**
      * 显示图书封面
      */
     handlePreviewCover() {
-      this.previewCoverUrl = this.formData.cover;
+      this.previewCoverUrl = this.formData.coverUrl;
       this.previewCoverVisible = true;
     },
     /**
@@ -282,13 +323,42 @@ export default {
      * @param {Boolean} st - 是否保存并继续
      */
     submitForm(formName) {
-      console.log(this.formData);
       // 表单验证
       this.$refs[formName].validate(valid => {
         if (valid) {
           // 验证通过
-        } else {
-          // 验证失败
+          // 包装处理数据
+          let bookstore = {};
+          bookstore.id = this.formData.id;
+          bookstore.storeName = this.formData.storeName;
+          bookstore.cover = this.formData.cover;
+          bookstore.address = this.formData.address;
+          bookstore.businessHours = this.formData.businessHours.join('-');
+          bookstore.borrowDay = this.formData.borrowDay;
+          bookstore.renewDay = this.formData.renewDay;
+          bookstore.distribution = this.formData.distribution;
+          bookstore.deliverFee = this.formData.deliverFee;
+          bookstore.label = JSON.stringify(this.formData.labelList);
+          bookstore.storeService = this.formData.storeService;
+          bookstore.notice = this.formData.notice;
+          // console.log('bookstore =>', bookstore);
+          editStoreInfoApi(bookstore).then(
+            res => {
+              if (res.data.flag) {
+                this.$showMsgs('店铺信息修改成功', {
+                  type: 'success',
+                  closeFunc: () => {
+                    this.goBack();
+                  }
+                });
+              } else {
+                this.$showMsgs(res.data.msg, { type: 'error' });
+              }
+            },
+            err => {
+              console.log('edit store info err =>', err);
+            }
+          );
         }
       });
     },

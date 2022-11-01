@@ -1,20 +1,24 @@
 import request from '@/utils/request';
 
 /**
- * 获取店内分类信息
- * @returns {Promise}
- */
-export const getGoodsCateApi = function() {
-  return request.get('/mockdata/goods_cate.json');
-}
-
-/**
  * 获取书店名称及门脸图片
  * @param {*} storeId
  * @returns
  */
 export const getStoreNameApi = function(storeId) {
   return request.get('/business/name', {
+    params: {
+      storeId: storeId
+    }
+  });
+}
+
+/**
+ * 获取书店信息
+ * @param {*} storeId
+ */
+export const getStoreInfoApi = function(storeId) {
+  return request.get('/business/info', {
     params: {
       storeId: storeId
     }
@@ -57,9 +61,41 @@ export const loginEmployeeApi = function(username, password) {
 }
 
 /**
- * 获取员工列表
+ * 修改员工状态
  * @returns
  */
-export const getEmployeesApi = function() {
-  return request.get('/mockdata/employee.json');
+export const editStoreStatusApi = function() {
+  return request.get('/business/status');
+}
+
+/**
+ * 修改店铺基本信息
+ */
+export const editStoreInfoApi = function(storeData) {
+  return request.put('/business/info', storeData);
+}
+
+/**
+ * 修改店铺认证信息
+ */
+export const editStoreAuthApi = function(detailData) {
+  return request.put('/business/auth', detailData);
+}
+
+/**
+ * 修改邮箱
+ * @param {*} data
+ * @returns
+ */
+export const editStoreEmailApi = function(data) {
+  return request.put('/business/email', data);
+}
+
+/**
+ * 修改手机号
+ * @param {*} data
+ * @returns
+ */
+export const editStorePhoneApi = function(data) {
+  return request.put('/business/phone', data);
 }

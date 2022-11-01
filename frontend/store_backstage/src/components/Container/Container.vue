@@ -3,7 +3,7 @@
     <Aside
       width="196px"
       :cover-url="
-        $store.state.businessInfo.cover ? $store.state.businessInfo.cover : baseUrl + '/api/img/com-no-cover.jpg'
+        $store.state.businessInfo.cover ? $store.state.businessInfo.coverUrl : baseUrl + '/api/img/com-no-cover.jpg'
       "
       :title="$store.state.businessInfo.storeName"
       :pathIndex="pathName" />

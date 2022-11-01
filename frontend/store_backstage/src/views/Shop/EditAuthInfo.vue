@@ -3,16 +3,16 @@
     <el-form :model="formData" :rules="rules" ref="form" label-width="188px" class="form">
       <div class="block-content">
         <div class="form-line">
-          <el-form-item label="法人姓名：" prop="owner_name">
+          <el-form-item label="法人姓名：" prop="ownerName">
             <div class="mess-label">
-              <span class="text">{{ formData.owner_name }}</span>
+              <span class="text">{{ formData.ownerName }}</span>
             </div>
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="法人身份证号：" prop="id_number">
+          <el-form-item label="法人身份证号：" prop="idNumber">
             <div class="mess-label">
-              <span class="text">{{ formData.id_number }}</span>
+              <span class="text">{{ formData.idNumber }}</span>
             </div>
           </el-form-item>
         </div>
@@ -33,14 +33,16 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="营业执照：" prop="business_license">
+          <el-form-item label="营业执照：" prop="businessLicense">
             <el-upload
-              action="#"
+              action=""
+              :http-request="uploadImagePlusApi"
+              :data="{ type: 'sta' }"
               drag
               list-type="picture-card"
-              :file-list="formData.business_license"
-              :on-success="(response, file) => uploadImageSuccess(response, file, 'business_license')"
-              :on-error="(err, file) => uploadImageError(err, file, 'business_license')"
+              :file-list="formData.businessLicense"
+              :on-success="(response, file) => uploadImageSuccess(response, file, 'businessLicense')"
+              :on-error="(err, file) => uploadImageError(err, file, 'businessLicense')"
               :before-upload="beforeImageUpload">
               <i slot="default" class="icon fbookfont ic-add"></i>
               <div slot="file" slot-scope="{ file }" class="thumbnail-view">
@@ -49,7 +51,7 @@
                   <span class="tool preview-tool" @click="previewImage(file)">
                     <i class="ic-preview"></i>
                   </span>
-                  <span class="tool delete-pop" @click="deleteImage(file, 'business_license')">
+                  <span class="tool delete-pop" @click="deleteImage(file, 'businessLicense')">
                     <i class="ic-delete"></i>
                   </span>
                 </span>
@@ -58,14 +60,16 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="出版物经营许可证：" prop="license_img">
+          <el-form-item label="出版物经营许可证：" prop="licenseImg">
             <el-upload
-              action="#"
+              action=""
+              :http-request="uploadImagePlusApi"
+              :data="{ type: 'sta' }"
               drag
               list-type="picture-card"
-              :file-list="formData.license_img"
-              :on-success="(response, file) => uploadImageSuccess(response, file, 'license_img')"
-              :on-error="(err, file) => uploadImageError(err, file, 'license_img')"
+              :file-list="formData.licenseImg"
+              :on-success="(response, file) => uploadImageSuccess(response, file, 'licenseImg')"
+              :on-error="(err, file) => uploadImageError(err, file, 'licenseImg')"
               :before-upload="beforeImageUpload">
               <i slot="default" class="icon fbookfont ic-add"></i>
               <div slot="file" slot-scope="{ file }" class="thumbnail-view">
@@ -74,7 +78,7 @@
                   <span class="tool preview-tool" @click="previewImage(file)">
                     <i class="ic-preview"></i>
                   </span>
-                  <span class="tool delete-pop" @click="deleteImage(file, 'license_img')">
+                  <span class="tool delete-pop" @click="deleteImage(file, 'licenseImg')">
                     <i class="ic-delete"></i>
                   </span>
                 </span>
@@ -83,14 +87,16 @@
           </el-form-item>
         </div>
         <div class="form-line">
-          <el-form-item label="店内环境：" prop="env_imgs">
+          <el-form-item label="店内环境：" prop="envImgs">
             <el-upload
-              action="#"
+              action=""
+              :http-request="uploadImagePlusApi"
+              :data="{ type: 'sta' }"
               drag
               list-type="picture-card"
-              :file-list="formData.env_imgs"
-              :on-success="(response, file) => uploadImageSuccess(response, file, 'env_imgs')"
-              :on-error="(err, file) => uploadImageError(err, file, 'env_imgs')"
+              :file-list="formData.envImgs"
+              :on-success="(response, file) => uploadImageSuccess(response, file, 'envImgs')"
+              :on-error="(err, file) => uploadImageError(err, file, 'envImgs')"
               :before-upload="beforeImageUpload">
               <i slot="default" class="icon fbookfont ic-add"></i>
               <div slot="file" slot-scope="{ file }" class="thumbnail-view">
@@ -99,7 +105,7 @@
                   <span class="tool preview-tool" @click="previewImage(file)">
                     <i class="ic-preview"></i>
                   </span>
-                  <span class="tool delete-pop" @click="deleteImage(file, 'env_imgs')">
+                  <span class="tool delete-pop" @click="deleteImage(file, 'envImgs')">
                     <i class="ic-delete"></i>
                   </span>
                 </span>
@@ -197,6 +203,8 @@
 import Steps from '@/components/Common/Steps/Steps';
 import Step from '@/components/Common/Steps/Step';
 import validator from '@/utils/validate';
+import { getStoreInfoApi, editStoreEmailApi, editStoreAuthApi } from '@/api/shopApi';
+import { uploadImagePlusApi, sendValidateCodeApi, checkValidateCodeApi } from '@/api/commonApi';
 
 export default {
   components: {
@@ -206,22 +214,18 @@ export default {
   data() {
     return {
       formData: {
-        owner_name: '张三',
-        id_number: '440204198403073752',
-        phone: '13456238956',
-        email: '4564556123@qq.com',
-        business_license: [{ url: '/static/images/license2.jpg' }],
-        license_img: [{ url: '/static/images/license1.jpg' }],
-        env_imgs: [
-          { url: '/static/images/ev1.jpg' },
-          { url: '/static/images/ev2.jpg' },
-          { url: '/static/images/ev3.jpg' }
-        ]
+        ownerName: '',
+        idNumber: '',
+        phone: '',
+        email: '',
+        businessLicense: [],
+        licenseImg: [],
+        envImgs: []
       },
       rules: {
-        business_license: [{ required: true, message: '请上传营业执照', trigger: 'blur' }],
-        license_img: [{ required: true, message: '请上传出版物经营许可证', trigger: 'blur' }],
-        env_imgs: [{ required: true, message: '请上传相关店内环境图', trigger: 'blur' }]
+        businessLicense: [{ required: true, message: '请上传营业执照', trigger: 'blur' }],
+        licenseImg: [{ required: true, message: '请上传出版物经营许可证', trigger: 'blur' }],
+        envImgs: [{ required: true, message: '请上传相关店内环境图', trigger: 'blur' }]
       },
       dialogImageVisible: false,
       dialogImageUrl: '',
@@ -257,7 +261,40 @@ export default {
       counter: 60
     };
   },
+  created() {
+    this.getStoreInfo();
+  },
   methods: {
+    uploadImagePlusApi,
+    /**
+     * 获取店铺信息
+     */
+    getStoreInfo() {
+      let employeeInfo = JSON.parse(window.localStorage.getItem('employeeInfo'));
+      if (employeeInfo) {
+        this.storeId = employeeInfo.storeId;
+      }
+      getStoreInfoApi(this.storeId).then(
+        res => {
+          if (res.data.flag) {
+            this.formData = res.data.data.bookstoreDetail;
+            this.formData.email = res.data.data.bookstore.email;
+            this.formData.businessLicense = this.getUploadImgObj(
+              this.formData.businessLicenseList,
+              this.formData.businessLicenseUrl
+            );
+            this.formData.licenseImg = this.getUploadImgObj(this.formData.licenseImgList, this.formData.licenseImgUrl);
+            this.formData.envImgs = this.getUploadImgObj(this.formData.envImgsList, this.formData.envImgsUrl);
+            // console.log('mess =>', this.formData);
+          } else {
+            this.$showMsgs('店铺认证资料获取失败', { type: 'error' });
+          }
+        },
+        err => {
+          console.log('get store err =>', err);
+        }
+      );
+    },
     /**
      * 返回上一级
      */
@@ -269,13 +306,54 @@ export default {
      * @param {String} formName - 表单的ref属性值
      */
     submitForm(formName) {
-      console.log(this.formData);
+      // console.log(this.formData);
       // 表单验证
       this.$refs[formName].validate(valid => {
         if (valid) {
           // 验证通过
-        } else {
-          // 验证失败
+          this.$confirm(
+            '修改认证资料后需重新进行审核，审核通过后才可继续正常营业。在此期间，只有店长可以登录系统查看，请问是否要继续操作？',
+            {
+              title: '提示',
+              type: 'warning',
+              showClose: false,
+              confirmButtonText: '继续',
+              customClass: 'confirm-box'
+            }
+          ).then(
+            res => {
+              // 确认提交
+              // 包装数据
+              let data = {};
+              data.id = this.formData.id;
+              data.ownerName = this.formData.ownerName;
+              data.idNumber = this.formData.idNumber;
+              data.businessLicense = JSON.stringify(this.getImageUrlList(this.formData.businessLicense));
+              data.licenseImg = JSON.stringify(this.getImageUrlList(this.formData.licenseImg));
+              data.envImgs = JSON.stringify(this.getImageUrlList(this.formData.envImgs));
+              editStoreAuthApi(data).then(
+                res => {
+                  if (res.data.flag) {
+                    this.$showMsgs('修改成功', {
+                      type: 'success',
+                      closeFunc: () => {
+                        this.goBack();
+                      }
+                    });
+                  } else {
+                    this.$showMsgs(res.data.msg, { type: 'error' });
+                  }
+                },
+                err => {
+                  console.log('edit auth err =>', err);
+                }
+              );
+            },
+            err => {
+              // console.log('conf err =>', err);
+              this.$showMsgs('已取消修改', { type: 'info' });
+            }
+          );
         }
       });
     },
@@ -284,6 +362,13 @@ export default {
      */
     uploadImageSuccess(res, file, st) {
       // this.formData.cover = URL.createObjectURL(file.raw);
+      if (st === 'businessLicense') {
+        this.formData.businessLicense.push(res.data.data);
+      } else if (st === 'licenseImg') {
+        this.formData.licenseImg.push(res.data.data);
+      } else if (st === 'envImgs') {
+        this.formData.envImgs.push(res.data.data);
+      }
     },
     /**
      * 删除图片失败
@@ -291,20 +376,6 @@ export default {
     uploadImageError(res, file, st) {
       // console.log('uploadImageError', res, file, st);
       this.$message.error('网络繁忙，请稍后再试！');
-      // TODO: 后续删除
-      if (st === 'business_license') {
-        this.formData.business_license.push({
-          url: URL.createObjectURL(file.raw)
-        });
-      } else if (st === 'license_img') {
-        this.formData.license_img.push({
-          url: URL.createObjectURL(file.raw)
-        });
-      } else if (st === 'env_imgs') {
-        this.formData.env_imgs.push({
-          url: URL.createObjectURL(file.raw)
-        });
-      }
     },
     /**
      * 图片上传前的判断处理
@@ -332,16 +403,16 @@ export default {
      * 删除图片
      */
     deleteImage(file, st) {
-      if (st === 'business_license') {
-        this.formData.business_license = this.formData.business_license.filter(item => {
+      if (st === 'businessLicense') {
+        this.formData.businessLicense = this.formData.businessLicense.filter(item => {
           return item.uid !== file.uid;
         });
-      } else if (st === 'license_img') {
-        this.formData.license_img = this.formData.license_img.filter(item => {
+      } else if (st === 'licenseImg') {
+        this.formData.licenseImg = this.formData.licenseImg.filter(item => {
           return item.uid !== file.uid;
         });
-      } else if (st === 'env_imgs') {
-        this.formData.env_imgs = this.formData.env_imgs.filter(item => {
+      } else if (st === 'envImgs') {
+        this.formData.envImgs = this.formData.envImgs.filter(item => {
           return item.uid !== file.uid;
         });
       }
@@ -391,10 +462,8 @@ export default {
         }
       } else if (this.active === 1) {
         flag = await this.checkInput();
+        console.log('res ', flag);
         if (flag) {
-          this.active += 2;
-          this.dialogAuthBtnText = '返回';
-          this.resetAuthMess();
           this.editAuthMess();
         }
       } else {
@@ -406,24 +475,43 @@ export default {
     /**
      * 获取验证码
      */
-    getCaptcha(authType = 'none') {
+    async getCaptcha(authType = 'none') {
       if (authType !== 'none' && !this.authMessInput) {
         // 未输入手机号/邮箱
         this.dialogAuthTip = '请输入' + (this.dialogAuthType === 'phone' ? '手机号' : '邮箱');
       } else if (authType === 'phone' && !validator.isCellPhone(this.authMessInput)) {
         // 手机号格式不对，显示相应提示
         this.dialogAuthTip = '请输入正确的手机号';
-      } else if (authType === 'email' && validator.isEmail(this.authMessInput)) {
+      } else if (authType === 'email' && !validator.isEmail(this.authMessInput)) {
         // 邮箱格式不对
         this.dialogAuthTip = '请输入正确的邮箱';
       } else {
         // 去除错误提示
         this.dialogAuthTip = '';
         // 发送验证码 ···
-        // 禁用按钮
-        this.isGetCaptcha = true;
-        // 开始60s倒计时
-        this.authCountDown();
+        if (authType === 'email') {
+          let res = await sendValidateCodeApi('sce', this.formData.email);
+          if (res.data.flag) {
+            this.$message({
+              showClose: true,
+              message: '验证码已发送，请注意查收',
+              type: 'success'
+            });
+            // 禁用按钮
+            this.isGetCaptcha = true;
+            // 开始60s倒计时
+            this.authCountDown();
+          } else {
+            this.$message({
+              showClose: true,
+              message: '验证码获取失败，请稍候再试',
+              type: 'warning'
+            });
+          }
+        } else {
+          // 手机
+          this.$showMsgs('由于不可抗力原因，无法发送手机验证码，请见谅', { type: 'warning' });
+        }
       }
     },
     /**
@@ -468,7 +556,20 @@ export default {
       // 调用后台api，获取验证码验证结果
       // const res = await 验证码验证API
       // return res.data;
-      return this.authCode === '123456';
+      return await checkValidateCodeApi(this.authCode).then(
+        res => {
+          if (res.data.flag) {
+            return true;
+          } else {
+            this.$showMsgs(res.data.msg, { type: 'warning' });
+            return false;
+          }
+        },
+        err => {
+          console.log('testValidateCode err =>', err);
+          return false;
+        }
+      );
     },
     /**
      * 检查验证码及邮箱、手机号输入
@@ -511,14 +612,42 @@ export default {
     /**
      * 修改手机号或邮箱
      */
-    async editAuthMess() {
-      if (this.authType === 'phone') {
+    editAuthMess() {
+      if (this.dialogAuthType === 'phone') {
         // 修改手机号
         // this.isEditSuccess = await ...
-      } else if (this.authType === 'email') {
+      } else if (this.dialogAuthType === 'email') {
         // 修改邮箱
+        let data = {
+          email: this.authMessInput
+        };
+        editStoreEmailApi(data)
+          .then(
+            res => {
+              if (res.data.flag) {
+                this.isEditSuccess = true;
+                this.$showMsgs('邮箱修改成功，请使用新邮箱进行登录', {
+                  type: 'success',
+                  closeFunc: () => {
+                    window.localStorage.removeItem('employeeInfo');
+                    this.$router.replace('/login');
+                  }
+                });
+              } else {
+                this.isEditSuccess = false;
+              }
+            },
+            err => {
+              console.log('edit eamil err =>', err);
+            }
+          )
+          .finally(() => {
+            this.resetAuthMess();
+            this.dialogAuthBtnText = '返回';
+            this.active += 2;
+          });
       }
-      this.isEditSuccess = false;
+      // this.isEditSuccess = false;
     },
     /**
      * 重置输入提示
@@ -528,6 +657,32 @@ export default {
     },
     resetAuthCodeTip() {
       this.dialogAuthCodeTip = '';
+    },
+    /**
+     * 将图片列表封装成upload组件列表显示的对象数组
+     * @param {Array} uriList
+     * @param {Array} urlList
+     */
+    getUploadImgObj(uriList, urlList) {
+      let list = [];
+      for (let i = 0; i < uriList.length; i++) {
+        list.push({
+          uri: uriList[i],
+          url: urlList[i]
+        });
+      }
+      return list;
+    },
+    /**
+     * 获取对象数组的属性值，整合成数组
+     * @param {Array} urlList
+     * @param {String} itemName 属性名
+     * @returns 列表
+     */
+    getImageUrlList(urlList, itemName = 'uri') {
+      return urlList.map(item => {
+        return item[itemName];
+      });
     }
   }
 };
@@ -635,6 +790,14 @@ export default {
               }
             }
           }
+        }
+      }
+      .el-upload-list__item {
+        &.is-ready {
+          display: none;
+        }
+        &.is-uploading {
+          display: none;
         }
       }
     }

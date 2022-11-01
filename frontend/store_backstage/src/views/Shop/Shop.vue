@@ -7,16 +7,16 @@
         <div class="left">
           <!-- 封面 -->
           <div class="cover">
-            <el-image :src="storeInfo.cover" :preview-src-list="[storeInfo.cover]"></el-image>
+            <el-image :src="storeInfo.coverUrl" :preview-src-list="[storeInfo.coverUrl]"></el-image>
           </div>
           <!-- 内容 -->
           <div class="content">
             <div class="top">
-              <div class="title">{{ storeInfo.name }}</div>
+              <div class="title">{{ storeInfo.storeName }}</div>
               <div class="mess">
                 <div class="score">
                   <i class="icon fbookfont ic-score"></i>
-                  <span>{{ storeInfo.score }}</span>
+                  <span>{{ storeInfo.score === null ? '暂无' : storeInfo.score }}</span>
                 </div>
                 <div class="amount">
                   <span class="tit">月借阅量：</span>
@@ -24,7 +24,7 @@
                 </div>
               </div>
               <div class="label-box">
-                <span v-for="(item, index) in storeInfo.label" :key="index" class="label">{{ item }}</span>
+                <span v-for="(item, index) in storeInfo.labelList" :key="index" class="label">{{ item }}</span>
               </div>
             </div>
             <div class="notice">
@@ -40,7 +40,7 @@
           <div class="mess">
             <div class="item">
               <span class="tit">商家地址</span>
-              <span class="text pointer">
+              <span class="text pointer" @click="openMessBox('address')">
                 <span>{{ storeInfo.address }}</span>
                 <i class="icon fbookfont ic-more-1"></i>
               </span>
@@ -48,18 +48,18 @@
             <div class="item">
               <span class="tit">营业时间</span>
               <span class="text">
-                <span>{{ storeInfo.business_hours }}</span>
+                <span>{{ storeInfo.businessHours }}</span>
               </span>
             </div>
             <div class="item">
               <span class="tit">相关执照</span>
-              <span class="text pointer">
+              <span class="text pointer" @click="openMessBox('license')">
                 <i class="icon fbookfont ic-more-1"></i>
               </span>
             </div>
             <div class="item">
               <span class="tit">店内环境</span>
-              <span class="text pointer">
+              <span class="text pointer" @click="openMessBox('env')">
                 <i class="icon fbookfont ic-more-1"></i>
               </span>
             </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="item">
               <span class="tit">商家服务</span>
-              <span v-if="isNotNull(storeInfo.store_service)" class="text pointer">
-                <span>{{ storeInfo.store_service }}</span>
+              <span v-if="isNotNull(storeInfo.storeService)" class="text pointer" @click="openMessBox('service')">
+                <span>{{ storeInfo.storeService }}</span>
                 <i class="icon fbookfont ic-more-1"></i>
               </span>
               <span v-else class="text">
@@ -98,13 +98,14 @@
               active-color="#83ccd2"
               inactive-color="#dcdfe6"
               :active-value="1"
-              :inactive-value="0"></el-switch>
+              :inactive-value="0"
+              @change="changeStoreStatus"></el-switch>
           </div>
         </div>
         <div class="income">
           <div class="title">总收入</div>
-          <div class="text">{{ storeDetail.income.toFixed(2) }}</div>
-          <div class="btn" ref="cash_out">
+          <div class="text">{{ keepTwoNum(storeInfo.income) }}</div>
+          <div class="btn" ref="cashOut">
             <i class="icon fbookfont ic-wallet"></i>
             提现
             <div class="dot-box">
@@ -114,6 +115,22 @@
         </div>
       </div>
     </div>
+    <!-- 店铺信息弹框 -->
+    <el-dialog class="mess-box" :title="messTitle" :visible.sync="messVisible">
+      <div v-if="messTitle !== '相关执照' && messTitle !== '店内环境'" class="mess-content">
+        {{ messContent }}
+      </div>
+      <div v-else>
+        <el-image
+          v-for="(item, index) in messContent"
+          :key="'img-' + index"
+          class="dia-img"
+          :src="item"
+          fit="cover"
+          :preview-src-list="messContent">
+        </el-image>
+      </div>
+    </el-dialog>
     <!-- 下方图表区域 -->
     <div class="chat-box">
       <div class="chat">
@@ -133,6 +150,7 @@ import BarChart from '@/components/Chart/BarChart';
 import ToolBox from '@/components/Common/ToolBox';
 import { getOrderQuantityApi } from '@/api/orderApi';
 import { getBookRankApi } from '@/api/bookApi';
+import { getStoreInfoApi, editStoreStatusApi } from '@/api/shopApi';
 import chartHandler from '@/utils/chartDataHandler';
 
 export default {
@@ -142,34 +160,19 @@ export default {
   },
   data() {
     return {
-      storeInfo: {
-        name: '片刻书店',
-        cover: 'https://s1.328888.xyz/2022/09/22/IwkOh.jpg',
-        score: '4.5',
-        address: '广东省韶关市浈江区大学路918号',
-        business_hours: '9:00-20:00',
-        distribution: 0,
-        distributionStr: '由 商家 配送',
-        deliver_fee: 3,
-        store_service: '',
-        label: ['哲学', '文学', '小说'],
-        notice: '校内借阅30天内免借阅费',
-        status: 1
-      },
-      storeDetail: {
-        name: '张三',
-        phone: '13456238956',
-        business_license: ['/static/images/license2.jpg'],
-        license_img: ['/static/images/license1.jpg'],
-        env_imgs: ['/static/images/ev1.jpg', '/static/images/ev2.jpg', '/static/images/ev3.jpg'],
-        income: 0
-      },
+      storeId: '',
+      storeInfo: {},
+      storeDetail: {},
       amount: 186, // 月借阅量
       orderOption: '',
-      bookRankOption: ''
+      bookRankOption: '',
+      messVisible: false,
+      messTitle: '商家地址',
+      messContent: ''
     };
   },
   created() {
+    this.getShopMess();
     this.getOrderChartOption();
     this.getBookRankChart();
   },
@@ -178,6 +181,78 @@ export default {
     this.setBtnVars();
   },
   methods: {
+    /**
+     * 改变营业状态
+     */
+    changeStoreStatus(val) {
+      this.storeInfo.status = val === 1 ? 0 : 1;
+      editStoreStatusApi().then(
+        res => {
+          if (res.data.flag) {
+            this.storeInfo.status = val;
+            this.$showMsgs(val === 1 ? '已营业' : '已休息', { type: 'success' });
+          } else {
+            this.$showMsgs(res.data.msg, { type: 'error' });
+          }
+        },
+        err => {
+          console.log('edit store status err =>', err);
+        }
+      );
+    },
+    /**
+     * 打开消息弹框
+     */
+    openMessBox(type) {
+      this.messVisible = true;
+      switch (type) {
+        case 'address':
+          this.messTitle = '商家地址';
+          this.messContent = this.storeInfo.address;
+          break;
+        case 'license':
+          this.messTitle = '相关执照';
+          this.messContent = [...this.storeDetail.businessLicenseUrl, ...this.storeDetail.licenseImgUrl];
+          break;
+        case 'env':
+          this.messTitle = '店内环境';
+          this.messContent = this.storeDetail.envImgsUrl;
+          break;
+        case 'service':
+          this.messTitle = '商家服务';
+          this.messContent = this.storeInfo.storeService ? this.storeInfo.storeService : '无';
+          break;
+        default:
+          this.messTitle = '其它信息';
+          this.messContent = '无';
+          break;
+      }
+    },
+    /**
+     * 获取商家信息
+     */
+    getShopMess() {
+      let employeeInfo = JSON.parse(window.localStorage.getItem('employeeInfo'));
+      if (employeeInfo) {
+        this.storeId = employeeInfo.storeId;
+      }
+      getStoreInfoApi(this.storeId).then(
+        res => {
+          if (res.data.flag) {
+            // console.log('mess =>', res.data.data);
+            this.storeInfo = res.data.data.bookstore;
+            this.storeDetail = res.data.data.bookstoreDetail;
+            this.$store.dispatch('setBusinessInfo', res.data.data.bookstore);
+            this.$store.dispatch('setBusinessDetail', res.data.data.bookstoreDetail);
+          } else {
+            this.$showMsgs('店铺信息货物失败', { type: 'error' });
+          }
+        },
+        err => {
+          console.log('get store err =>', err);
+        }
+      );
+    },
     /**
      * 前往编辑店铺xinx
      */
@@ -189,20 +264,19 @@ export default {
      * @param {String} str
      */
     isNotNull(str) {
-      if (str.length !== 0 && str !== null) {
+      if (typeof str === 'string' && str.length > 0) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     },
     /**
      * 为提现按钮动态设置变量
      */
     setBtnVars() {
       // 获取提现按钮的宽度
-      let btnWidth = this.$refs.cash_out.offsetWidth;
+      let btnWidth = this.$refs.cashOut.offsetWidth;
       // 为提现按钮设置变量
-      this.$refs.cash_out.style.setProperty('--btn-w', btnWidth + 'px');
+      this.$refs.cashOut.style.setProperty('--btn-w', btnWidth + 'px');
     },
     /**
      * 获取近14天订单图表数据
@@ -238,6 +312,26 @@ export default {
         res.data.data[4][1] += 50;
         this.bookRankOption.dataset.source = res.data.data;
       });
+    },
+    /**
+     * 保留两位小数
+     */
+    keepTwoNum(num) {
+      // 四舍五入
+      let mNum = Math.round(num * 100) / 100;
+      let numStr = mNum.toString();
+      let dotIndex = numStr.indexOf('.');
+      // 当整数时，pos_decimal=-1 自动补0
+      if (dotIndex < 0) {
+        dotIndex = numStr.length;
+        numStr += '.';
+      }
+
+      // 当数字的长度< 小数点索引+2时，补0
+      while (numStr.length <= dotIndex + 2) {
+        numStr += '0';
+      }
+      return numStr;
     }
   }
 };
@@ -580,12 +674,6 @@ export default {
             100% {
               transform: translateX(var(--move-l)) rotate(90deg) translateX(36px);
             }
-            // 80% {
-            //   transform: translateX(0) rotate(180deg);
-            // }
-            // 100% {
-            //   transform: translateX(0) rotate(360deg);
-            // }
           }
         }
       }
@@ -611,6 +699,14 @@ export default {
         top: 0;
         right: 0;
       }
+    }
+  }
+  .mess-box {
+    .dia-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 5px;
+      margin: 6px;
     }
   }
 }

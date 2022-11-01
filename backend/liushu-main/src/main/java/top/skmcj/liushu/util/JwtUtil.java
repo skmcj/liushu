@@ -75,7 +75,7 @@ public class JwtUtil {
         String dToken = decodeToken(token);
         //创建返回结果
         DecodedJWT verify = JWT.require(Algorithm.HMAC256(SECRET)).build().verify(dToken);
-        System.out.println("type => " + verify.getClaim("type").asString());
+        // System.out.println("type => " + verify.getClaim("type").asString());
         if(!verify.getClaim("type").asString().equals("employee")) {
             throw new JWTDecodeException("无法解析为员工对象");
         }
