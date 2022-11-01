@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <!-- 引入Element-UI样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.7/lib/theme-chalk/index.css" />
+  <!-- 引入项目图标库，后期可改为引用本地资源 -->
+  <!-- <link rel="stylesheet" href="https://at.alicdn.com/t/c/font_3567073_baqkd9uybuk.css" /> -->
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+        Please enable it to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+<!-- 由于使用CDN引入第三方组件库，所以多导一份vue -->
+<!-- TODO: 后期优化压缩，vue.min.js -->
+<script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+<!-- 引入Element-UI样式库 -->
+<script src="https://unpkg.com/element-ui@2.15.7/lib/index.js"></script>
+
+</html>

@@ -7,6 +7,7 @@ const request = Axios.create({
   // 设置请求根路径
   // 为解决跨域，设置为项目根路径
   baseURL: 'http://localhost:8081'
+  // baseURL: 'http://localhost:8080/api'
   // baseURL: process.env.NODE_ENV === 'development' ? './' : '/store/'
 });
 
