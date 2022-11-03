@@ -1,0 +1,33 @@
+:root {
+    /***** 主题色 *****/
+    /* 通用色 */
+    --primary: #83CCD2;
+    --success: #A8C97F;
+    --warning: #F6AD49;
+    --error: #CD5E3C;
+    --info: #9AA7B1;
+    /* 按钮色 */
+    --danger: #EE827C;
+    /* 渐变色 */
+    --primary-g-1: #17EAD9;
+    --primary-g-2: #6078EA;
+    /* 字体色 */
+    --primary-text: #3D3D3D;
+    --regular-text: #474A4D;
+    --secondary-text: #8D8D8D;
+    --placeholder-text: #999999;
+    --link-text: #53B2F4;
+    --fri-text: #5E5E5E;
+    /* border色 */
+    --base-b: #8D8D8D;
+    --light-b: #F1F2F3;
+    --lighter-b: #E8E8E8;
+    --extra-light-b: #DCDFE6;
+    /* 背景色 */
+    --white: #FFF;
+    --black: #000;
+    --grey: #D8D8D8;
+    --light-grey: #F3F3F2;
+    --lighter-grey: #F5F3F2;
+
+}
