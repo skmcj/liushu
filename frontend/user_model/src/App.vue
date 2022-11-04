@@ -7,19 +7,6 @@
 </template>
 
 <style lang="less">
-@font-face {
-  font-family: AlibabaPuHuiTi-2-55-Regular;
-  src: url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.eot)
-      format('embedded-opentype'),
-    url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.otf)
-      format('opentype'),
-    url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.ttf)
-      format('TrueType'),
-    url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.woff)
-      format('woff'),
-    url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.woff2)
-      format('woff2');
-}
 html,
 body {
   width: 100%;
@@ -27,6 +14,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: AlibabaPuHuiTi-2-55-Regular, 'Noto Sans';
+  color: var(--primary-text);
   // background-color: var(--default-bg);
 }
 // 选中时的背景色

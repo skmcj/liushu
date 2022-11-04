@@ -6,6 +6,7 @@ import md5 from 'js-md5';
 
 // 导入通用样式
 import '@/assets/style/theme.css';
+import '@/assets/fonts/font.css';
 
 Vue.config.productionTip = false;
 /** 封装一些工具到Vue上 */

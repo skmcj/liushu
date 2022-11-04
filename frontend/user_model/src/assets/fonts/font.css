@@ -1,0 +1,19 @@
+/* 阿里巴巴普惠体2.0 */
+@font-face {
+    font-family: AlibabaPuHuiTi-2-55-Regular;
+    src: url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.eot)
+        format('embedded-opentype'),
+      url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.otf)
+        format('opentype'),
+      url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.ttf)
+        format('TrueType'),
+      url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.woff)
+        format('woff'),
+      url(https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-55-Regular/AlibabaPuHuiTi-2-55-Regular.woff2)
+        format('woff2');
+}
+/* 优设标题黑 */
+@font-face {
+    font-family: uisdcfont-titleblack;
+    src: url(./uisdcfont-titleblack.ttf) format('TrueType');
+}
