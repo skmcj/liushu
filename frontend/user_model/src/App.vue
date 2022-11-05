@@ -15,7 +15,7 @@ body {
   padding: 0;
   font-family: AlibabaPuHuiTi-2-55-Regular, 'Noto Sans';
   color: var(--primary-text);
-  // background-color: var(--default-bg);
+  background-color: var(--default-bg);
 }
 // 选中时的背景色
 ::selection {
@@ -37,6 +37,10 @@ body {
   position: relative;
 }
 .main-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
   width: 100%;
   padding-bottom: 180px;
 }

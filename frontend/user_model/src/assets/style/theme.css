@@ -17,6 +17,7 @@
     --secondary-text: #8D8D8D;
     --placeholder-text: #999999;
     --link-text: #53B2F4;
+    --grey-link: #8E8E8E;
     --fri-text: #5E5E5E;
     /* border色 */
     --base-b: #8D8D8D;
@@ -24,6 +25,7 @@
     --lighter-b: #E8E8E8;
     --extra-light-b: #DCDFE6;
     /* 背景色 */
+    --default-bg: #F1F2F3;
     --white: #FFF;
     --black: #000;
     --grey: #D8D8D8;

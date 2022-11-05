@@ -34,13 +34,13 @@
           <i class="icon ic-about"></i>
           <span class="link-tit">关于</span>
         </div>
-        <div v-if="!isLogin" class="nav-item" :class="{ 'is-active': activeLink === '/mine' }">
+        <div v-if="!isLogin" class="nav-login">
           <i class="icon ic-mine-2"></i>
           <span class="link-tit" @click="handleClick('/login')">登录</span>
           <span class="hr"></span>
           <span class="link-tit" @click="handleClick('/logon')">注册</span>
         </div>
-        <div v-if="isLogin" class="nav-mine">
+        <div v-if="isLogin" class="nav-mine" :class="{ 'is-active': activeLink === '/mine' }">
           <div class="avatar" @click="handleClick('/mine')">
             <img class="img" src="@/assets/images/avarat.jpeg" />
           </div>
@@ -217,6 +217,7 @@ export default {
         margin: 0 12px;
         cursor: pointer;
         transition: all 0.5s ease;
+        opacity: 0.75;
         &.is-active {
           opacity: 1;
         }
@@ -230,10 +231,9 @@ export default {
           user-select: none;
           font-size: 18px;
           color: var(--white);
-          opacity: 0.75;
-          &:hover {
-            opacity: 1;
-          }
+        }
+        &:hover {
+          opacity: 1;
         }
         .hr {
           margin: 0 5px;
@@ -267,6 +267,42 @@ export default {
           &:hover {
             opacity: 1;
           }
+        }
+      }
+      .nav-login {
+        display: flex;
+        align-items: center;
+        margin: 0 12px;
+        cursor: pointer;
+        transition: all 0.5s ease;
+        &:hover {
+          .icon {
+            opacity: 1;
+          }
+        }
+        .icon {
+          font-size: 27px;
+          color: var(--white);
+          margin-right: 6px;
+          opacity: 0.75;
+          transition: opacity 0.5s ease;
+        }
+        .link-tit {
+          user-select: none;
+          font-size: 18px;
+          color: var(--white);
+          opacity: 0.75;
+          transition: opacity 0.5s ease;
+          &:hover {
+            opacity: 1;
+          }
+        }
+        .hr {
+          margin: 0 5px;
+          width: 3px;
+          height: 21px;
+          border-radius: 1.5px;
+          background-color: var(--white);
         }
       }
     }

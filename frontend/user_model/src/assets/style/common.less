@@ -1,0 +1,37 @@
+// banner
+.banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  .img {
+    width: 100%;
+    height: 100%;
+  }
+}
+.content-box {
+  display: flex;
+  justify-content: center;
+  margin-top: -128px;
+  width: 100%;
+  .content {
+    width: 75%;
+    .content-item {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      background-color: var(--white);
+    }
+  }
+}
+/* Element-UI 的自定义样式 */
+
+// el-scrollbar
+.el-scrollbar {
+  .el-select-dropdown__item {
+    &.selected {
+      color: var(--primary);
+    }
+  }
+}

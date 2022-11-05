@@ -48,9 +48,10 @@ export default {
 
 <style lang="less" scoped>
 .head {
+  z-index: 999;
   width: 100%;
   padding-top: 36px;
-  background-color: rgba(51, 51, 51, 0.45);
+  background-color: rgba(51, 51, 51, 0.7);
   position: fixed;
   top: 0;
   left: 0;
