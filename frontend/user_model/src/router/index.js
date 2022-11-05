@@ -39,7 +39,8 @@ const routes = [
         alias: ['/', '/index'],
         component: Home,
         meta: {
-          title: '首页'
+          title: '首页',
+          rootLink: '/home'
         }
       },
       {
@@ -47,7 +48,8 @@ const routes = [
         name: 'cate',
         component: Cate,
         meta: {
-          title: '分类'
+          title: '分类',
+          rootLink: '/cate'
         }
       },
       {
@@ -55,7 +57,8 @@ const routes = [
         name: 'about',
         component: About,
         meta: {
-          title: '关于'
+          title: '关于',
+          rootLink: '/about'
         }
       },
       {
@@ -63,7 +66,8 @@ const routes = [
         name: 'mine',
         component: Mine,
         meta: {
-          title: '我的'
+          title: '我的',
+          rootLink: '/mine'
         }
       }
     ]

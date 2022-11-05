@@ -119,11 +119,13 @@ export default {
           user-select: none;
           font-size: 12px;
           color: #3d3d3d;
-          &:active {
-            transform: scale(0.95) translateZ(0);
-          }
           & + .sk-content-block__icon {
             margin-left: 5px;
+          }
+        }
+        &:active {
+          .sk-content-block__text {
+            transform: scale(0.95) translateZ(0);
           }
         }
       }

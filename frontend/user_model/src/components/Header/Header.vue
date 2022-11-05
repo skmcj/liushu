@@ -92,6 +92,16 @@ export default {
     closeSearch() {
       this.isShow = false;
     }
+  },
+  watch: {
+    // 监听当前路由信息
+    $route: {
+      immediate: true,
+      handler(val) {
+        console.log('route =>', val);
+        this.activeLink = val.meta.rootLink;
+      }
+    }
   }
 };
 </script>
@@ -105,7 +115,8 @@ export default {
   width: 96%;
   height: 96px;
   border-radius: 0 48px 48px 0;
-  background-image: linear-gradient(to bottom right, var(--primary-g-1), var(--primary-g-2));
+  // background-image: linear-gradient(to right, var(--primary-g-1), var(--primary-g-2));
+  background-color: var(--primary);
   .left {
     display: flex;
     align-items: center;

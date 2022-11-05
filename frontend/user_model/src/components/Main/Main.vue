@@ -2,6 +2,9 @@
   <div class="container">
     <!-- 导航条 -->
     <div class="head" :class="{ hide: scrollH > 88 }">
+      <div class="links">
+        <span class="link" @click="gotoStore">我是商家</span>
+      </div>
       <Header />
     </div>
     <!-- 主要显示内容 -->
@@ -41,16 +44,21 @@ export default {
     handleScroll() {
       // 获取当前滚动高度
       this.scrollH = document.body.scrollTop || document.documentElement.scrollTop || window.pageYOffset;
-    }
+    },
+    /**
+     * 进入商家入口
+     */
+    gotoStore() {}
   }
 };
 </script>
 
 <style lang="less" scoped>
 .head {
+  position: relative;
   z-index: 999;
   width: 100%;
-  padding-top: 36px;
+  padding-top: 32px;
   background-color: rgba(51, 51, 51, 0.7);
   position: fixed;
   top: 0;
@@ -59,6 +67,28 @@ export default {
   transition: all 0.5s ease-in-out;
   &.hide {
     top: -150px;
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 120px;
+    .link {
+      opacity: 0.3;
+      line-height: 32px;
+      color: var(--white);
+      font-size: 12px;
+      user-select: none;
+      cursor: pointer;
+      transition: opacity 0.5s ease-in;
+      &:hover {
+        opacity: 0.7;
+      }
+      & + .link {
+        margin-left: 12px;
+      }
+    }
   }
 }
 .main {

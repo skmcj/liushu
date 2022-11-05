@@ -188,13 +188,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.banner {
-  overflow: hidden;
-  .wave {
-    position: absolute;
-    bottom: 0;
-  }
-}
 .content {
   width: 75%;
   .block {
@@ -227,33 +220,6 @@ export default {
           justify-content: center;
         }
       }
-    }
-  }
-  .card-box {
-    width: 100%;
-    margin-top: 30px;
-    display: grid;
-    justify-content: space-between;
-    grid-row-gap: 30px;
-  }
-  @media (max-width: 1366.9px) {
-    .card-box {
-      grid-template-columns: repeat(2, 300px);
-    }
-  }
-  @media (min-width: 1367px) and (max-width: 1700.9px) {
-    .card-box {
-      grid-template-columns: repeat(3, 300px);
-    }
-  }
-  @media (min-width: 1701px) and (max-width: 2095.9px) {
-    .card-box {
-      grid-template-columns: repeat(4, 300px);
-    }
-  }
-  @media (min-width: 2096px) {
-    .card-box {
-      grid-template-columns: repeat(5, 300px);
     }
   }
 }
