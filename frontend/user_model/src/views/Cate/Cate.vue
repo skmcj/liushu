@@ -141,7 +141,9 @@ export default {
     /**
      * 更多
      */
-    handleMore(id) {},
+    handleMore(id) {
+      this.$router.push({ path: '/cate/detail', query: { id } });
+    },
     /**
      * 用于测试
      */

@@ -68,6 +68,7 @@ public class BusinessController {
      * @param request
      * @return
      */
+    @Transactional
     @PostMapping("/logon")
     public Result<String> logon(@RequestBody EmployeeDto employeeDTO, HttpServletRequest request) {
         // 获取验证码
@@ -95,16 +96,16 @@ public class BusinessController {
                 // 设置一些默认值
                 store.setEmail(employeeDTO.getEmail());
                 store.setPassword(employeeDTO.getPassword());
-                store.setPrefix(BaseConvertUtil.convert10To36(record + 1));
+                store.setPrefix(BaseConvertUtil.convert10To36(record + 1024));
                 storeService.save(store);
                 statistical.setRecord(record + 1);
                 statisticalService.updateById(statistical);
                 // 获取新增商家id
-                Bookstore newBookstore = storeService.getOne(queryWrapper);
-                System.out.println("storeId => " + newBookstore.getId());
+                session.setAttribute("storeId", store.getId());
+                System.out.println("storeId => " + store.getId());
                 // 注册员工，权限为店长
                 Employee employee = new Employee();
-                employee.setStoreId(newBookstore.getId());
+                employee.setStoreId(store.getId());
                 employee.setEmail(employeeDTO.getEmail());
                 employee.setPassword(employeeDTO.getPassword());
                 employee.setName("店长");
@@ -227,6 +228,7 @@ public class BusinessController {
         bookstore.setAddress(authVo.getAddress());
         bookstore.setBusinessHours(authVo.getBusinessHours());
         bookstore.setDeliverFee(authVo.getDeliverFee());
+        bookstore.setAuditStatus(1);
         storeService.updateById(bookstore);
         // 详细信息
         storeDetail.setStoreId(storeId);

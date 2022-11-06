@@ -95,6 +95,9 @@ export default {
       font-size: 18px;
       font-weight: bold;
       font-family: 'Source Han Sans';
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .sk-book-card__author {
       font-size: 12px;

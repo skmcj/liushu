@@ -23,7 +23,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         // 配置商家后台访问路径映射资源
         registry.addResourceHandler("/store/**").addResourceLocations("classpath:/store/");
         // 配置用户前台访问路径映射资源
-        // registry.addResourceHandler("/**").addResourceLocations("classpath:/front/");
+        registry.addResourceHandler("/**").addResourceLocations("classpath:/front/");
         // 配置其它路径映射资源
         registry.addResourceHandler("/other/**").addResourceLocations("classpath:/other/");
     }

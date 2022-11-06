@@ -84,7 +84,7 @@ export default {
     },
     handleSearch() {
       if (this.isShow) {
-        console.log(this.searchContent);
+        // console.log(this.searchContent);
       } else {
         this.isShow = true;
       }
@@ -98,7 +98,7 @@ export default {
     $route: {
       immediate: true,
       handler(val) {
-        console.log('route =>', val);
+        // console.log('route =>', val);
         this.activeLink = val.meta.rootLink;
       }
     }

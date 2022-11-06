@@ -5,6 +5,7 @@ import Login from '@/views/Login/Login';
 import Main from '@/components/Main/Main';
 import Home from '@/views/Home/Home';
 import Cate from '@/views/Cate/Cate';
+import CateDetail from '@/views/Cate/CateDetail';
 import About from '@/views/About/About';
 import Mine from '@/views/Mine/Mine';
 
@@ -53,6 +54,15 @@ const routes = [
         }
       },
       {
+        path: '/cate/detail',
+        name: 'cateDetail',
+        component: CateDetail,
+        meta: {
+          title: '分类-更多',
+          rootLink: '/cate'
+        }
+      },
+      {
         path: '/about',
         name: 'about',
         component: About,
@@ -78,6 +88,18 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+});
+
+// 路由拦截器
+router.beforeEach((to, from, next) => {
+  // 处理标题
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  } else {
+    document.title = '流书网'; // 此处写默认的title
+  }
+  // 登录验证
+  next();
 });
 
 export default router;

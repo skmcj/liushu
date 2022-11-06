@@ -16,11 +16,14 @@
   }
 }
 .content-box {
+  position: relative;
+  z-index: 888;
   display: flex;
   justify-content: center;
   margin-top: -128px;
   width: 100%;
   .content {
+    position: relative;
     width: 75%;
     .content-item {
       position: relative;
@@ -55,6 +58,33 @@
         grid-template-columns: repeat(5, 300px);
       }
     }
+    .book-box {
+      width: 100%;
+      margin-top: 42px;
+      display: grid;
+      justify-content: space-between;
+      grid-row-gap: 30px;
+    }
+    @media (max-width: 1416.9px) {
+      .book-box {
+        grid-template-columns: repeat(2, 240px);
+      }
+    }
+    @media (min-width: 1417px) and (max-width: 1839.9px) {
+      .book-box {
+        grid-template-columns: repeat(3, 240px);
+      }
+    }
+    @media (min-width: 1840px) and (max-width: 2376.9px) {
+      .book-box {
+        grid-template-columns: repeat(4, 240px);
+      }
+    }
+    @media (min-width: 2377px) {
+      .book-box {
+        grid-template-columns: repeat(5, 240px);
+      }
+    }
   }
 }
 /* Element-UI 的自定义样式 */
@@ -64,6 +94,45 @@
   .el-select-dropdown__item {
     &.selected {
       color: var(--primary);
+    }
+  }
+}
+// el-pagination
+.el-pagination {
+  // button {
+  //   &:disabled {
+  //     border-color: #c0c4cc;
+  //   }
+  // }
+  .btn-prev,
+  .btn-next {
+    border-radius: 3px;
+    border: 1px solid #dcdee2;
+    &:hover {
+      color: var(--primary);
+    }
+  }
+  .btn-prev {
+    margin-right: 5px;
+  }
+  .btn-next {
+    margin-left: 5px;
+  }
+  .el-pager {
+    li {
+      min-width: 30px;
+      margin: 0 5px;
+      border-radius: 3px;
+      border: 1px solid #dcdee2;
+      &:hover {
+        color: var(--primary);
+      }
+      &.active {
+        color: var(--primary);
+        & + li {
+          border-left: 1px solid #dcdee2;
+        }
+      }
     }
   }
 }
