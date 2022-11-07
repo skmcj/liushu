@@ -16,6 +16,7 @@ body {
   font-family: AlibabaPuHuiTi-2-55-Regular, 'Noto Sans';
   color: var(--primary-text);
   background-color: var(--default-bg);
+  box-sizing: border-box;
 }
 // 选中时的背景色
 ::selection {

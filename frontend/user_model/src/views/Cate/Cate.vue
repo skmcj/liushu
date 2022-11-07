@@ -8,6 +8,7 @@
       <div class="content">
         <template v-for="(item, index) in bookCate">
           <ContentBlock
+            :id="item.name"
             :key="'cate-' + index"
             class="block"
             :more-tool="true"
@@ -28,6 +29,13 @@
           </ContentBlock>
         </template>
       </div>
+      <Tool
+        class="tools"
+        :cate="true"
+        :cate-list="bookCate"
+        :active-cate="activeCate"
+        :listenCateHash="handleListenCateHash"
+        :top-visible-height="500" />
     </div>
   </div>
 </template>
@@ -36,12 +44,14 @@
 import ContentBlock from '@/components/Common/ContentBlock';
 import BookCard from '@/components/Card/BookCard';
 import Wave from '@/components/Common/Wave';
+import Tool from '@/components/Tool/Tool';
 
 export default {
   components: {
     ContentBlock,
     BookCard,
-    Wave
+    Wave,
+    Tool
   },
   created() {
     this.getBook();
@@ -96,7 +106,8 @@ export default {
           sort: 9
         }
       ],
-      bookList: {}
+      bookList: {},
+      activeCate: '#文学'
     };
   },
   methods: {
@@ -144,6 +155,9 @@ export default {
     handleMore(id) {
       this.$router.push({ path: '/cate/detail', query: { id } });
     },
+    handleListenCateHash(hash) {
+      this.activeCate = hash;
+    },
     /**
      * 用于测试
      */
@@ -168,6 +182,13 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.tools {
+  :deep(.sk-tool-cate-list) {
+    &:first-of-type {
+      margin-bottom: 53px;
+    }
+  }
+}
 .content {
   width: 75%;
   .block {

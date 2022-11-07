@@ -45,6 +45,7 @@
           </div>
         </ContentBlock>
       </div>
+      <Tool class="tools" :top-visible-height="500" />
     </div>
   </div>
 </template>
@@ -54,13 +55,15 @@ import ContentBlock from '@/components/Common/ContentBlock';
 import BookCard from '@/components/Card/BookCard';
 import ShopCard from '@/components/Card/ShopCard';
 import Wave from '@/components/Common/Wave';
+import Tool from '@/components/Tool/Tool';
 
 export default {
   components: {
     ContentBlock,
     BookCard,
     ShopCard,
-    Wave
+    Wave,
+    Tool
   },
   created() {
     this.getRecommendingBook();

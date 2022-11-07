@@ -52,6 +52,7 @@
           </div>
         </div>
       </div>
+      <Tool class="tools" :top-visible-height="500" />
     </div>
   </div>
 </template>
@@ -59,9 +60,11 @@
 <script>
 import BookCard from '@/components/Card/BookCard';
 import Wave from '@/components/Common/Wave';
+import Tool from '@/components/Tool/Tool';
 
 export default {
   components: {
+    Tool,
     Wave,
     BookCard
   },
