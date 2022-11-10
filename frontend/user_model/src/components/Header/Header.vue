@@ -42,7 +42,7 @@
         </div>
         <div v-if="isLogin" class="nav-mine" :class="{ 'is-active': activeLink === '/mine' }">
           <div class="avatar" @click="handleClick('/mine')">
-            <img class="img" src="@/assets/images/avarat.jpeg" />
+            <img class="img" :src="avatarUrl" />
           </div>
           <i class="icon ic-bell" @click="handleClick('/mine/mess')"></i>
         </div>
@@ -57,7 +57,8 @@ export default {
     isLogin: {
       type: Boolean,
       default: false
-    }
+    },
+    avatarUrl: String
   },
   data() {
     return {

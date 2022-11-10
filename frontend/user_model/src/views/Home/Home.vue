@@ -17,7 +17,8 @@
               :title="book.title"
               :author="book.author"
               :profile="book.profile"
-              :store-name="book.storeName" />
+              :store-name="book.storeName"
+              :handleBook="() => clickBook(index)" />
           </div>
         </ContentBlock>
         <!-- 推荐商家 -->
@@ -143,6 +144,16 @@ export default {
     };
   },
   methods: {
+    /**
+     * 点击图书
+     */
+    clickBook(id) {
+      this.$router.push({ path: '/book', query: { id } });
+    },
+    /**
+     * 点击商家
+     */
+    clickStore() {},
     /**
      * 根据当前屏幕大小计算请求数量
      */

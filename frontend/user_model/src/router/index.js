@@ -6,6 +6,7 @@ import Main from '@/components/Main/Main';
 import Home from '@/views/Home/Home';
 import Cate from '@/views/Cate/Cate';
 import CateDetail from '@/views/Cate/CateDetail';
+import BookDetail from '@/views/Detail/BookDetail';
 import About from '@/views/About/About';
 import Mine from '@/views/Mine/Mine';
 
@@ -60,6 +61,15 @@ const routes = [
         meta: {
           title: '分类-更多',
           rootLink: '/cate'
+        }
+      },
+      {
+        path: '/book',
+        name: 'bookDetail',
+        component: BookDetail,
+        meta: {
+          title: '图书详情',
+          rootLink: '/book'
         }
       },
       {
