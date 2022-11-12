@@ -11,6 +11,7 @@ import ShopDetail from '@/views/Detail/ShopDetail';
 import About from '@/views/About/About';
 import AboutProfile from '@/views/About/AboutProfile';
 import AboutProblem from '@/views/About/AboutProblem';
+import AboutProblemResult from '@/views/About/AboutProblemResult';
 import AboutOur from '@/views/About/AboutOur';
 import AboutLink from '@/views/About/AboutLink';
 import Mine from '@/views/Mine/Mine';
@@ -109,6 +110,15 @@ const routes = [
             path: '/about/problem',
             name: 'aboutProblem',
             component: AboutProblem,
+            meta: {
+              title: '关于-常见问题',
+              rootLink: '/about'
+            }
+          },
+          {
+            path: '/about/problem/q=:id',
+            name: 'aboutProblemResult',
+            component: AboutProblemResult,
             meta: {
               title: '关于-常见问题',
               rootLink: '/about'

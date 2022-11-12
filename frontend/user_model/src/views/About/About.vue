@@ -44,7 +44,8 @@ export default {
   },
   data() {
     return {
-      activeAside: 'profile'
+      activeAside: 'profile',
+      title: '本站简介'
     };
   },
   methods: {
@@ -54,6 +55,20 @@ export default {
     handleAside(text) {
       this.activeAside = text;
       this.$router.push(`/about/${text}`);
+      switch (text) {
+        case 'problem':
+          this.title = '常见问题';
+          break;
+        case 'our':
+          this.title = '关于我们';
+          break;
+        case 'link':
+          this.title = '友情链接';
+          break;
+        default:
+          this.title = '本站简介';
+          break;
+      }
     }
   }
 };
