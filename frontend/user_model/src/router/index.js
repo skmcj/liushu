@@ -9,6 +9,10 @@ import CateDetail from '@/views/Cate/CateDetail';
 import BookDetail from '@/views/Detail/BookDetail';
 import ShopDetail from '@/views/Detail/ShopDetail';
 import About from '@/views/About/About';
+import AboutProfile from '@/views/About/AboutProfile';
+import AboutProblem from '@/views/About/AboutProblem';
+import AboutOur from '@/views/About/AboutOur';
+import AboutLink from '@/views/About/AboutLink';
 import Mine from '@/views/Mine/Mine';
 
 Vue.use(VueRouter)
@@ -89,7 +93,46 @@ const routes = [
         meta: {
           title: '关于',
           rootLink: '/about'
-        }
+        },
+        children: [
+          {
+            path: '/about/profile',
+            name: 'aboutProfile',
+            component: AboutProfile,
+            alias: ['/'],
+            meta: {
+              title: '关于-本站简介',
+              rootLink: '/about'
+            }
+          },
+          {
+            path: '/about/problem',
+            name: 'aboutProblem',
+            component: AboutProblem,
+            meta: {
+              title: '关于-常见问题',
+              rootLink: '/about'
+            }
+          },
+          {
+            path: '/about/our',
+            name: 'aboutOur',
+            component: AboutOur,
+            meta: {
+              title: '关于-关于我们',
+              rootLink: '/about'
+            }
+          },
+          {
+            path: '/about/link',
+            name: 'aboutLink',
+            component: AboutLink,
+            meta: {
+              title: '关于-友情链接',
+              rootLink: '/about'
+            }
+          }
+        ]
       },
       {
         path: '/mine',
