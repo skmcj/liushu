@@ -4,7 +4,7 @@
       <img class="img" :src="$bannerUrl" />
       <Wave class="wave" colorHex="#f1f2f3" />
     </div>
-    <div class="content-box" id="contentBox">
+    <div class="content-box" id="bookContentBox">
       <div class="content" :style="style">
         <div class="top">
           <BookMessCard
@@ -37,7 +37,7 @@
             @clickRankItem="handleRankItem"
             @clickStoreName="handleStoreName" />
         </div>
-        <div class="tab-box" id="tabBox">
+        <div class="tab-box" id="bookTabBox">
           <!-- 选项卡 -->
           <div class="tab-tit-panel" :style="navStyle">
             <!-- 左边导航组 -->
@@ -276,8 +276,8 @@ export default {
   },
   mounted() {
     this.width = document.body.offsetWidth;
-    this.contentBoxDom = document.getElementById('contentBox');
-    this.tabBoxDom = document.getElementById('tabBox');
+    this.contentBoxDom = document.getElementById('bookContentBox');
+    this.tabBoxDom = document.getElementById('bookTabBox');
     this.detailDom = document.getElementById('bookDetail');
     this.detailAsideDom = document.getElementById('detailAside');
     this.commentDom = document.getElementById('bookComment');
@@ -515,6 +515,7 @@ export default {
     }
     .shop-mess {
       width: 27%;
+      margin-right: 30px;
     }
   }
   .tab-box {

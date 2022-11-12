@@ -7,6 +7,7 @@ import Home from '@/views/Home/Home';
 import Cate from '@/views/Cate/Cate';
 import CateDetail from '@/views/Cate/CateDetail';
 import BookDetail from '@/views/Detail/BookDetail';
+import ShopDetail from '@/views/Detail/ShopDetail';
 import About from '@/views/About/About';
 import Mine from '@/views/Mine/Mine';
 
@@ -70,6 +71,15 @@ const routes = [
         meta: {
           title: '图书详情',
           rootLink: '/book'
+        }
+      },
+      {
+        path: '/shop',
+        name: 'shopDetail',
+        component: ShopDetail,
+        meta: {
+          title: '商家详情',
+          rootLink: '/shop'
         }
       },
       {

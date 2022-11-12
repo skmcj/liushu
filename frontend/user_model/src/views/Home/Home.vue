@@ -18,13 +18,20 @@
               :author="book.author"
               :profile="book.profile"
               :store-name="book.storeName"
-              :handleBook="() => clickBook(index)" />
+              :handle-book="() => clickBook(index)"
+              :handle-store="() => clickStore(1)" />
           </div>
         </ContentBlock>
         <!-- 推荐商家 -->
         <ContentBlock class="block" title="推荐商家" :handleChange="handleChangeShop">
           <div class="card-box">
-            <ShopCard v-for="index of 6" :key="index" :cover="shop.cover" :name="shop.storeName" :score="shop.score" />
+            <ShopCard
+              v-for="index of 6"
+              :key="index"
+              :cover="shop.cover"
+              :name="shop.storeName"
+              :score="shop.score"
+              :hanle-click="() => clickStore(1)" />
           </div>
         </ContentBlock>
         <!-- 分类图书 -->
@@ -153,7 +160,9 @@ export default {
     /**
      * 点击商家
      */
-    clickStore() {},
+    clickStore(id) {
+      this.$router.push({ path: '/shop', query: { id } });
+    },
     /**
      * 根据当前屏幕大小计算请求数量
      */

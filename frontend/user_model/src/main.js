@@ -21,6 +21,35 @@ Vue.prototype.$noAvatarUrl = noAvatar;
 // 将md5绑定到vue上
 Vue.prototype.$md5 = md5;
 
+/** 封装使用率高的工具函数 */
+/**
+ * 判断传入对象是否为空
+ * @param {Object} obj 一个对象
+ * @returns 布尔结果
+ */
+Vue.prototype.$isEmpty = function(obj) {
+  let str = JSON.stringify(obj);
+  let flag = false;
+  switch(str) {
+    case '""':
+      flag = true;
+      break;
+    case '[]':
+      flag = true;
+      break;
+    case '{}':
+      flag = true;
+      break;
+    case 'null':
+      flag = true;
+      break;
+    case undefined:
+      flag = true;
+      break;
+  }
+  return flag;
+}
+
 new Vue({
   router,
   store,
