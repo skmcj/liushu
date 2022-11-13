@@ -69,6 +69,10 @@ Vue.prototype.$isEmpty = function(obj) {
   return flag;
 }
 
+/** 加载插件 */
+// const VueMasonryPlugin = window['vue-masonry-plugin'].VueMasonryPlugin;
+// Vue.use(VueMasonryPlugin);
+
 new Vue({
   router,
   store,

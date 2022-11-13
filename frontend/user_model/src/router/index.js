@@ -103,7 +103,8 @@ const routes = [
             alias: ['/'],
             meta: {
               title: '关于-本站简介',
-              rootLink: '/about'
+              rootLink: '/about',
+              aside: 'profile'
             }
           },
           {
@@ -112,7 +113,8 @@ const routes = [
             component: AboutProblem,
             meta: {
               title: '关于-常见问题',
-              rootLink: '/about'
+              rootLink: '/about',
+              aside: 'problem'
             }
           },
           {
@@ -121,7 +123,8 @@ const routes = [
             component: AboutProblemResult,
             meta: {
               title: '关于-常见问题',
-              rootLink: '/about'
+              rootLink: '/about',
+              aside: 'problem'
             }
           },
           {
@@ -130,7 +133,8 @@ const routes = [
             component: AboutOur,
             meta: {
               title: '关于-联系我们',
-              rootLink: '/about'
+              rootLink: '/about',
+              aside: 'our'
             }
           },
           {
@@ -139,7 +143,8 @@ const routes = [
             component: AboutLink,
             meta: {
               title: '关于-友情链接',
-              rootLink: '/about'
+              rootLink: '/about',
+              aside: 'link'
             }
           }
         ]
