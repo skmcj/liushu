@@ -14,7 +14,7 @@
             常见问题
           </div>
           <div class="item" :class="{ 'is-active': activeAside === 'our' }" @click.stop="handleAside('our')">
-            关于我们
+            联系我们
           </div>
           <div class="item" :class="{ 'is-active': activeAside === 'link' }" @click.stop="handleAside('link')">
             友情链接
@@ -23,7 +23,7 @@
         <div class="main-content">
           <div class="title-box">
             <span class="icon"></span>
-            <span class="text">本站简介</span>
+            <span class="text">{{ title }}</span>
             <div class="hr"></div>
           </div>
           <transition name="fade">
@@ -60,7 +60,7 @@ export default {
           this.title = '常见问题';
           break;
         case 'our':
-          this.title = '关于我们';
+          this.title = '联系我们';
           break;
         case 'link':
           this.title = '友情链接';
