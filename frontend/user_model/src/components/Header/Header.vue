@@ -42,7 +42,7 @@
         </div>
         <div v-if="isLogin" class="nav-mine" :class="{ 'is-active': activeLink === '/mine' }">
           <div class="avatar" @click="handleClick('/mine')">
-            <img class="img" :src="avatarUrl" />
+            <img class="img" :src="avatarUrl ? avatarUrl : $noAvatarUrl" />
           </div>
           <i class="icon ic-bell" @click="handleClick('/mine/mess')"></i>
         </div>

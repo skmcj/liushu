@@ -1,0 +1,48 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 153 144" height="144px" width="153px">
+    <title> 备份 4</title>
+    <defs>
+        <linearGradient id="linearGradient-1" y2="-7.86526499%" x2="52.0445751%" y1="100%" x1="52.0445751%">
+            <stop offset="0%" stop-opacity="0" stop-color="#F3F4F6"></stop>
+            <stop offset="100%" stop-color="#E4E6E9"></stop>
+        </linearGradient>
+        <path id="path-2" d="M44.4680851,24.8239615 C44.4680851,11.1140661 34.5135652,0 22.2340426,0 C9.95451992,0 0,11.1140661 0,24.8239615 C0,38.5338568 44.4680851,38.5338568 44.4680851,24.8239615 Z"></path>
+        <linearGradient id="linearGradient-4" y2="50%" x2="66.4682859%" y1="27.9227096%" x1="34.5837242%">
+            <stop offset="0%" stop-color="#F3F4F6"></stop>
+            <stop offset="100%" stop-color="#E4E6E9"></stop>
+        </linearGradient>
+        <linearGradient id="linearGradient-5" y2="32.4155649%" x2="50%" y1="-18.7923964%" x1="50%">
+            <stop offset="0%" stop-color="#F6F7F9"></stop>
+            <stop offset="100%" stop-color="#EAEDF0"></stop>
+        </linearGradient>
+        <rect rx="5.546" height="11.7021277" width="55" y="0" x="0" id="path-6"></rect>
+    </defs>
+    <g fill-rule="evenodd" fill="none" stroke-width="1" stroke="none" id="缺省页">
+        <g id="编组-24" transform="translate(-1098.000000, -251.000000)">
+            <g transform="translate(1119.000000, 274.000000)">
+                <ellipse ry="23.5" rx="55.5" cy="58.5" cx="55.5" opacity="0.685308547" fill="url(#linearGradient-1)" id="椭圆形备份-2"></ellipse>
+                <g transform="translate(55.500000, 31.500000) rotate(-360.000000) translate(-55.500000, -31.500000) translate(28.000000, 4.000000)" id="编组-166">
+                    <ellipse ry="5.85106383" rx="5.26595745" cy="5.85106383" cx="27.5" fill="#E2E4E7" id="椭圆形"></ellipse>
+                    <ellipse ry="9.94680851" rx="9.36170213" cy="45.0531915" cx="28.0851064" fill="#E9ECEF" id="椭圆形备份-106"></ellipse>
+                    <g transform="translate(4.680851, 5.851064)" id="编组-165">
+                        <mask fill="white" id="mask-3">
+                            <use xlink:href="#path-2"></use>
+                        </mask>
+                        <use xlink:href="#path-2" fill="#E1E3E6" id="椭圆形备份-105"></use>
+                        <path mask="url(#mask-3)" fill="url(#linearGradient-4)" id="椭圆形" d="M37.0567376,24.8239615 C37.0567376,11.1140661 27.1022177,0 14.822695,0 C2.54317241,0 -7.41134752,11.1140661 -7.41134752,24.8239615 C-7.41134752,38.5338568 37.0567376,38.5338568 37.0567376,24.8239615 Z"></path>
+                        <path mask="url(#mask-3)" stroke-linecap="round" stroke-width="1.84866667" stroke="#FFFFFF" id="路径" d="M18.5340603,3.36064022 C17.3714006,3.81905027 16.2530995,4.38235498 15.1882773,5.04037182 C9.75232474,8.3995697 5.71010504,14.227095 4.2750041,21.1682213"></path>
+                    </g>
+                    <g transform="translate(0.000000, 31.595745)" id="矩形-11">
+                        <mask fill="white" id="mask-7">
+                            <use xlink:href="#path-6"></use>
+                        </mask>
+                        <use xlink:href="#path-6" fill="url(#linearGradient-5)" id="矩形"></use>
+                        <path mask="url(#mask-7)" fill="#E4E6E9" id="矩形备份-104" d="M0,5.85106383 L55,5.85106383 L55,6.15612766 C55,9.21909888 52.5169712,11.7021277 49.454,11.7021277 L5.546,11.7021277 C2.48302878,11.7021277 1.26328421e-15,9.21909888 0,6.15612766 L0,5.85106383 L0,5.85106383 Z"></path>
+                    </g>
+                </g>
+                <circle r="2.91" cy="3.5" cx="76.5" stroke-width="1.18" stroke="#E4E6E9" id="椭圆形"></circle>
+                <circle r="2.91" cy="3.5" cx="88.5" stroke-width="1.18" stroke="#E4E6E9" id="椭圆形备份-3"></circle>
+                <circle r="2.91" cy="3.5" cx="100.5" stroke-width="1.18" stroke="#E4E6E9" id="椭圆形备份-4"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

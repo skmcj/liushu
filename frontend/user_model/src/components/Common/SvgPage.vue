@@ -11,6 +11,12 @@
       <img v-if="name === 'no-records'" :src="noRecords" alt="no-records" />
       <img v-if="name === 'no-result'" :src="noResult" alt="no-result" />
       <img v-if="name === 'no-content'" :src="noContent" alt="no-content" />
+      <img v-if="name === 'no-order'" :src="noOrder" alt="no-order" />
+      <img v-if="name === 'no-mess'" :src="noMess" alt="no-mess" />
+      <img v-if="name === 'no-address'" :src="noAddress" alt="no-address" />
+      <img v-if="name === 'no-cart'" :src="noCart" alt="no-cart" />
+      <img v-if="name === 'no-comment'" :src="noComment" alt="no-comment" />
+      <img v-if="name === 'no-coupon'" :src="noCoupon" alt="no-coupon" />
     </div>
     <div
       class="sk-svg-mess"
@@ -27,9 +33,15 @@
 </template>
 
 <script>
-import noRecords from '@/assets/images/no-records.svg';
-import noResult from '@/assets/images/no-result.svg';
-import noContent from '@/assets/images/no-content.svg';
+import noRecords from '@/assets/images/svg/no-records.svg';
+import noResult from '@/assets/images/svg/no-result.svg';
+import noContent from '@/assets/images/svg/no-content.svg';
+import noOrder from '@/assets/images/svg/no-order.svg';
+import noMess from '@/assets/images/svg/no-mess.svg';
+import noAddress from '@/assets/images/svg/no-address.svg';
+import noCart from '@/assets/images/svg/no-cart.svg';
+import noComment from '@/assets/images/svg/no-comment.svg';
+import noCoupon from '@/assets/images/svg/no-coupon.svg';
 
 export default {
   props: {
@@ -56,7 +68,13 @@ export default {
     return {
       noRecords,
       noResult,
-      noContent
+      noContent,
+      noOrder,
+      noMess,
+      noAddress,
+      noCart,
+      noComment,
+      noCoupon
     };
   },
   computed: {

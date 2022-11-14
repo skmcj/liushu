@@ -5,7 +5,7 @@
       <div class="links">
         <span class="link" @click="gotoStore">我是商家</span>
       </div>
-      <Header />
+      <Header :is-login="true" />
     </div>
     <!-- 主要显示内容 -->
     <div class="main">

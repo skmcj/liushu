@@ -15,6 +15,14 @@ import AboutProblemResult from '@/views/About/AboutProblemResult';
 import AboutOur from '@/views/About/AboutOur';
 import AboutLink from '@/views/About/AboutLink';
 import Mine from '@/views/Mine/Mine';
+import MineMain from '@/views/Mine/MineMain';
+import MineCenter from '@/views/Mine/MineCenter';
+import MineCart from '@/views/Mine/MineCart';
+import MineOrder from '@/views/Mine/MineOrder';
+import MineMess from '@/views/Mine/MineMess';
+import MineAddress from '@/views/Mine/MineAddress';
+import MineColl from '@/views/Mine/MineColl';
+import MineComment from '@/views/Mine/MineComment';
 
 Vue.use(VueRouter)
 
@@ -156,7 +164,90 @@ const routes = [
         meta: {
           title: '我的',
           rootLink: '/mine'
-        }
+        },
+        children: [
+          {
+            path: '/mine',
+            name: 'mineMain',
+            component: MineMain,
+            alias: ['/', '/index'],
+            meta: {
+              title: '我的',
+              rootLink: '/mine',
+              aside: 'main'
+            }
+          },
+          {
+            path: '/mine/center',
+            name: 'mineCenter',
+            component: MineCenter,
+            meta: {
+              title: '我的-个人中心',
+              rootLink: '/mine',
+              aside: 'center'
+            }
+          },
+          {
+            path: '/mine/cart',
+            name: 'mineCart',
+            component: MineCart,
+            meta: {
+              title: '我的-购物车',
+              rootLink: '/mine',
+              aside: 'cart'
+            }
+          },
+          {
+            path: '/mine/order',
+            name: 'mineOrder',
+            component: MineOrder,
+            meta: {
+              title: '我的-订单',
+              rootLink: '/mine',
+              aside: 'order'
+            }
+          },
+          {
+            path: '/mine/mess',
+            name: 'mineMess',
+            component: MineMess,
+            meta: {
+              title: '我的-消息',
+              rootLink: '/mine',
+              aside: 'mess'
+            }
+          },
+          {
+            path: '/mine/address',
+            name: 'mineAddress',
+            component: MineAddress,
+            meta: {
+              title: '我的-地址',
+              rootLink: '/mine',
+              aside: 'address'
+            }
+          },
+          {
+            path: '/mine/coll',
+            name: 'mineColl',
+            component: MineColl,
+            meta: {
+              title: '我的-收藏',
+              rootLink: '/mine',
+              aside: 'coll'
+            }
+          },
+          {
+            path: '/mine/comment',
+            name: 'mineComment',
+            component: MineComment,
+            meta: {
+              title: '我的-评价',
+              rootLink: '/mine',
+              aside: 'comment'
+            }
+          }
+        ]
       }
     ]
   }
