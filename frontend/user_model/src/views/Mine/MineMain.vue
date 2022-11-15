@@ -20,7 +20,7 @@
         <!-- 支持横向滚动 -->
         <div class="box" @mousewheel.stop="handleWalletBoxScroll" ref="scrollXBox">
           <!-- 零钱 -->
-          <div class="wallet">
+          <div class="wallet" @click.stop="handlePrevieward('wallet')">
             <div class="text-box">{{ walletVisible ? keepTwoNum(userInfo.money) : '***' }}</div>
             <div class="title-box">
               <i class="ic-wallet"></i>
@@ -32,7 +32,7 @@
             </div>
           </div>
           <!-- 优惠卷 -->
-          <div class="coupon">
+          <div class="coupon" @click.stop="handlePrevieward('coupon')">
             <div class="text-box">{{ userInfo.coupon ? userInfo.coupon.length : '无' }}</div>
             <div class="title-box">
               <i class="ic-coupon"></i>
@@ -41,13 +41,13 @@
           </div>
         </div>
       </div>
+      <!-- 购物车 -->
       <div class="shop-cart">
         <div class="title">我的购物车</div>
-        <div class="box">
+        <div class="box" @click.stop="handlePrevieward('cart')">
           <i class="ic-shopping-cart"></i>
         </div>
       </div>
-      <!-- 购物车 -->
     </div>
     <!-- 下方数据卡 -->
     <div class="data-box">
@@ -125,6 +125,48 @@
         </div>
       </div>
     </div>
+    <!-- 弹窗 -->
+    <el-dialog
+      class="mine-main-dialog"
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      :modal-append-to-body="false">
+      <div v-if="dialogTitle === '钱包'" class="wallet-dialog">
+        <div class="main-dialog">
+          <div class="title">我的零钱(元)</div>
+          <div class="money">{{ keepTwoNum(userInfo.money) }}</div>
+          <div class="btns">
+            <div class="btn grey">充值</div>
+            <div class="btn">提现</div>
+          </div>
+        </div>
+        <div class="record-box">
+          <div class="record-tit">近1个月零钱明细</div>
+          <div class="record-list-box">
+            <SvgPage v-if="moneyRecords.length < 1" name="no-content" :img-width="180" text="暂无零钱记录" />
+            <div v-else class="record-list">
+              <div class="record-item" v-for="(item, index) in moneyRecords" :key="'money-record-' + index">
+                <div class="text">
+                  <span class="type">{{ '[' + item.type + ']' }}</span>
+                  <span
+                    class="change"
+                    :class="{
+                      add: item.change === 1,
+                      reduce: item.change === 0
+                    }"
+                    >{{ (item.change ? '+' : '-') + keepTwoNum(item.amount) }}</span
+                  >
+                </div>
+                <span class="time">{{ item.updateTime }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="dialogTitle === '我的优惠卷'" class="coupon-dialog">
+        <SvgPage name="no-coupon" :img-width="240" text="暂无优惠卷" />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -146,11 +188,17 @@ export default {
       },
       walletVisible: true,
       // 消息卡选项的选择项 sys | per
-      messActive: 'sys'
+      messActive: 'sys',
+      // 弹窗控制参数
+      dialogVisible: false,
+      dialogTitle: '钱包',
+      moneyRecords: []
     };
   },
+  created() {
+    this.moneyRecords = this.getRecordsTest(15);
+  },
   mounted() {
-    console.log('%O', this.$el.offsetWidth);
     this.width = this.$el.offsetWidth;
   },
   methods: {
@@ -204,6 +252,34 @@ export default {
      */
     changeMessItem(text) {
       this.messActive = text;
+    },
+    /**
+     * 点击上方工具卡片
+     */
+    handlePrevieward(text) {
+      if (text === 'wallet') {
+        this.dialogVisible = true;
+        this.dialogTitle = '钱包';
+      } else if (text === 'coupon') {
+        this.dialogVisible = true;
+        this.dialogTitle = '我的优惠卷';
+      } else if (text === 'cart') {
+        this.$router.push('/mine/cart');
+      }
+    },
+    getRecordsTest(n) {
+      let list = [];
+      for (let i = 0; i < n; i++) {
+        let record = {
+          id: '1',
+          type: '充值',
+          change: i % 2 ? 1 : 0,
+          amount: 8.37,
+          updateTime: '2022-11-15 22:23'
+        };
+        list.push(record);
+      }
+      return list;
     }
   },
   computed: {
@@ -468,6 +544,7 @@ export default {
     border-radius: 12px;
     background-color: var(--white);
     .title {
+      user-select: none;
       box-sizing: border-box;
       padding: 0 12px;
       width: 100%;
@@ -610,6 +687,160 @@ export default {
         }
       }
     }
+  }
+}
+.mine-main-dialog {
+  :deep(.el-dialog) {
+    width: 42%;
+    .el-dialog__body {
+      padding-top: 16px;
+    }
+  }
+  .wallet-dialog {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 0 24px;
+    .main-dialog {
+      user-select: none;
+      width: 100%;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 16px 24px;
+      border-radius: 12px;
+      background-color: #f6f5ec;
+      .title {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--primary-text);
+      }
+      .money {
+        font-size: 64px;
+        font-weight: bold;
+        color: var(--primary-text);
+      }
+      .btns {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        padding: 0 12px;
+        .btn {
+          cursor: pointer;
+          font-size: 24px;
+          text-align: center;
+          line-height: 56px;
+          width: 210px;
+          height: 56px;
+          box-sizing: border-box;
+          border-radius: 28px;
+          color: var(--white);
+          transition: background-color 0.5s ease-in-out;
+          background-color: var(--primary-btn);
+          &:hover {
+            background-color: var(--primary-btn-h);
+          }
+          &:active {
+            background-color: var(--primary-btn-a);
+          }
+          &.grey {
+            background-color: var(--success-btn);
+            &:hover {
+              background-color: var(--success-btn-h);
+            }
+            &:active {
+              background-color: var(--success-btn-a);
+            }
+          }
+        }
+      }
+    }
+    .record-box {
+      margin-top: 18px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      .record-tit {
+        user-select: none;
+        width: 100%;
+        height: 36px;
+        border-radius: 8px;
+        font-size: 16px;
+        color: var(--primary-text);
+        text-align: center;
+        line-height: 36px;
+        background-color: #f5f5f5;
+      }
+      .record-list-box {
+        position: relative;
+        width: 100%;
+        height: 240px;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        overflow: hidden;
+        .record-list {
+          overflow-y: auto;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          &::-webkit-scrollbar {
+            display: none;
+          }
+          .record-item {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: 42px;
+            border-radius: 8px;
+            background-color: #f7f7f7;
+            box-sizing: border-box;
+            padding: 0 12px;
+            .text {
+              font-size: 16px;
+              color: #666666;
+              .type {
+                color: #999999;
+              }
+              .change {
+                margin-left: 12px;
+                &.add {
+                  color: var(--success);
+                }
+                &.reduce {
+                  color: var(--danger);
+                }
+              }
+            }
+            .time {
+              font-size: 14px;
+              color: #666666;
+            }
+            & + .record-item {
+              margin-top: 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+  .coupon-dialog {
+    width: 100%;
+    height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>
