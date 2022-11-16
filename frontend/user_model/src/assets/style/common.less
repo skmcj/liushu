@@ -183,6 +183,115 @@
     }
   }
 }
+// el-message-box
+.el-message-box {
+  border-radius: 12px;
+  .el-message-box__header {
+    .el-message-box__headerbtn {
+      &:hover,
+      &:focus {
+        .el-message-box__close {
+          color: var(--primary);
+        }
+      }
+    }
+  }
+}
+// el-button
+.el-button {
+  transition: color 0.5s ease-in-out, border-color 0.5s ease-in-out, background-color 0.5s ease-in-out;
+  &:focus,
+  &:hover {
+    color: var(--primary);
+    border-color: #b2ebf2;
+    background-color: #e0f7fa;
+  }
+}
+.el-button--primary {
+  color: var(--white);
+  border-color: var(--primary-btn);
+  background-color: var(--primary-btn);
+  &:focus {
+    color: var(--white);
+    border-color: var(--primary-btn);
+    background-color: var(--primary-btn);
+  }
+  &:hover {
+    color: var(--white);
+    border-color: var(--primary-btn-h);
+    background-color: var(--primary-btn-h);
+  }
+  &:active {
+    color: var(--white);
+    border-color: var(--primary-btn-a);
+    background-color: var(--primary-btn-a);
+  }
+  &.danger {
+    color: var(--white);
+    border-color: var(--danger);
+    background-color: var(--danger);
+    &:focus {
+      color: var(--white);
+      border-color: var(--danger);
+      background-color: var(--danger);
+    }
+    &:hover {
+      color: var(--white);
+      border-color: var(--danger-btn-h);
+      background-color: var(--danger-btn-h);
+    }
+    &:active {
+      color: var(--white);
+      border-color: var(--danger-btn-a);
+      background-color: var(--danger-btn-a);
+    }
+  }
+}
+// el-input
+.el-input {
+  &.is-active {
+    .el-input__inner {
+      border-color: var(--primary);
+    }
+  }
+  .el-input__inner {
+    &:focus {
+      border-color: var(--primary);
+    }
+  }
+}
+// el-textarea
+.el-textarea {
+  .el-textarea__inner {
+    &:focus {
+      border-color: var(--primary);
+    }
+  }
+}
+// el-select
+.el-select {
+  .el-input {
+    &.is-focus {
+      .el-input__inner {
+        border-color: var(--primary);
+      }
+    }
+    .el-input__inner {
+      &:focus {
+        border-color: #dcdfe6;
+      }
+    }
+  }
+}
+// el-form
+.el-form {
+  .el-form-item {
+    .el-form-item__label {
+      color: var(--placeholder-text);
+      font-size: 16px;
+    }
+  }
+}
 
 // 自定义组件样式
 .sk-hidden-scroll {
