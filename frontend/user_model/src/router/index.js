@@ -20,6 +20,8 @@ import MineCenter from '@/views/Mine/MineCenter';
 import MineCart from '@/views/Mine/MineCart';
 import MineOrder from '@/views/Mine/MineOrder';
 import MineMess from '@/views/Mine/MineMess';
+import MineMessSys from '@/views/Mine/MineMessSys';
+import MineMessPer from '@/views/Mine/MineMessPer';
 import MineAddress from '@/views/Mine/MineAddress';
 import MineColl from '@/views/Mine/MineColl';
 import MineComment from '@/views/Mine/MineComment';
@@ -178,7 +180,7 @@ const routes = [
             }
           },
           {
-            path: '/mine/center',
+            path: 'center',
             name: 'mineCenter',
             component: MineCenter,
             meta: {
@@ -188,7 +190,7 @@ const routes = [
             }
           },
           {
-            path: '/mine/cart',
+            path: 'cart',
             name: 'mineCart',
             component: MineCart,
             meta: {
@@ -198,7 +200,7 @@ const routes = [
             }
           },
           {
-            path: '/mine/order',
+            path: 'order',
             name: 'mineOrder',
             component: MineOrder,
             meta: {
@@ -208,14 +210,37 @@ const routes = [
             }
           },
           {
-            path: '/mine/mess',
+            path: 'mess',
             name: 'mineMess',
             component: MineMess,
             meta: {
               title: '我的-消息',
               rootLink: '/mine',
               aside: 'mess'
-            }
+            },
+            children: [
+              {
+                path: 'sys',
+                name: 'mineMessSys',
+                component: MineMessSys,
+                alias: ['/'],
+                meta: {
+                  title: '我的-系统消息',
+                  rootLink: '/mine',
+                  aside: 'mess'
+                }
+              },
+              {
+                path: 'personal',
+                name: 'mineMessPer',
+                component: MineMessPer,
+                meta: {
+                  title: '我的-私信',
+                  rootLink: '/mine',
+                  aside: 'mess'
+                }
+              }
+            ]
           },
           {
             path: '/mine/address',
@@ -228,7 +253,7 @@ const routes = [
             }
           },
           {
-            path: '/mine/coll',
+            path: 'coll',
             name: 'mineColl',
             component: MineColl,
             meta: {
@@ -238,7 +263,7 @@ const routes = [
             }
           },
           {
-            path: '/mine/comment',
+            path: 'comment',
             name: 'mineComment',
             component: MineComment,
             meta: {

@@ -1,4 +1,5 @@
 <template>
+  <!-- 我的-首页组件 -->
   <div class="mine-main">
     <!-- 上方信息卡 -->
     <div class="preview">

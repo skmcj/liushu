@@ -1,4 +1,5 @@
 <template>
+  <!-- 我的-评论组件 -->
   <div class="mine mine-comment">
     <div class="title-box">
       <span class="icon ic-assess"></span>

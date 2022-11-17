@@ -1,4 +1,5 @@
 <template>
+  <!-- 我的组件 -->
   <div class="main-box">
     <div class="banner">
       <img class="img" :src="$bannerUrl" />

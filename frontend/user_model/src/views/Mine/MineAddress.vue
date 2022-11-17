@@ -1,4 +1,5 @@
 <template>
+  <!-- 我的-地址组件 -->
   <div class="mine mine-address">
     <div class="title-box">
       <span class="icon ic-address-books"></span>
@@ -6,7 +7,7 @@
       <div class="hr"></div>
     </div>
     <div class="btns">
-      <div class="btn" @click="dialogVisible = true">
+      <div class="btn" @click="handleAdd">
         <i class="ic-add"></i>
         <span>新增收货地址</span>
       </div>
@@ -239,6 +240,15 @@ export default {
         });
     },
     /**
+     * 新增地址
+     */
+    handleAdd() {
+      this.dialogTitle = '新增地址';
+      this.dialogType = 'add';
+      this.dialogVisible = true;
+      this.resetForm();
+    },
+    /**
      * 编辑地址
      */
     handleEdit(id) {
@@ -262,6 +272,22 @@ export default {
         .catch(() => {
           // 取消删除
         });
+    },
+    /**
+     * 重置表单
+     */
+    resetForm() {
+      this.addressForm = {
+        id: '',
+        consignee: '',
+        sex: 0,
+        areaCode: '+86',
+        phone: '',
+        location: '',
+        detail: '',
+        label: '',
+        isDefault: 0
+      };
     }
   }
 };
