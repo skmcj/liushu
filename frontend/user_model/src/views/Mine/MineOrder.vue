@@ -1,0 +1,1505 @@
+<template>
+  <div class="mine mine-order">
+    <div class="title-box">
+      <span class="icon ic-order-1"></span>
+      <span class="text">我的订单</span>
+      <div class="hr"></div>
+    </div>
+    <!-- 导航 -->
+    <div class="nav-box">
+      <div
+        class="nav"
+        v-for="(item, i) in navList"
+        :key="'nav-item-' + i"
+        :class="{ 'is-checked': navCheck === item.value }"
+        @click.stop="handleNav(item)">
+        <span class="text">{{ item.label }}</span>
+      </div>
+    </div>
+    <!-- 订单列表 -->
+    <div class="order-list">
+      <!-- 订单项 -->
+      <div
+        class="order-item"
+        v-for="(order, oi) in orderList"
+        :key="'order-item-' + oi"
+        @click.stop="handleDetail(order)">
+        <!-- 订单主要内容 -->
+        <div class="order-content">
+          <!-- 订单基本信息 -->
+          <div class="order-mess-box">
+            <div class="order-mess-item">
+              <span class="label">订单号：</span>
+              <span class="text">{{ order.number }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">创建时间：</span>
+              <span class="text">{{ order.createTime }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">商家名称：</span>
+              <span class="text link">{{ order.storeName }}</span>
+            </div>
+          </div>
+          <!-- 订单商品列表 -->
+          <div class="orderr-goods-box">
+            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
+              <div class="order-goods-item" v-for="(goods, gi) in order.orderDetail" :key="'order-goods-item-' + gi">
+                <div class="order-goods-content">
+                  <div class="cover">
+                    <img :src="goods.bookCover" alt="goods" />
+                  </div>
+                  <div class="title">{{ goods.bookName }}</div>
+                </div>
+                <div class="order-goods-amount">
+                  <span>{{ '×' + goods.quantity }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 订单提示 -->
+          <div class="order-tip-box" v-if="order.orderTip">
+            <i class="ic-info"></i>
+            <span>{{ order.orderTip }}</span>
+          </div>
+        </div>
+        <div v-if="computeOrderStatus(order) === 'pay'" class="order-other">
+          <!-- 订单类型 -->
+          <!-- 待付款 -->
+          <div class="order-type">
+            <i class="ic-no-payment"></i>
+            <span>待付款</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn pay" @click.stop="handlePay(order)">待付款</div>
+            <div class="order-btn cancel" @click.stop="handleCancel(order)">取消订单</div>
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <div v-if="computeOrderStatus(order) === 'send'" class="order-other">
+          <!-- 待配送 -->
+          <div class="order-type">
+            <i class="ic-delivery"></i>
+            <span>待配送</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn urge" @click.stop="handleUrge(order)">我要催单</div>
+            <div class="order-btn" @click.stop="handleConfirm(order)">确认收货</div>
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <div v-if="computeOrderStatus(order) === 'back'" class="order-other">
+          <!-- 待归还 -->
+          <div class="order-type">
+            <i class="ic-return-books"></i>
+            <span>待归还</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn renew" @click.stop="handleRenew(order)">我要续借</div>
+            <div class="order-btn repay" @click.stop="handleRepay(order)">预约归还</div>
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <div v-if="computeOrderStatus(order) === 'comment'" class="order-other">
+          <!-- 待评价 -->
+          <div class="order-type">
+            <i class="ic-evaluate"></i>
+            <span>待评价</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn comment" @click.stop="handleComment(order)">去评价</div>
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <div v-if="computeOrderStatus(order) === 'after'" class="order-other">
+          <!-- 退款/售后 -->
+          <div class="order-type">
+            <i class="ic-after-sales"></i>
+            <span>退款/售后</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-tool">
+      <el-pagination
+        layout="total, prev, pager, next"
+        :total="total"
+        :page-count="total / pageSize"
+        :page-size="pageSize"
+        :current-page="currentPage"
+        @current-change="handleCurrentChange"
+        hide-on-single-page>
+      </el-pagination>
+    </div>
+    <!-- 评价dialog -->
+    <el-dialog
+      class="comment-dialog"
+      :title="'订单号：' + commentDgTitle"
+      :visible.sync="commentDgVisable"
+      :modal-append-to-body="false"
+      :close-on-click-modal="false">
+      <div class="goods-comment-list">
+        <div class="goods-comment-item" v-for="(comment, ci) in commentDgList" :key="'comment-item-' + ci">
+          <div class="goods-comment-top">
+            <!-- 顶部商品信息 -->
+            <div class="goods-mess">
+              <div class="goods-cover">
+                <img :src="comment.bookCover" alt="goods-cover" />
+              </div>
+              <div class="goods-name">{{ comment.bookName }}</div>
+            </div>
+            <div class="goods-rate-box">
+              <div class="goods-rate-title">评分：</div>
+              <div class="goods-rate">
+                <el-rate
+                  v-model="comment.score"
+                  :max="5"
+                  allow-half
+                  :icon-classes="['ic-score', 'ic-score', 'ic-score']"
+                  :colors="['#83ccd2', '#83ccd2', '#83ccd2']"
+                  void-icon-class="ic-score"
+                  disabled-void-icon-class="ic-score"
+                  show-score
+                  text-color="#83ccd2"
+                  disabled-void-color="#999999"
+                  score-template="{value}">
+                </el-rate>
+              </div>
+            </div>
+          </div>
+          <!-- 评论内容 -->
+          <div class="goods-comment-content">
+            <el-input type="textarea" :rows="5" placeholder="请输入评价内容" v-model="comment.content"></el-input>
+          </div>
+          <!-- 是否匿名 -->
+          <div class="goods-comment-anonymity">
+            <div class="text">{{ comment.isAnonymous === 0 ? '未匿名' : '已匿名' }}</div>
+            <div class="switch">
+              <el-switch
+                v-model="comment.isAnonymous"
+                active-color="#83ccd2"
+                :active-value="1"
+                :inactive-value="0"
+                @change="commentSwitchChange(comment)">
+              </el-switch>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitComment">提交 评价</el-button>
+      </span>
+    </el-dialog>
+    <!-- 续借dialog -->
+    <el-dialog
+      class="renew-dialog"
+      :title="'续借图书'"
+      :visible.sync="renewVisable"
+      :modal-append-to-body="false"
+      :close-on-click-modal="false">
+      <div class="dialog-main-box">
+        <div class="order-content">
+          <!-- 订单基本信息 -->
+          <div class="order-mess-box">
+            <div class="order-mess-item">
+              <span class="label">订单号：</span>
+              <span class="text">{{ dialogOrder.number }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">创建时间：</span>
+              <span class="text">{{ dialogOrder.createTime }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">商家名称：</span>
+              <span class="text">{{ dialogOrder.storeName }}</span>
+            </div>
+          </div>
+          <!-- 订单商品列表 -->
+          <div class="orderr-goods-box">
+            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
+              <div
+                class="order-goods-item"
+                v-for="(goods, gi) in dialogOrder.orderDetail"
+                :key="'order-goods-item-' + gi">
+                <div class="order-goods-content">
+                  <div class="cover">
+                    <img :src="goods.bookCover" alt="goods" />
+                  </div>
+                  <div class="title">{{ goods.bookName }}</div>
+                </div>
+                <div class="order-goods-amount">
+                  <span>{{ '×' + goods.quantity }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="other-mess">
+          <div class="other-mess-item">
+            <span class="label">借阅时长：</span>
+            <span class="text">{{ dialogOrder.borrowTime + ' 天' }}</span>
+          </div>
+          <div class="other-mess-item">
+            <span class="label">剩余时长：</span>
+            <span class="text">{{ computeLeaveDay(dialogOrder.createTime, dialogOrder.borrowTime) }}</span>
+          </div>
+        </div>
+        <!-- 提示 -->
+        <div class="tip-box">
+          <i class="ic-info"></i>
+          <span>{{ getDialogTip('renew') }}</span>
+        </div>
+        <!-- 表单 -->
+        <div class="dialog-form">
+          <div class="dialog-form-item">
+            <div class="dialog-form__label">续借时长：</div>
+            <div class="dialog-form__content">
+              <el-slider v-model="renewValue" :min="0" :max="maxRenewValue" show-input input-size="mini"></el-slider>
+              <span class="unit">天</span>
+            </div>
+          </div>
+        </div>
+        <!-- 结果 -->
+        <div class="dialog-result-box">
+          <div class="dialog-result-item-box">
+            <div class="dialog-result-item" style="margin-right: 12px">
+              <span class="label">借阅费：</span>
+              <span class="text">{{ renewCost + ' 元' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="gotoPay">去付款</el-button>
+      </span>
+    </el-dialog>
+    <!-- 归还dialog -->
+    <el-dialog
+      class="repay-dialog"
+      :title="'预约归还'"
+      :visible.sync="repayDgVisable"
+      :modal-append-to-body="false"
+      :close-on-click-modal="false">
+      <div class="dialog-main-box">
+        <div class="order-content">
+          <!-- 订单基本信息 -->
+          <div class="order-mess-box">
+            <div class="order-mess-item">
+              <span class="label">订单号：</span>
+              <span class="text">{{ dialogOrder.number }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">创建时间：</span>
+              <span class="text">{{ dialogOrder.createTime }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">商家名称：</span>
+              <span class="text">{{ dialogOrder.storeName }}</span>
+            </div>
+          </div>
+          <!-- 订单商品列表 -->
+          <div class="orderr-goods-box">
+            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
+              <div
+                class="order-goods-item"
+                v-for="(goods, gi) in dialogOrder.orderDetail"
+                :key="'order-goods-item-' + gi">
+                <div class="order-goods-content">
+                  <div class="cover">
+                    <img :src="goods.bookCover" alt="goods" />
+                  </div>
+                  <div class="title">{{ goods.bookName }}</div>
+                </div>
+                <div class="order-goods-amount">
+                  <span>{{ '×' + goods.quantity }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="other-mess">
+          <div class="other-mess-item">
+            <span class="label">借阅时长：</span>
+            <span class="text">{{ dialogOrder.borrowTime + ' 天' }}</span>
+          </div>
+          <div class="other-mess-item">
+            <span class="label">剩余时长：</span>
+            <span class="text">{{ computeLeaveDay(dialogOrder.createTime, dialogOrder.borrowTime) }}</span>
+          </div>
+        </div>
+        <!-- 提示 -->
+        <div class="tip-box">
+          <i class="ic-info"></i>
+          <span>{{ getDialogTip('repay') }}</span>
+        </div>
+        <!-- 表单 -->
+        <div class="dialog-form">
+          <div class="dialog-form-item">
+            <div class="dialog-form__label">预约还书时间：</div>
+            <div class="dialog-form__content">
+              <el-date-picker
+                v-model="repayDate"
+                type="datetime"
+                placeholder="选择日期时间"
+                align="right"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd HH:mm"
+                format="yyyy-MM-dd HH:mm">
+              </el-date-picker>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitRepayMess">预约 归还</el-button>
+      </span>
+    </el-dialog>
+    <!-- 详情dialog -->
+    <el-dialog class="detail-dialog" title="订单详情" :visible.sync="detailDgVisable" :modal-append-to-body="false">
+      <div class="dialog-main-box">
+        <div class="order-goods-box">
+          <div class="order-goods-title-box">{{ dialogOrder.storeName }}</div>
+          <div class="order-goods-list">
+            <div
+              class="order-goods-item"
+              v-for="(goods, gi) in dialogOrder.orderDetail"
+              :key="'order-goods-item-' + gi">
+              <div class="order-goods-content">
+                <div class="cover">
+                  <img :src="goods.bookCover" alt="goods" />
+                </div>
+                <div class="title">{{ goods.bookName }}</div>
+              </div>
+              <div class="order-goods-amount">
+                <span>{{ '×' + goods.quantity }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="order-detail-box">
+          <!-- 基本信息 -->
+          <div class="order-detail-item-box">
+            <div class="order-detail-item">
+              <span class="label">借阅时长</span>
+              <span class="text">{{ dialogOrder.borrowTime + ' 天' }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">期望时间</span>
+              <span class="text">{{ dialogOrder.expectedTime }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">联系信息</span>
+              <span class="text">{{ dialogOrder.consignee + ' ' + dialogOrder.phone }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">配送地址</span>
+              <span class="text">{{ dialogOrder.address }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">配送服务</span>
+              <span class="text">{{ dialogOrder.shippingMethod ? '高质量配送团队提供' : '由 商家 提供' }}</span>
+            </div>
+          </div>
+          <!-- 订单信息 -->
+          <div class="order-detail-item-box">
+            <div class="order-detail-item">
+              <span class="label">订单号</span>
+              <span class="text">{{ dialogOrder.number }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">支付时间</span>
+              <span class="text">{{ dialogOrder.payTime }}</span>
+            </div>
+            <div class="order-detail-item">
+              <span class="label">支付方式</span>
+              <span class="text">{{ dialogOrder.payMethod === 0 ? '线上支付' : '其它方式' }}</span>
+            </div>
+          </div>
+          <!-- 费用信息 -->
+          <div class="order-detail-item-box">
+            <div class="order-detail-item between">
+              <span class="label">借阅费</span>
+              <span class="text">{{ '￥ ' + dialogOrder.allBorrowCost }}</span>
+            </div>
+            <div class="order-detail-item between">
+              <span class="label">包装费</span>
+              <span class="text">{{ '￥ ' + dialogOrder.allPackingCost }}</span>
+            </div>
+            <div class="order-detail-item between">
+              <span class="label">配送费</span>
+              <span class="text">{{ '￥ ' + dialogOrder.deliveryFee }}</span>
+            </div>
+            <div class="order-detail-item between">
+              <span class="label">优惠金额</span>
+              <span class="text">{{ '￥ ' + dialogOrder.discountAmount }}</span>
+            </div>
+            <div class="all-cost">
+              <span class="label">共计</span>
+              <span class="text">{{ '￥ ' + dialogOrder.amount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      nickname: '蜡笔小新',
+      orderList: [],
+      navCheck: 'all',
+      navList: [
+        { label: '全部订单', value: 'all', ct: {} },
+        { label: '待付款', value: 'pay', ct: { payStatus: 0 } },
+        { label: '待配送', value: 'send', ct: { status: [0, 1] } },
+        { label: '待归还', value: 'back', ct: { status: [2, 3, 6] } },
+        { label: '待评价', value: 'comment', ct: { status: 4 } },
+        { label: '退款/售后', value: 'after', ct: { status: 8 } }
+      ],
+      currentPage: 1,
+      pageSize: 5,
+      total: 21,
+      commentDgVisable: false,
+      commentDgTitle: '',
+      commentDgList: {},
+      renewVisable: false,
+      repayDgVisable: false,
+      dialogOrder: {},
+      // 可续借时长
+      renewValue: 0,
+      maxRenewValue: 60,
+      renewCost: 0,
+      // 还书时间
+      repayDate: '',
+      pickerOptions: {
+        // 时间的快捷选项
+        shortcuts: [
+          {
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date());
+            }
+          },
+          {
+            text: '明天',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24);
+              picker.$emit('pick', date);
+            }
+          },
+          {
+            text: '后天',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24);
+              picker.$emit('pick', date);
+            }
+          },
+          {
+            text: '一周后',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', date);
+            }
+          }
+        ],
+        // 禁用日期
+        disabledDate(time) {
+          return time.getTime() < Date.now();
+        }
+      },
+      // 详情
+      detailDgVisable: false
+    };
+  },
+  created() {
+    this.orderList = this.getOrderTest(5);
+    this.orderList[0].payStatus = 0;
+    this.orderList[2].status = 2;
+    this.orderList[3].status = 4;
+    this.orderList[4].status = 8;
+    this.orderList[4].orderTip = '当前订单已逾期';
+  },
+  methods: {
+    getOrderTest(n) {
+      let list = [];
+      for (let i = 0; i < n; i++) {
+        let order = {
+          id: '111',
+          // 订单号
+          number: 'L-1234567894561230',
+          // 所属用户id
+          userId: '123',
+          // 所属书店id
+          storeId: '124',
+          // 订单地址id
+          addressId: '125',
+          storeName: '片刻书店',
+          // 收货人姓名
+          consignee: '蜡笔小新',
+          // 收货人联系方式
+          phone: '13489568956',
+          // 收货地址
+          address: '广东省韶关市韶关学院西区曼陀罗苑',
+          // 借阅时长(天)
+          borrowTime: 30,
+          // 可续借时长，默认为图书设定值
+          renewDuration: 30,
+          // 期望配送时间
+          expectedTime: '2022-11-12 23:22',
+          // 配送费
+          deliveryFee: 2,
+          // 借阅费
+          allBorrowCost: 0,
+          // 包装费
+          allPackingCost: 0,
+          // 配送方式，0-由商家配送；1-由平台配送
+          shippingMethod: 0,
+          // 支付方式，0-在线支付
+          payMethod: 0,
+          // 支付时间
+          payTime: '2022-11-17 23:25',
+          // 订单总金额
+          orderAmount: 2.0,
+          // 优惠金额，默认为0
+          discountAmount: 0,
+          // 实付金额 = 订单总金额 - 优惠金额
+          amount: 2.0,
+          // 订单备注
+          remark: 1,
+          // 交易状态，0-进行中；1-已完成；2-已取消
+          tradeStatus: 1,
+          // 支付状态，0-未支付，1-已支付
+          payStatus: 1,
+          // 售后状态，0-待售后；1-待退款；2-已退款；3-待退货；4-已退货
+          amStatus: 0,
+          // 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-待评价；5-已完成；6-逾期中；7-已逾期；8-售后中
+          status: 0,
+          // 创建时间
+          createTime: '2022-11-11 23:22',
+          // 更新时间
+          updateTime: '2022-11-11 23:22',
+          // 是否删除，0-默认；1-删除
+          isDelete: 0,
+          orderDetail: []
+        };
+        let goods = {
+          // 订单详情id
+          id: '222',
+          // 所属订单id
+          orderId: '111',
+          // 图书id
+          bookId: '224',
+          // 图书名称
+          bookName: '数学之美',
+          // 图书封面
+          bookCover: 'https://voidtech.cn/i/2022/11/15/115c6tb.jpg',
+          // 数量
+          quantity: Math.round(Math.random() * 3 + 1),
+          // 订单项状态，0-已提交订单；1-已取消订单
+          itemStatus: 0,
+          // 借阅费
+          borrowCost: 0,
+          // 包装费
+          packingCost: 2,
+          // 总金额
+          amount: 2
+        };
+        let num = Math.round(Math.random() * 9 + 1);
+        for (let j = 0; j < num; j++) {
+          order.orderDetail.push(goods);
+        }
+        list.push(order);
+      }
+      return list;
+    },
+    getDialogTip(text) {
+      let tip = '';
+      // 当前订单 dialogOrder
+      // 获取订单提示
+      if (text === 'renew') {
+        tip = '借阅时间小于等于 30 天的，免借阅费；大于 30 天的，0.07 元/天';
+      }
+      if (text === 'repay') {
+        tip = '请在借阅时间结束前预约上门收书，商家会在预约时间的后两个小时内上门收书，请确保有足够的时间等待';
+      }
+      return tip;
+    },
+    // 页码改变时
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      // 获取图书
+    },
+    /**
+     * 计算当前订单的状态 待付款 | 待配送 | 待归还 | 待评价
+     * status 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-待评价；5-已完成；6-逾期中；7-已逾期；8-售后中
+     * amStatus 售后状态，0-待售后；1-待退款；2-已退款；3-待退货；4-已退货
+     * payStatus 支付状态，0-未支付，1-已支付
+     * tradeStatus 交易状态，0-进行中；1-已完成；2-已取消
+     */
+    computeOrderStatus(item) {
+      if (item.payStatus === 0) {
+        return 'pay';
+      }
+      if (item.status === 0 || item.status === 1) {
+        return 'send';
+      }
+      if (item.status === 2 || item.status === 3 || item.status === 6) {
+        return 'back';
+      }
+      if (item.status === 4 || item.status === 7) {
+        return 'comment';
+      }
+      if (item.status === 8) {
+        return 'after';
+      }
+    },
+    /**
+     * 横向滚动
+     */
+    handleXScroll(event) {
+      // 禁止默认滚动
+      event.preventDefault();
+      // 获取当前dom
+      const box = event.path[4];
+      // 获取滚动方向
+      const detail = event.wheelDelta || event.detail;
+      // 定义滚动方向，其实也可以在赋值的时候写
+      const moveForwardStep = 1;
+      const moveBackStep = -1;
+      // 定义滚动距离
+      let step = 0;
+      // 滚动幅度
+      let speed = 42;
+      // 判断滚动方向,这里的100可以改，代表滚动幅度，也就是说滚动幅度是自定义的
+      if (detail < 0) {
+        step = moveForwardStep * speed;
+      } else {
+        step = moveBackStep * speed;
+      }
+      // 对需要滚动的元素进行滚动操作
+      box.scrollLeft += step;
+    },
+    handleNav(item) {
+      this.navCheck = item.value;
+      // 获取指定订单
+    },
+    handleDetail(item) {
+      this.dialogOrder = item;
+      this.detailDgVisable = true;
+    },
+    /**
+     * 去付款
+     */
+    handlePay(item) {},
+    /**
+     * 取消订单
+     */
+    handleCancel(item) {},
+    /**
+     * 联系商家
+     */
+    handleContact(item) {},
+    /**
+     * 催单
+     */
+    handleUrge(item) {},
+    /**
+     * 确认收货
+     */
+    handleConfirm(item) {},
+    /**
+     * 续借
+     */
+    handleRenew(item) {
+      this.dialogOrder = item;
+      this.renewVisable = true;
+    },
+    // 去付款
+    gotoPay() {
+      this.renewVisable = false;
+    },
+    /**
+     * 归还
+     */
+    handleRepay(item) {
+      this.dialogOrder = item;
+      this.repayDgVisable = true;
+    },
+    // 预约归还
+    submitRepayMess() {
+      this.repayDgVisable = false;
+    },
+    /**
+     * 评价
+     */
+    handleComment(item) {
+      this.commentDgList = [];
+      for (let i = 0; i < item.orderDetail.length; i++) {
+        let comment = {
+          // 订单id
+          orderId: item.id,
+          // 订单详情id
+          orderItemId: item.orderDetail[i].id,
+          // 用户id
+          userId: item.userId,
+          // 图书id
+          bookId: item.orderDetail[i].bookId,
+          // 书店id
+          storeId: item.storeId,
+          // 图书名称
+          bookName: item.orderDetail[i].bookName,
+          // 图书封面
+          bookCover: item.orderDetail[i].bookCover,
+          // 用户昵称
+          nickname: this.nickname,
+          // 评论内容
+          content: '',
+          // 评分
+          score: 0,
+          // 是否匿名，0-不匿；1-匿名
+          isAnonymous: 0
+        };
+        this.commentDgList.push(comment);
+      }
+      this.commentDgTitle = item.number;
+      this.commentDgVisable = true;
+    },
+    // 评价匿名处理
+    commentSwitchChange(item) {
+      item.nickname = item.isAnonymous === 0 ? this.nickname : '';
+    },
+    /**
+     * 提交评价
+     */
+    submitComment() {
+      this.commentDgVisable = false;
+      console.log('comment =>', this.commentDgList);
+    },
+    /**
+     * 计算剩余时长
+     */
+    computeLeaveDay(startDate, time) {
+      let now = new Date();
+      let start = new Date(startDate);
+      let num = start.getDate() + time - now.getDate();
+      return num >= 0 ? num + '天' : '逾期 ' + num * -1 + ' 天';
+    }
+  }
+};
+</script>
+
+<style lang="less" scoped>
+.nav-box {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 24px;
+  margin-top: 24px;
+  .nav {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    height: 32px;
+    line-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: var(--primary-text);
+    padding: 0 3px;
+    transition: all 0.5s ease-in-out;
+    & + .nav {
+      margin-left: 24px;
+    }
+    &::after {
+      transition: all 0.5s ease-in-out;
+      content: '';
+      display: block;
+      width: 0%;
+      height: 3px;
+      border-radius: 1.5px;
+      position: absolute;
+      bottom: 0;
+      background-color: var(--primary);
+    }
+    &.is-checked {
+      color: var(--primary);
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
+.order-content {
+  max-width: 68%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  .order-mess-box {
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .order-mess-item {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      .label {
+        color: var(--primary-text);
+      }
+      .text {
+        color: #6b798e;
+        &.link {
+          cursor: pointer;
+          transition: color 0.5s ease-in-out;
+          &:hover {
+            color: var(--link-text);
+          }
+        }
+      }
+    }
+  }
+  .orderr-goods-box {
+    margin-top: 12px;
+    width: 100%;
+    border-radius: 8px;
+    box-sizing: border-box;
+    padding: 8px;
+    background-color: #fff;
+    overflow: hidden;
+    .order-goods-list {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 92px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      &::-webkit-scrollbar {
+        height: 5px;
+        background-color: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        width: 25px;
+        border-radius: 2.5px;
+        background-color: rgba(216, 216, 216, 0);
+      }
+      &:hover {
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(216, 216, 216, 0.5);
+        }
+      }
+      .order-goods-item {
+        user-select: none;
+        width: 92px;
+        height: 92px;
+        border-radius: 5px;
+        overflow: hidden;
+        display: flex;
+        flex-shrink: 0;
+        justify-content: space-between;
+        align-items: flex-end;
+        .order-goods-content {
+          display: flex;
+          flex-direction: column;
+          width: 72px;
+          height: 100%;
+          align-items: center;
+          justify-content: space-between;
+          .cover {
+            width: 72px;
+            height: 72px;
+            border-radius: 5px;
+            overflow: hidden;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+          .title {
+            width: 100%;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+        }
+        .order-goods-amount {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          span {
+            font-size: 10px;
+            color: #d8d8d8;
+          }
+        }
+        & + .order-goods-item {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  .order-tip-box {
+    margin-top: 6px;
+    padding-left: 18px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 24px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    color: #999;
+    i {
+      color: #f6ad49;
+    }
+    span {
+      margin-left: 12px;
+    }
+  }
+}
+.order-list {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  box-sizing: border-box;
+  .order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: #f3f3f2;
+
+    .order-other {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      .order-type {
+        user-select: none;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 0 32px;
+        box-sizing: border-box;
+        i {
+          font-size: 48px;
+          color: #666666;
+        }
+        span {
+          margin-top: 5px;
+          font-size: 12px;
+          color: #666666;
+        }
+      }
+      .order-tools {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        box-sizing: border-box;
+        padding: 0 12px;
+        .order-btn {
+          cursor: pointer;
+          user-select: none;
+          width: 96px;
+          height: 27px;
+          border-radius: 5px;
+          font-size: 12px;
+          line-height: 27px;
+          text-align: center;
+          background-color: var(--primary-btn);
+          color: #ffffff;
+          transition: all 0.5s ease-in-out;
+          &:hover {
+            background-color: var(--primary-btn-h);
+          }
+          &:active {
+            background-color: var(--primary-btn-a);
+          }
+          & + .order-btn {
+            margin-top: 8px;
+          }
+          /* 付款按钮 */
+          &.pay {
+            background-color: var(--success-btn);
+            &:hover {
+              background-color: var(--success-btn-h);
+            }
+            &:active {
+              background-color: var(--success-btn-a);
+            }
+          }
+          /* 取消按钮 */
+          &.cancel {
+            background-color: var(--cancel-btn);
+            &:hover {
+              background-color: var(--cancel-btn-h);
+            }
+            &:active {
+              background-color: var(--cancel-btn-a);
+            }
+          }
+          /* 联系按钮 */
+          &.contact {
+            background-color: var(--contact-btn);
+            &:hover {
+              background-color: var(--contact-btn-h);
+            }
+            &:active {
+              background-color: var(--contact-btn-a);
+            }
+          }
+          /* 催促按钮 */
+          &.urge {
+            background-color: var(--urge-btn);
+            &:hover {
+              background-color: var(--urge-btn-h);
+            }
+            &:active {
+              background-color: var(--urge-btn-a);
+            }
+          }
+          /* 续借按钮 */
+          &.renew {
+            background-color: var(--renew-btn);
+            &:hover {
+              background-color: var(--renew-btn-h);
+            }
+            &:active {
+              background-color: var(--renew-btn-a);
+            }
+          }
+          /* 归还按钮 */
+          &.repay {
+            background-color: var(--repay-btn);
+            &:hover {
+              background-color: var(--repay-btn-h);
+            }
+            &:active {
+              background-color: var(--repay-btn-a);
+            }
+          }
+          /* 评价按钮 */
+          &.comment {
+            background-color: var(--comment-btn);
+            &:hover {
+              background-color: var(--comment-btn-h);
+            }
+            &:active {
+              background-color: var(--comment-btn-a);
+            }
+          }
+        }
+      }
+    }
+    & + .order-item {
+      margin-top: 12px;
+    }
+  }
+}
+.page-tool {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 120px;
+}
+.comment-dialog,
+.renew-dialog,
+.repay-dialog {
+  :deep(.el-dialog) {
+    .el-button--primary {
+      border-radius: 20px;
+      padding: 12px 36px;
+    }
+    .el-dialog__header {
+      .el-dialog__title {
+        font-weight: 500;
+      }
+    }
+  }
+  .dialog-main-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    .other-mess {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      .other-mess-item {
+        user-select: none;
+        display: flex;
+        align-items: center;
+        .label {
+          font-size: 14px;
+          color: #666666;
+        }
+        .text {
+          margin-left: 6px;
+          font-size: 14px;
+          color: #999;
+        }
+        & + .other-mess-item {
+          margin-top: 6px;
+        }
+      }
+    }
+    .tip-box {
+      margin-top: 12px;
+      width: 100%;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 0 12px;
+      background-color: rgba(243, 166, 148, 0.15);
+      i {
+        font-size: 16px;
+        color: #999;
+      }
+      span {
+        margin-left: 6px;
+        font-size: 14px;
+        color: #999;
+      }
+    }
+    .dialog-form {
+      width: 100%;
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      .dialog-form-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        .dialog-form__label {
+          user-select: none;
+          font-size: 12px;
+          color: #666;
+          margin-right: 5px;
+        }
+        .dialog-form__content {
+          display: flex;
+          align-items: center;
+          flex-grow: 1;
+          .el-slider {
+            margin-left: 12px;
+            width: 64%;
+          }
+          .unit {
+            user-select: none;
+            font-size: 14px;
+            color: #999;
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+    .dialog-result-box {
+      margin-top: 12px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding: 0 12px;
+      .dialog-result-item-box {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        .dialog-result-item {
+          user-select: none;
+          display: flex;
+          align-items: center;
+          .label {
+            font-size: 14px;
+            color: #666;
+          }
+          .text {
+            margin-left: 5px;
+            font-size: 14px;
+            color: #999;
+          }
+        }
+      }
+    }
+  }
+}
+.comment-dialog {
+  .goods-comment-list {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 0 16px;
+    .goods-comment-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      .goods-comment-top {
+        width: 100%;
+        height: 42px;
+        border-radius: 8px;
+        background-color: #f6f6f6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .goods-mess {
+          margin-left: 12px;
+          display: flex;
+          align-items: center;
+          .goods-cover {
+            width: 36px;
+            height: 36px;
+            border-radius: 3px;
+            overflow: hidden;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+          .goods-name {
+            margin-left: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary-text);
+          }
+        }
+        .goods-rate-box {
+          margin-right: 18px;
+          display: flex;
+          align-items: center;
+          .goods-rate-title {
+            font-size: 14px;
+            color: #666666;
+          }
+          .goods-rate {
+            margin-left: 5px;
+            :deep(.el-rate) {
+              .el-rate__text {
+                text-align: center;
+                display: inline-block;
+                min-width: 20px;
+              }
+            }
+          }
+        }
+      }
+      .goods-comment-content {
+        margin-top: 8px;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f8f8f8;
+        :deep(.el-textarea) {
+          .el-textarea__inner {
+            border: none;
+            background-color: transparent;
+          }
+        }
+      }
+      .goods-comment-anonymity {
+        user-select: none;
+        margin-top: 8px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        .text {
+          font-size: 12px;
+          color: #999;
+          margin-right: 6px;
+        }
+        .switch {
+          margin-right: 12px;
+        }
+      }
+      & + .goods-comment-item {
+        margin-top: 12px;
+      }
+    }
+  }
+}
+.renew-dialog,
+.repay-dialog {
+  .order-content {
+    max-width: 100%;
+    border-radius: 12px;
+    background-color: #e6e6e6;
+    box-sizing: border-box;
+    padding: 12px;
+  }
+}
+.detail-dialog {
+  :deep(.el-dialog) {
+    width: 64%;
+  }
+  .order-goods-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    .order-goods-title-box {
+      width: 100%;
+      height: 36px;
+      line-height: 36px;
+      box-sizing: border-box;
+      padding: 0 12px;
+      border-radius: 5px;
+      background-color: #efefef;
+      font-size: 16px;
+      font-weight: bold;
+      color: #2c2f3b;
+    }
+    .order-goods-list {
+      margin-top: 12px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      box-sizing: border-box;
+      padding: 8px 12px;
+      border-radius: 5px;
+      background-color: #f5f3f2;
+      .order-goods-item {
+        user-select: none;
+        width: 92px;
+        height: 92px;
+        border-radius: 5px;
+        overflow: hidden;
+        display: flex;
+        flex-shrink: 0;
+        justify-content: space-between;
+        align-items: flex-end;
+        .order-goods-content {
+          display: flex;
+          flex-direction: column;
+          width: 72px;
+          height: 100%;
+          align-items: center;
+          justify-content: space-between;
+          .cover {
+            width: 72px;
+            height: 72px;
+            border-radius: 5px;
+            overflow: hidden;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+          .title {
+            width: 100%;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+        }
+        .order-goods-amount {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          span {
+            font-size: 10px;
+            color: #d8d8d8;
+          }
+        }
+      }
+    }
+  }
+  .order-detail-box {
+    margin-top: 24px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 12px 8px;
+    .order-detail-item-box {
+      position: relative;
+      width: 33%;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      box-sizing: border-box;
+      padding: 12px;
+      .order-detail-item {
+        user-select: none;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        &.between {
+          justify-content: space-between;
+        }
+        .label {
+          min-width: 72px;
+          text-align: right;
+          font-size: 16px;
+          color: #9fa0a0;
+        }
+        .text {
+          margin-left: 5px;
+          font-size: 16px;
+          color: var(--primary-text);
+        }
+        & + .order-detail-item {
+          margin-top: 8px;
+        }
+      }
+      & + .order-detail-item-box {
+        border-left: 1px solid #d3ccd6;
+      }
+      .all-cost {
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+        .label {
+          font-size: 16px;
+          color: var(--primary-text);
+        }
+        .text {
+          margin-left: 12px;
+          font-size: 16px;
+          color: var(--danger);
+        }
+      }
+    }
+  }
+}
+</style>

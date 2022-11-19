@@ -16,6 +16,30 @@
     --success-btn: #A8C97F;
     --success-btn-h: #B9D499;
     --success-btn-a: #A0BF79;
+    /* 取消按钮 */
+    --cancel-btn: #CD5E3C;
+    --cancel-btn-h: #D77E63;
+    --cancel-btn-a: #BF5838;
+    /* 联系按钮 */
+    --contact-btn: #F6AD49;
+    --contact-btn-h: #F8BD6D;
+    --contact-btn-a: #E8A345;
+    /* 催促按钮 */
+    --urge-btn: #EE827C;
+    --urge-btn-h: #F19B96;
+    --urge-btn-a: #DB7872;
+    /* 续借按钮 */
+    --renew-btn: #68BE8D;
+    --renew-btn-h: #86CBA4;
+    --renew-btn-a: #60B083;
+    /* 归还按钮 */
+    --repay-btn: #ECD452;
+    --repay-btn-h: #F0DD75;
+    --repay-btn-a: #DBC54C;
+    /* 评价按钮 */
+    --comment-btn: #FAC03D;
+    --comment-btn-h: #FBCD64;
+    --comment-btn-a: #EBB439;
     /* 渐变色 */
     --primary-g-1: #17EAD9;
     --primary-g-2: #6078EA;

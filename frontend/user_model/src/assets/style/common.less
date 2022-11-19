@@ -206,6 +206,14 @@
     border-color: #b2ebf2;
     background-color: #e0f7fa;
   }
+  &.is-plain {
+    &:focus,
+    &:hover {
+      color: var(--primary);
+      border-color: #b2ebf2;
+      background-color: #e0f7fa;
+    }
+  }
 }
 .el-button--primary {
   color: var(--white);
@@ -289,6 +297,136 @@
     .el-form-item__label {
       color: var(--placeholder-text);
       font-size: 16px;
+    }
+  }
+}
+// el-input-number
+.el-input-number {
+  .el-input-number__increase,
+  .el-input-number__decrease {
+    &:hover {
+      color: var(--primary);
+    }
+    &:hover:not(.is-disabled) {
+      & ~ .el-input {
+        .el-input__inner:not(.is-disabled) {
+          border-color: var(--primary);
+        }
+      }
+    }
+  }
+}
+// el-slider
+.el-slider {
+  .el-slider__bar {
+    background-color: var(--primary);
+  }
+  .el-slider__button {
+    border-color: var(--primary);
+  }
+}
+// el-picker-panel
+.el-picker-panel {
+  .el-picker-panel__sidebar {
+    .el-picker-panel__shortcut {
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+  .el-picker-panel__body {
+    .el-date-picker__header {
+      .el-picker-panel__icon-btn {
+        &:hover {
+          color: var(--primary);
+        }
+      }
+      .el-date-picker__header-label {
+        &.active,
+        &:hover {
+          color: var(--primary);
+        }
+      }
+    }
+    .el-picker-panel__content {
+      .el-date-table {
+        td {
+          &.available {
+            &:hover {
+              color: var(--primary);
+            }
+          }
+          &.today {
+            span {
+              color: var(--primary);
+            }
+          }
+          &.current {
+            &:not(.disabled) {
+              span {
+                background-color: var(--primary);
+              }
+            }
+          }
+        }
+      }
+      .el-month-table {
+        td {
+          .cell {
+            &:hover {
+              color: var(--primary);
+            }
+          }
+          &.today {
+            .cell {
+              color: var(--primary);
+            }
+          }
+          &.current {
+            &:not(.disabled) {
+              .cell {
+                color: var(--primary);
+              }
+            }
+          }
+        }
+      }
+      .el-year-table {
+        td {
+          &.current {
+            &:not(.disabled) {
+              .cell {
+                color: var(--primary);
+              }
+            }
+          }
+          &.today {
+            .cell {
+              color: var(--primary);
+            }
+          }
+          .cell {
+            &:hover {
+              color: var(--primary);
+            }
+          }
+        }
+      }
+    }
+  }
+  .el-picker-panel__footer {
+    .el-button--text {
+      color: var(--primary);
+    }
+  }
+}
+// el-time-panel
+.el-time-panel {
+  .el-time-panel__footer {
+    .el-time-panel__btn {
+      &.confirm {
+        color: var(--primary);
+      }
     }
   }
 }
