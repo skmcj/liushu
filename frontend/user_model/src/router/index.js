@@ -17,6 +17,9 @@ import AboutLink from '@/views/About/AboutLink';
 import Mine from '@/views/Mine/Mine';
 import MineMain from '@/views/Mine/MineMain';
 import MineCenter from '@/views/Mine/MineCenter';
+import MineCenterPer from '@/views/Mine/MineCenterPer';
+import MineCenterAcc from '@/views/Mine/MineCenterAcc';
+import MineCenterPay from '@/views/Mine/MineCenterPay';
 import MineCart from '@/views/Mine/MineCart';
 import MineOrder from '@/views/Mine/MineOrder';
 import MineMess from '@/views/Mine/MineMess';
@@ -187,7 +190,40 @@ const routes = [
               title: '我的-个人中心',
               rootLink: '/mine',
               aside: 'center'
-            }
+            },
+            children: [
+              {
+                path: 'personal',
+                name: 'mineCenterPer',
+                component: MineCenterPer,
+                alias: ['/'],
+                meta: {
+                  title: '我的-个人信息',
+                  rootLink: '/mine',
+                  aside: 'center'
+                }
+              },
+              {
+                path: 'account',
+                name: 'mineCenterAcc',
+                component: MineCenterAcc,
+                meta: {
+                  title: '我的-账号安全',
+                  rootLink: '/mine',
+                  aside: 'center'
+                }
+              },
+              {
+                path: 'pay',
+                name: 'mineCenterPay',
+                component: MineCenterPay,
+                meta: {
+                  title: '我的-支付设置',
+                  rootLink: '/mine',
+                  aside: 'center'
+                }
+              }
+            ]
           },
           {
             path: 'cart',

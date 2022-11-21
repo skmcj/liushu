@@ -430,6 +430,36 @@
     }
   }
 }
+// el-checkbox
+.el-checkbox {
+  .el-checkbox__input {
+    &.is-checked {
+      .el-checkbox__inner {
+        background-color: var(--primary);
+        border-color: var(--primary);
+      }
+      & + .el-checkbox__label {
+        color: var(--primary);
+      }
+    }
+    &.is-focus {
+      .el-checkbox__inner {
+        border-color: var(--primary);
+      }
+    }
+    &.is-indeterminate {
+      .el-checkbox__inner {
+        background-color: var(--primary);
+        border-color: var(--primary);
+      }
+    }
+    .el-checkbox__inner {
+      &:hover {
+        border-color: var(--primary);
+      }
+    }
+  }
+}
 
 // 自定义组件样式
 .sk-hidden-scroll {
