@@ -69,6 +69,28 @@ Vue.prototype.$isEmpty = function(obj) {
   return flag;
 }
 
+/**
+ * 保留两位小数
+ * @param {Number} num
+ */
+Vue.prototype.$keepTwoNum = function(num) {
+  // 四舍五入
+  let mNum = Math.round(num * 100) / 100;
+  let numStr = mNum.toString();
+  let dotIndex = numStr.indexOf('.');
+  // 当整数时，pos_decimal=-1 自动补0
+  if (dotIndex < 0) {
+    dotIndex = numStr.length;
+    numStr += '.';
+  }
+
+  // 当数字的长度< 小数点索引+2时，补0
+  while (numStr.length <= dotIndex + 2) {
+    numStr += '0';
+  }
+  return numStr;
+}
+
 /** 加载插件 */
 // const VueMasonryPlugin = window['vue-masonry-plugin'].VueMasonryPlugin;
 // Vue.use(VueMasonryPlugin);
