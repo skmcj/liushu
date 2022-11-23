@@ -28,6 +28,7 @@ import MineMessPer from '@/views/Mine/MineMessPer';
 import MineAddress from '@/views/Mine/MineAddress';
 import MineColl from '@/views/Mine/MineColl';
 import MineComment from '@/views/Mine/MineComment';
+import Settlement from '@/views/Common/Settlement';
 
 Vue.use(VueRouter)
 
@@ -309,6 +310,15 @@ const routes = [
             }
           }
         ]
+      },
+      {
+        path: '/settlement',
+        name: 'settlement',
+        component: Settlement,
+        meta: {
+          title: '结算页面',
+          rootLink: '/settlement'
+        }
       }
     ]
   }

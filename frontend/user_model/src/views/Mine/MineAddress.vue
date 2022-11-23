@@ -17,10 +17,11 @@
         class="mess-address-item"
         v-for="(item, index) in address"
         :key="'address-item-' + index"
-        :class="{ 'is-default': item.isDefault === 1 }">
+        :class="{ 'is-default': item.isDefault === 1 }"
+        @click.stop="checkedAddress(item)">
         <div class="address-content-box">
           <div class="title">
-            <span class="tit">学习</span>
+            <span class="tit">{{ item.label }}</span>
             <span class="default-label" v-if="item.isDefault === 1">默认地址</span>
           </div>
           <div class="mess-box">
@@ -182,8 +183,16 @@ export default {
       },
       dialogTitle: '新增地址',
       dialogType: 'add',
-      dialogVisible: false
+      dialogVisible: false,
+      fromName: ''
     };
+  },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      // 此时 this 还未确认
+      // 通过 `vm` 访问组件实例,将值传入fromPath
+      vm.fromName = from.name;
+    });
   },
   created() {
     this.address = this.getAddressTest(5);
@@ -207,6 +216,17 @@ export default {
       }
       list[0].isDefault = 1;
       return list;
+    },
+    /**
+     * 选中地址
+     */
+    checkedAddress(item) {
+      // console.log('form =>', this.fromName, item);
+      if (this.fromName === 'settlement') {
+        // 从 结算 界面来
+        this.$store.dispatch('setCheckedAddress', item);
+        this.$router.replace('/settlement');
+      }
     },
     /**
      * 保存地址

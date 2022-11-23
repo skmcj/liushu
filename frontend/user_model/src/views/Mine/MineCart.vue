@@ -110,7 +110,9 @@
           </div>
         </div>
         <div class="right">
-          <el-button class="btn" type="primary" round>结算</el-button>
+          <el-button class="btn" type="primary" round @click.stop="handleSettlement">{{
+            '结算' + (cartCount > 0 ? '(' + cartCount + ')' : '')
+          }}</el-button>
         </div>
       </div>
     </div>
@@ -368,6 +370,61 @@ export default {
      */
     handleDeleteItem() {
       // 只留下未选中的项
+    },
+    /**
+     * 结算
+     */
+    handleSettlement() {
+      let checkedObj = this.getCheckedGoods();
+      if (this.$isEmpty(checkedObj)) {
+        this.$showMsg('请先选中商品');
+      } else {
+        // 存储选中对象
+        this.$store.dispatch('setSettlementObj', {
+          data: checkedObj,
+          // 总借阅费
+          allBorrowCost: this.allBorrowCost,
+          // 总包装费
+          allPackingCost: this.allPackingCost,
+          // 总配送费
+          allDeliverFee: this.allDeliverFee,
+          // 押金
+          allDeposit: this.allDeposit,
+          // 总金额
+          allAmount: this.allAmount
+        });
+        // 特别注意: 如果传递path那么默认的 会将 params 忽略,就是说你就算传了也没有用,所以在使用params传递数据的时候一定要注意,不能使用path,只能使用name来指定路由的目标对象
+        this.$router.push('/settlement');
+      }
+      // console.log('check obj =>', checkedObj);
+    },
+    /**
+     * 获取选中商品
+     */
+    getCheckedGoods() {
+      let checkedObj = {};
+      for (let key in this.cartObj) {
+        this.cartObj[key].products.forEach(item => {
+          if (item.checked === 1) {
+            if (Object.prototype.hasOwnProperty.call(checkedObj, item.storeId)) {
+              // 商铺已添加
+              checkedObj[item.storeId].products.push(item);
+            } else {
+              // 商铺未添加
+              // obj 未包含指定商家
+              let shopItem = {
+                storeId: item.storeId,
+                storeName: item.storeName,
+                deliverFee: 2,
+                products: []
+              };
+              shopItem.products.push(item);
+              checkedObj[item.storeId] = shopItem;
+            }
+          }
+        });
+      }
+      return checkedObj;
     }
   },
   watch: {
@@ -627,6 +684,7 @@ export default {
       .btn {
         height: 40px;
         padding: 0 42px;
+        line-height: normal;
       }
     }
   }

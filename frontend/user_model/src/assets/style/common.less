@@ -102,6 +102,16 @@
     }
   }
 }
+// el-cascader-menu
+.el-cascader-menu {
+  .el-cascader-node {
+    &.in-active-path,
+    &.is-active,
+    &.is-selectable.in-checked-path {
+      color: var(--primary);
+    }
+  }
+}
 // el-pagination
 .el-pagination {
   // button {
@@ -287,6 +297,21 @@
     .el-input__inner {
       &:focus {
         border-color: #dcdfe6;
+      }
+    }
+  }
+}
+// el-cascader
+.el-cascader {
+  .el-input {
+    .el-input__inner {
+      &:focus {
+        border-color: var(--primary);
+      }
+    }
+    &.is-focus {
+      .el-input__inner {
+        border-color: var(--primary);
       }
     }
   }
