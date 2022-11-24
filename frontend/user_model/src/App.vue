@@ -71,4 +71,14 @@ body {
 .fade-leave-to {
   opacity: 0;
 }
+
+// 动画帧
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 </style>

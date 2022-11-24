@@ -136,19 +136,38 @@
         </div>
       </div>
     </div>
+    <!-- 付款dialog -->
+    <el-dialog
+      title="收银台"
+      :visible.sync="payDialogVisible"
+      class="pay-dialog"
+      :close-on-click-modal="false"
+      destroy-on-close
+      @close="handlePayPanelClose">
+      <div class="order-to-pay">
+        <PaymentPanel :cart-obj="orderObj" :amount="allAmount" />
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="payDialogVisible = false" round>确认 支付</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Wave from '@/components/Common/Wave';
+import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
 import commonUtil from '@/utils/common';
 
 export default {
   components: {
-    Wave
+    Wave,
+    PaymentPanel
   },
   data() {
     return {
+      // 收银台
+      payDialogVisible: false,
       address: {},
       expectTime: '',
       options: [],
@@ -221,7 +240,15 @@ export default {
     /**
      * 去付款
      */
-    handleSettlement() {},
+    handleSettlement() {
+      // 发送请求，生成订单
+      for (const key in this.orderObj) {
+        this.orderObj[key].createTime = new Date();
+        this.orderObj[key].payStatus = 0;
+      }
+      console.log('order =>', this.orderObj);
+      this.payDialogVisible = true;
+    },
     /**
      * 期望时间
      */
@@ -283,6 +310,14 @@ export default {
         }
       }
       return options;
+    },
+    /**
+     * 支付面板关闭
+     */
+    handlePayPanelClose() {
+      // 暂时跳转到首页
+      // this.$router.replace('/');
+      this.$router.replace('/mine/cart');
     }
   }
 };
@@ -609,6 +644,11 @@ export default {
         padding: 0 42px;
       }
     }
+  }
+}
+.pay-dialog {
+  :deep(.el-dialog) {
+    width: 64%;
   }
 }
 </style>

@@ -172,6 +172,7 @@ export default {
     }
   }
   .sk-input-pay-tip {
+    user-select: none;
     width: 100%;
     text-align: left;
     margin-top: 5px;

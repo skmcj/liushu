@@ -140,7 +140,8 @@ export default {
       // 押金
       allDeposit: 0,
       // 总金额
-      allAmount: 0
+      allAmount: 0,
+      orderSet: {}
     };
   },
   created() {
@@ -333,6 +334,7 @@ export default {
      */
     changeItemCost(item, flag = true) {
       let q = item.quantity;
+      let addDeliverFee = 0;
       if (flag) {
         // 加
         // 总借阅费
@@ -340,11 +342,17 @@ export default {
         // 总包装费
         this.allPackingCost += item.packingCost * q;
         // 总配送费
-        this.allDeliverFee += this.cartObj[item.storeId].deliverFee;
+        if (!this.orderSet[item.storeId]) {
+          this.orderSet[item.storeId] = 1;
+          addDeliverFee = this.cartObj[item.storeId].deliverFee;
+        } else {
+          this.orderSet[item.storeId] += 1;
+        }
+        this.allDeliverFee += addDeliverFee;
         // 押金
         this.allDeposit += item.deposit * q;
         // 总金额
-        this.allAmount += item.amount + this.cartObj[item.storeId].deliverFee;
+        this.allAmount += item.amount + addDeliverFee;
       } else {
         // 减
         // 总借阅费
@@ -352,11 +360,17 @@ export default {
         // 总包装费
         this.allPackingCost -= item.packingCost * q;
         // 总配送费
-        this.allDeliverFee -= this.cartObj[item.storeId].deliverFee;
+        if (this.orderSet[item.storeId] === 1) {
+          addDeliverFee = this.cartObj[item.storeId].deliverFee;
+          this.orderSet[item.storeId] -= 1;
+        } else {
+          this.orderSet[item.storeId] -= 1;
+        }
+        this.allDeliverFee -= addDeliverFee;
         // 押金
         this.allDeposit -= item.deposit * q;
         // 总金额
-        this.allAmount -= item.amount + this.cartObj[item.storeId].deliverFee;
+        this.allAmount -= item.amount + addDeliverFee;
       }
     },
     /**
