@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 // 组件
 import Login from '@/views/Login/Login';
+import Logon from '@/views/Login/Logon';
 import Main from '@/components/Main/Main';
 import Home from '@/views/Home/Home';
 import Cate from '@/views/Cate/Cate';
@@ -41,7 +42,18 @@ const routes = [
       index: Login
     },
     meta: {
-      title: '登录'
+      title: '流书网-登录'
+    }
+  },
+  // 注册页
+  {
+    path: '/logon',
+    name: 'logon',
+    components: {
+      index: Logon
+    },
+    meta: {
+      title: '流书网-注册'
     }
   },
   // 主要页面

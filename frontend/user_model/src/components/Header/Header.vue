@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import Login from '@/views/Login/Login';
+
 export default {
   props: {
     isLogin: {
@@ -69,7 +71,8 @@ export default {
       activeLink: '/home',
       inFocus: false,
       isShow: false,
-      searchContent: ''
+      searchContent: '',
+      loginVisible: false
     };
   },
   methods: {
