@@ -30,6 +30,8 @@ import MineAddress from '@/views/Mine/MineAddress';
 import MineColl from '@/views/Mine/MineColl';
 import MineComment from '@/views/Mine/MineComment';
 import Settlement from '@/views/Common/Settlement';
+import Agreement from '@/views/Common/Agreement';
+import PrivacyPolicy from '@/views/Common/PrivacyPolicy';
 
 Vue.use(VueRouter)
 
@@ -68,12 +70,28 @@ const routes = [
     },
     children: [
       {
+        path: '/agreement',
+        name: 'agreement',
+        component: Agreement,
+        meta: {
+          title: '流书网-用户服务协议'
+        }
+      },
+      {
+        path: '/privacy_policy',
+        name: 'privacyPolicy',
+        component: PrivacyPolicy,
+        meta: {
+          title: '流书网-隐私政策'
+        }
+      },
+      {
         path: '/home',
         name: 'home',
         alias: ['/', '/index'],
         component: Home,
         meta: {
-          title: '首页',
+          title: '流书网-首页',
           rootLink: '/home'
         }
       },
@@ -82,7 +100,7 @@ const routes = [
         name: 'cate',
         component: Cate,
         meta: {
-          title: '分类',
+          title: '流书网-分类',
           rootLink: '/cate'
         }
       },
@@ -91,7 +109,7 @@ const routes = [
         name: 'cateDetail',
         component: CateDetail,
         meta: {
-          title: '分类-更多',
+          title: '流书网-分类-更多',
           rootLink: '/cate'
         }
       },
@@ -100,7 +118,7 @@ const routes = [
         name: 'bookDetail',
         component: BookDetail,
         meta: {
-          title: '图书详情',
+          title: '流书网-图书详情',
           rootLink: '/book'
         }
       },
@@ -109,7 +127,7 @@ const routes = [
         name: 'shopDetail',
         component: ShopDetail,
         meta: {
-          title: '商家详情',
+          title: '流书网-商家详情',
           rootLink: '/shop'
         }
       },
@@ -118,7 +136,7 @@ const routes = [
         name: 'about',
         component: About,
         meta: {
-          title: '关于',
+          title: '流书网-关于',
           rootLink: '/about'
         },
         children: [
@@ -180,7 +198,7 @@ const routes = [
         name: 'mine',
         component: Mine,
         meta: {
-          title: '我的',
+          title: '流书网-我的',
           rootLink: '/mine'
         },
         children: [

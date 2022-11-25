@@ -33,11 +33,8 @@
           <el-input v-model="logonForm.secondPass" prefix-icon="ic-password" placeholder="请再次输入密码"></el-input>
         </el-form-item>
         <el-checkbox v-model="isCheck"
-          >注册即代表你同意<span class="link" @click.stop="handleAgreement('agreement')">《用户服务协议》</span>和<span
-            class="link"
-            @click.stop="handleAgreement('privacyPolicy')"
-            >《隐私政策》</span
-          ></el-checkbox
+          >注册即代表你同意<router-link to="/agreement" target="_blank" class="link">《用户服务协议》</router-link
+          >和<router-link to="/privacy_policy" target="_blank" class="link">《隐私政策》</router-link></el-checkbox
         >
         <div class="btns">
           <el-button type="primary" @click.stop="handleLogon">注 册</el-button>
@@ -403,6 +400,7 @@ export default {
         }
       }
       .link {
+        text-decoration: none;
         cursor: pointer;
         user-select: none;
         font-size: 14px;

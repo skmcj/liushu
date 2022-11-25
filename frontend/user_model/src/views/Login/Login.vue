@@ -20,11 +20,8 @@
           <el-button plain @click.stop="handleLogon">注 册</el-button>
         </div>
         <el-checkbox v-model="isCheck"
-          >登录即代表你同意<span class="link" @click.stop="handleAgreement('agreement')">《用户服务协议》</span>和<span
-            class="link"
-            @click.stop="handleAgreement('privacyPolicy')"
-            >《隐私政策》</span
-          ></el-checkbox
+          >登录即代表你同意<router-link to="/agreement" target="_blank" class="link">《用户服务协议》</router-link
+          >和<router-link to="/privacy_policy" target="_blank" class="link">《隐私政策》</router-link></el-checkbox
         >
       </el-form>
     </div>
@@ -199,6 +196,7 @@ export default {
         }
       }
       .link {
+        text-decoration: none;
         cursor: pointer;
         user-select: none;
         font-size: 14px;
