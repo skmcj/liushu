@@ -8,6 +8,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import top.skmcj.liushu.entity.Employee;
+import top.skmcj.liushu.entity.User;
 
 import java.util.Date;
 import java.util.Map;
@@ -60,6 +61,26 @@ public class JwtUtil {
         return encodeToken(token);
     }
 
+    /**
+     * 获取用户登录的token
+     * @param user
+     * @return
+     */
+    public static String getToken(User user) throws JWTDecodeException {
+        Date expiresDate = new Date(System.currentTimeMillis() + EXPIRES * 1000);
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
+        String token = null;
+        token = JWT.create()
+                .withIssuer("liushu")
+                .withClaim("type", "employee")
+                .withClaim("id", user.getId())
+                .withIssuedAt(new Date())
+                .withExpiresAt(expiresDate)
+                .sign(algorithm);
+
+        return encodeToken(token);
+    }
+
 
     /**
      * 校验token
@@ -85,6 +106,31 @@ public class JwtUtil {
         employee.setStoreId(verify.getClaim("storeId").asLong());
         return employee;
     }
+
+    /**
+     * 校验token
+     * @param token
+     * @return
+     */
+    public static User verifyTokenOfUser(String token) throws Exception {
+        //如果token无效
+        if (token == null || "".equals(token)) {
+            throw new JWTDecodeException("无效的token！");
+        }
+        //解析token
+        String dToken = decodeToken(token);
+        //创建返回结果
+        DecodedJWT verify = JWT.require(Algorithm.HMAC256(SECRET)).build().verify(dToken);
+        // System.out.println("type => " + verify.getClaim("type").asString());
+        if(!verify.getClaim("type").asString().equals("user")) {
+            throw new JWTDecodeException("无法解析为用户对象");
+        }
+        User user = new User();
+        // 解析信息
+        user.setId(verify.getClaim("id").asLong());
+        return user;
+    }
+
 
     /**
      * 生成token

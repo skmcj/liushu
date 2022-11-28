@@ -130,17 +130,31 @@
                 <!-- 本书特色 -->
                 <div class="detail-block">
                   <div class="detail-tit">本书特色</div>
-                  <div class="detail-text">{{ handleBookInfo(bookData.bookDetail.featureDesc) }}</div>
+                  <div class="detail-text">
+                    <p
+                      v-for="(text, ti) in handleBookText(bookData.bookDetail.featureDesc)"
+                      :key="'featureDesc--' + ti">
+                      {{ text }}
+                    </p>
+                  </div>
                 </div>
                 <!-- 内容简介 -->
                 <div class="detail-block">
                   <div class="detail-tit">内容简介</div>
-                  <div class="detail-text">{{ handleBookInfo(bookData.bookDetail.outline) }}</div>
+                  <div class="detail-text">
+                    <p v-for="(text, ti) in handleBookText(bookData.bookDetail.outline)" :key="'outline-' + ti">
+                      {{ text }}
+                    </p>
+                  </div>
                 </div>
                 <!-- 作者简介 -->
                 <div class="detail-block">
                   <div class="detail-tit">作者简介</div>
-                  <div class="detail-text">{{ handleBookInfo(bookData.bookDetail.authorDesc) }}</div>
+                  <div class="detail-text">
+                    <p v-for="(text, ti) in handleBookText(bookData.bookDetail.authorDesc)" :key="'authorDesc-' + ti">
+                      {{ text }}
+                    </p>
+                  </div>
                 </div>
               </div>
               <!-- 详情右边导航 -->
@@ -292,6 +306,10 @@ export default {
     handleBookInfo(info) {
       if (info) return info;
       return '暂无';
+    },
+    handleBookText(text) {
+      if (text) return text.split('\n');
+      return ['暂无'];
     },
     /**
      * 滚动事件
@@ -734,6 +752,10 @@ export default {
               text-indent: 2em;
               line-height: 24px;
               box-sizing: border-box;
+              white-space: pre-wrap;
+              p {
+                margin: 8px 0;
+              }
             }
             & + .detail-block {
               margin-top: 12px;

@@ -36,7 +36,7 @@ public class OrderItem implements Serializable {
     /**
      * 图书封面
      */
-    private String cover;
+    private String bookCover;
 
     /**
      * 数量
@@ -62,5 +62,10 @@ public class OrderItem implements Serializable {
      * 总金额
      */
     private BigDecimal amount;
+
+    /**
+     * 押金
+     */
+    private BigDecimal deposit;
 
 }

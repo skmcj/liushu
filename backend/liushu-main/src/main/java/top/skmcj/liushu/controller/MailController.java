@@ -45,7 +45,7 @@ public class MailController {
         HttpSession session = request.getSession();
         session.setAttribute("code", code);
         session.setAttribute("codeTime", System.currentTimeMillis() + mailTime * 1000);
-        System.out.println("生成的验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟");
+        System.out.println("生成的验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟, 验证码类型 =>" + type);
         Map<String, String> data = new HashMap<>();
         data.put("cause", cause);
         data.put("vCode", code);
@@ -113,6 +113,11 @@ public class MailController {
          * slo - shop logon => 商家注册
          * sce - shop change email => 商家修改邮箱
          * sne - shop new email => 商家验证新邮箱
+         * ulo - user logon => 用户注册
+         * uce - user change email => 用户修改邮箱
+         * une - user new email => 用户新邮箱
+         * ucp - user change password => 用户修改密码
+         * usp - user set payPassword => 用户设置支付密码
          */
         String cause;
         switch (type) {
@@ -124,6 +129,21 @@ public class MailController {
                 break;
             case "sne":
                 cause = "您正在修改商家绑定邮箱，需验证新邮箱是否可用";
+                break;
+            case "ulo":
+                cause = "感谢你注册流书网";
+                break;
+            case "uce":
+                cause = "您正在修改流书网绑定邮箱，需验证当前绑定邮箱";
+                break;
+            case "une":
+                cause = "您正在修改流书网绑定邮箱，需验证新邮箱是否可用";
+                break;
+            case "ucp":
+                cause = "您正在修改流书网密码，需验证身份";
+                break;
+            case "usp":
+                cause = "您正在设置流书网支付密码";
                 break;
             default:
                 cause = "您正在请求的业务需要验证码";

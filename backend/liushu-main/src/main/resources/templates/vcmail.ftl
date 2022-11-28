@@ -17,12 +17,12 @@
                     style="position: relative; width: 100%; height: 196px; background-color: #83ccd2; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     <div
                         style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
-                        <img style="width: 100%;" src="https://s3.bmp.ovh/imgs/2022/10/09/5df2bf8d18be173e.png"
+                        <img style="width: 100%;" src="https://voidtech.cn/i/2022/11/28/x422bx.png"
                             alt="logo" />
                     </div>
                     <div id="waves"
                         style="width: 100%; position: absolute; bottom: -0.6875rem; -webkit-tap-highlight-color: transparent;">
-                        <img style="width: 100%;" src='https://s3.bmp.ovh/imgs/2022/10/09/838136dac0da1aab.gif'
+                        <img style="width: 100%;" src='https://voidtech.cn/i/2022/11/28/wekkfe.gif'
                             alt="waves" />
                     </div>
                 </div>
@@ -37,7 +37,7 @@
                         <div
                             style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
                             <img style="width: 100%; height: 100%;"
-                                src="https://s3.bmp.ovh/imgs/2022/10/09/58e5d2e58bb64ea4.png" alt="tip" />
+                                src="https://voidtech.cn/i/2022/11/28/x4mcgy.png" alt="tip" />
                         </div>
                         <span style="font-size: 14px; color: #b2b6b6;">验证码${validTime}分钟内有效，请勿提供给他人。如非本人的操作，请忽略。</span>
                     </div>
