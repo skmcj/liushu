@@ -72,7 +72,7 @@ public class JwtUtil {
         String token = null;
         token = JWT.create()
                 .withIssuer("liushu")
-                .withClaim("type", "employee")
+                .withClaim("type", "user")
                 .withClaim("id", user.getId())
                 .withIssuedAt(new Date())
                 .withExpiresAt(expiresDate)
@@ -121,6 +121,7 @@ public class JwtUtil {
         String dToken = decodeToken(token);
         //创建返回结果
         DecodedJWT verify = JWT.require(Algorithm.HMAC256(SECRET)).build().verify(dToken);
+        // System.out.println("expires at =>" + verify.getExpiresAt());
         // System.out.println("type => " + verify.getClaim("type").asString());
         if(!verify.getClaim("type").asString().equals("user")) {
             throw new JWTDecodeException("无法解析为用户对象");

@@ -32,6 +32,7 @@ public class LoginCheckFilter implements Filter {
                 "/api/business/logon",
                 "/api/business/logout",
                 "/api/business/examine",
+                // "/api/user/**",
                 "/api/mail/**",
                 "/api/img/**",
         };

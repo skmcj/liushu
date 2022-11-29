@@ -27,10 +27,18 @@
           }}</el-button>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="logonForm.password" prefix-icon="ic-password" placeholder="请输入密码"></el-input>
+          <el-input
+            v-model="logonForm.password"
+            show-password
+            prefix-icon="ic-password"
+            placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="secondPass">
-          <el-input v-model="logonForm.secondPass" prefix-icon="ic-password" placeholder="请再次输入密码"></el-input>
+          <el-input
+            v-model="logonForm.secondPass"
+            show-password
+            prefix-icon="ic-password"
+            placeholder="请再次输入密码"></el-input>
         </el-form-item>
         <el-checkbox v-model="isCheck"
           >注册即代表你同意<router-link to="/agreement" target="_blank" class="link">《用户服务协议》</router-link
@@ -52,7 +60,7 @@
 <script>
 import Footer from '@/components/Footer/Footer';
 import { REGEX } from '@/utils/commonEnums';
-import { sendValidateCodeApi } from '@/api/commonApi';
+import { getValidateCodeApi, userLogonApi } from '@/api/userApi';
 
 export default {
   components: {
@@ -107,7 +115,7 @@ export default {
     const validatePassAgain = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'));
-      } else if (this.password === this.secondPass) {
+      } else if (this.password !== this.secondPass) {
         callback(new Error('两次输入密码不一致'));
       } else {
         callback();
@@ -164,13 +172,46 @@ export default {
         if (valid) {
           // 校验通过，继续
           // 如果都对发起请求注册
+          let user = {
+            username: this.logonForm.username,
+            email: this.logonForm.email,
+            password: this.$md5(this.logonForm.password),
+            code: this.logonForm.captcha
+          };
+          userLogonApi(user).then(res => {
+            console.log('logon =>', res);
+            if (res.data.flag) {
+              // 注册成功，返回登录
+              this.$showMsg('注册成功，请前往登录···', {
+                type: 'success',
+                closeFunc: () => {
+                  this.$router.replace('/login');
+                }
+              });
+            } else {
+              if (res.data.code === 52101) {
+                // 用户名已存在
+                this.userErrorFlag = true;
+                this.userErrorTip = '该用户名不可用';
+                this.validateField('logonForm', 'username');
+              } else if (res.data.code === 21020) {
+                // 验证码校验失败
+                this.captchaErrorFlag = true;
+                this.captchaErrorTip = '验证码错误';
+                this.validateField('logonForm', 'captcha');
+              } else if (res.data.code === 21022) {
+                // 验证码过期
+                this.captchaErrorFlag = true;
+                this.captchaErrorTip = '验证码已过期，请重新获取';
+                this.validateField('logonForm', 'captcha');
+              } else {
+                // 其它情况
+                this.$showMsg(res.data.msg, { type: 'error' });
+              }
+            }
+          });
         }
       });
-      // 验证用户名是否可用
-      let userFlag = this.testUsername();
-      // 校验验证码是否正确
-      let captchaFlag = this.testCaptcha();
-      // 如果都对发起请求注册
     },
     /**
      * 登录
@@ -185,18 +226,19 @@ export default {
       const emailFlag = await this.validateField('logonForm', 'email');
       if (!emailFlag) {
         // 发送验证码
-        // sendValidateCodeApi('slo', this.logonForm.email).then(res => {
-        //   if (res.data.flag) {
-        //     this.$showMsg('验证码已发送，请注意查收', { type: 'success' });
-        //     this.captchaBtnFlag = true;
-        //     this.timeCountDown();
-        //   } else {
-        //     this.$showMsg('验证码获取失败，请稍候再试', { type: 'warning' });
-        //   }
-        // });
-        // 测试
-        this.captchaBtnFlag = true;
-        this.timeCountDown();
+        getValidateCodeApi(this.logonForm.email).then(res => {
+          if (res.data.flag) {
+            this.$showMsg('验证码已发送，请注意查收', { type: 'success' });
+            this.captchaBtnFlag = true;
+            this.timeCountDown();
+          } else {
+            if (res.data.code === 52102) {
+              this.$showMsg('该邮箱已注册，请前往登录', { type: 'warning' });
+            } else {
+              this.$showMsg('验证码获取失败，请稍候再试', { type: 'warning' });
+            }
+          }
+        });
       }
     },
     /**
@@ -231,34 +273,6 @@ export default {
         // 计时器对象重置为空
         this.timer = null;
       }
-    },
-    /**
-     * 校验验证码
-     */
-    testCaptcha() {
-      // 发送请求
-      // 测试
-      let flag = true;
-      if (this.logonForm.captcha !== '123456') {
-        this.captchaErrorFlag = true;
-        // 触发字段校验
-        this.validateField('logonForm', 'captcha');
-      }
-      return flag;
-    },
-    /**
-     * 校验用户名是否可用
-     */
-    testUsername() {
-      // 发送请求
-      // 测试
-      let flag = true;
-      if (this.logonForm.username === 'zhangsan') {
-        // 用户名存在
-        this.userErrorFlag = true;
-        this.validateField('logonForm', 'username');
-      }
-      return flag;
     },
     /**
      * 改变用户名输入

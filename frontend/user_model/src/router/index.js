@@ -366,10 +366,20 @@ router.beforeEach((to, from, next) => {
   if (to.meta.title) {
     document.title = to.meta.title;
   } else {
-    document.title = '流书网'; // 此处写默认的title
+    document.title = '流书网'; // 此处是默认的title
   }
   // 登录验证
-  next();
+  if(to.meta.rootLink === '/mine' || to.name === 'settlement') {
+    // 前往个人页面或结算界面
+    const isLogin = JSON.parse(sessionStorage.getItem('loginFlag')) || false;
+    if(isLogin) {
+      next();
+    } else {
+      next('/login');
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

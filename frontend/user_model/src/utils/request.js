@@ -5,8 +5,10 @@ const request = Axios.create({
   // 设置请求根路径
   // 为解决跨域，设置为项目根路径
   // baseURL: 'http://localhost:8081'
-  // baseURL: 'http://localhost:8080/api'
+  baseURL: 'http://localhost:8080/api',
   // baseURL: process.env.NODE_ENV === 'development' ? './' : '/store/'
+  // 跨域请求时发送Cookie
+  withCredentials: true
 });
 
 // http request拦截器 添加一个请求拦截器

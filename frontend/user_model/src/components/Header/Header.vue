@@ -77,6 +77,11 @@ export default {
   },
   methods: {
     handleClick(to) {
+      if (to === '/login') {
+        // 前往登录
+        // console.log('now route =>', this.$route);
+        this.$store.dispatch('setLoginFromPath', this.$route.fullPath);
+      }
       this.$router.push(to);
       this.activeLink = to;
     },

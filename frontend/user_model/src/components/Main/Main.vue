@@ -4,8 +4,9 @@
     <div class="head" :class="{ hide: scrollH > 88 }">
       <div class="links">
         <span class="link" @click="gotoStore">我是商家</span>
+        <span v-if="$store.state.loginFlag" class="link" @click="logout">退出登录</span>
       </div>
-      <Header :is-login="false" />
+      <Header :is-login="$store.state.loginFlag" :avatar-url="$store.state.userInfo.avatarUrl" />
     </div>
     <!-- 主要显示内容 -->
     <div class="main">
@@ -48,7 +49,37 @@ export default {
     /**
      * 进入商家入口
      */
-    gotoStore() {}
+    gotoStore() {},
+    /**
+     * 退出登录
+     */
+    logout() {
+      this.$confirm('您是否确认要退出登录', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'danger',
+        type: 'error'
+      })
+        .then(() => {
+          // 清除store里的信息
+          this.$store.dispatch('setLoginFlag', false);
+          this.$store.dispatch('setUserInfo', {});
+          // 清除会话存储
+          window.sessionStorage.removeItem('userInfo');
+          window.sessionStorage.removeItem('loginFlag');
+          // 清除本地存储
+          window.localStorage.removeItem('userInfo');
+          this.$showMsg('退出成功', {
+            type: 'success',
+            closeFunc: () => {
+              if (this.$route.meta.rootLink === '/mine' || this.$route.name === 'settlement') {
+                this.$router.replace('/');
+              }
+            }
+          });
+        })
+        .catch(() => {});
+    }
   }
 };
 </script>
@@ -69,6 +100,7 @@ export default {
   }
   .links {
     display: flex;
+    flex-direction: row-reverse;
     align-items: center;
     position: absolute;
     top: 0;
@@ -85,7 +117,7 @@ export default {
         opacity: 0.7;
       }
       & + .link {
-        margin-left: 12px;
+        margin-right: 12px;
       }
     }
   }

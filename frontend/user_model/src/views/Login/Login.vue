@@ -1,5 +1,9 @@
 <template>
   <div class="login-box">
+    <!-- 返回图标 -->
+    <div class="return" @click.stop="handleReturn">
+      <i class="ic-back"></i>
+    </div>
     <div class="login-main">
       <div class="logo">
         <i class="ic-logo"></i>
@@ -9,7 +13,11 @@
           <el-input v-model="loginForm.username" prefix-icon="ic-mine-2" placeholder="请输入用户名/邮箱"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="loginForm.password" prefix-icon="ic-password" placeholder="请输入密码"></el-input>
+          <el-input
+            v-model="loginForm.password"
+            show-password
+            prefix-icon="ic-password"
+            placeholder="请输入密码"></el-input>
         </el-form-item>
         <div class="tips">
           <span class="link" @click.stop="handleForget">忘记密码？</span>
@@ -32,6 +40,7 @@
 <script>
 import Footer from '@/components/Footer/Footer';
 import { REGEX } from '@/utils/commonEnums';
+import { userLoginApi } from '@/api/userApi';
 
 export default {
   components: {
@@ -87,7 +96,31 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           if (this.isCheck) {
-            this.$showMsg('登录成功', { type: 'success' });
+            let user = {
+              username: this.loginForm.username,
+              password: this.$md5(this.loginForm.password)
+            };
+            userLoginApi(user).then(
+              res => {
+                // console.log('user login => ', res);
+                if (res.data.flag) {
+                  window.localStorage.setItem('userInfo', JSON.stringify(res.data.data));
+                  this.$store.dispatch('setUserInfo', JSON.stringify(res.data.data));
+                  this.$store.dispatch('setLoginFlag', true);
+                  this.$showMsg('登录成功', {
+                    type: 'success',
+                    closeFunc: () => {
+                      this.$router.replace(this.$store.state.loginFromPath);
+                    }
+                  });
+                } else {
+                  this.$showMsg(res.data.msg, { type: 'warning' });
+                }
+              },
+              err => {
+                this.$showMsg('登录失败', { type: 'success' });
+              }
+            );
           } else {
             this.$showMsg('请先勾选下方协议', { type: 'warning' });
           }
@@ -115,6 +148,12 @@ export default {
       } else if (text === 'privacyPolicy') {
         console.log('点击隐私协议');
       }
+    },
+    /**
+     * 返回上一级
+     */
+    handleReturn() {
+      this.$router.replace(this.$store.state.loginFromPath);
     }
   }
 };
@@ -122,10 +161,30 @@ export default {
 
 <style lang="less" scoped>
 .login-box {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  .return {
+    cursor: pointer;
+    width: 120px;
+    height: 120px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    i {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(5px, 5px);
+      font-size: 32px;
+      color: var(--white);
+    }
+  }
   .login-main {
     margin-top: 96px;
     margin-bottom: 180px;

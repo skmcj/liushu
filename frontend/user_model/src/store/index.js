@@ -17,6 +17,21 @@ const actions = {
   setCheckedAddress(context, value) {
     // 'setCheckedAddress' 是mutations中相应操作的名称
     context.commit('setCheckedAddress', value);
+  },
+  // 发出设置userinfo的动作
+  setUserInfo(context, value) {
+    // 'setUserInfo' 是mutations中相应操作的名称
+    context.commit('setUserInfo', value);
+  },
+  // 发出设置loginFromPath的动作
+  setLoginFromPath(context, value) {
+    // 'setLoginFromPath' 是mutations中相应操作的名称
+    context.commit('setLoginFromPath', value);
+  },
+  // 发出设置loginFlag的动作
+  setLoginFlag(context, value) {
+    // 'setLoginFlag' 是mutations中相应操作的名称
+    context.commit('setLoginFlag', value);
   }
 };
 // 准备mutations -> 用于操作数据(state)
@@ -30,6 +45,21 @@ const mutations = {
   setCheckedAddress(state, value) {
     sessionStorage.setItem('checkedAddress', JSON.stringify(value));
     state.checkedAddress = value;
+  },
+  // 设置 userInfo 值
+  setUserInfo(state, value) {
+    sessionStorage.setItem('userInfo', JSON.stringify(value));
+    state.userInfo = value;
+  },
+  // 设置logon的from路径
+  setLoginFromPath(state, value) {
+    sessionStorage.setItem('loginFromPath', JSON.stringify(value));
+    state.loginFromPath = value;
+  },
+  // 设置 loginFlag 的值
+  setLoginFlag(state, value) {
+    sessionStorage.setItem('loginFlag', JSON.stringify(value));
+    state.loginFlag = value;
   }
 };
 // 准备state -> 用于存储数据
@@ -38,7 +68,13 @@ const state = {
   // 待结算商品
   settlementObj: JSON.parse(sessionStorage.getItem('settlementObj')) || {},
   // 选中地址
-  checkedAddress: JSON.parse(sessionStorage.getItem('checkedAddress')) || {}
+  checkedAddress: JSON.parse(sessionStorage.getItem('checkedAddress')) || {},
+  // 用户信息
+  userInfo: JSON.parse(sessionStorage.getItem('userInfo')) || {},
+  // 用户登录的from路径
+  loginFromPath: JSON.parse(sessionStorage.getItem('loginFromPath')) || '/',
+  // 用户是否登录
+  loginFlag: JSON.parse(sessionStorage.getItem('loginFlag')) || false
 };
 
 // 待优化

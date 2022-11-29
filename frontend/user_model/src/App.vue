@@ -6,6 +6,39 @@
   </div>
 </template>
 
+<script>
+import { validateTokenApi } from '@/api/userApi';
+
+export default {
+  created() {
+    // 应用初始化时
+    this.initUserInfo();
+  },
+  methods: {
+    /**
+     * 初始化用户登录信息
+     */
+    initUserInfo() {
+      // console.log('app init');
+      const userInfo = JSON.parse(window.localStorage.getItem('userInfo'));
+      // 查看本地是否有用户信息
+      // 无，直接返回
+      if (!userInfo) return;
+      // 有，则发送请求，验证token是否有效
+      const token = userInfo.token;
+      validateTokenApi(token).then(res => {
+        if (res.data.flag) {
+          // 有效，设置会话默认值
+          // console.log('token => ', res.data);
+          this.$store.dispatch('setUserInfo', userInfo);
+          this.$store.dispatch('setLoginFlag', true);
+        }
+      });
+    }
+  }
+};
+</script>
+
 <style lang="less">
 html,
 body {

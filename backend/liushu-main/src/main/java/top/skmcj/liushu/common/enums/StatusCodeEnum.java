@@ -59,6 +59,7 @@ public enum StatusCodeEnum {
     /**
      * JWT异常
      */
+    JWT_OK(22900, "Token校验正常"),
     JWT_ERR(52901, "Token校验异常"),
     /**
      * 未登录

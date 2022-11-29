@@ -1,6 +1,9 @@
 package top.skmcj.liushu.controller;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,8 @@ import top.skmcj.liushu.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +82,7 @@ public class UserController {
                 userDto.setAvatar(userInfo.getAvatar());
                 userDto.setAvatarUrl(url);
             }
+            userDto.setId(loginUser.getId());
             userDto.setUsername(loginUser.getUsername());
             userDto.setEmail(loginUser.getEmail());
             userDto.setToken(token);
@@ -163,7 +169,7 @@ public class UserController {
         HttpSession session = request.getSession();
         session.setAttribute("code", code);
         session.setAttribute("codeTime", System.currentTimeMillis() + mailTime * 1000);
-        System.out.println("用户注册：验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟");
+        System.out.println(to + " 用户注册：验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟");
         Map<String, String> data = new HashMap<>();
         data.put("cause", cause);
         data.put("vCode", code);
@@ -177,4 +183,23 @@ public class UserController {
         }
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
+
+    /**
+     * 校验用户token
+     * @param token
+     * @return
+     */
+    @GetMapping("/validate/token")
+    public Result<Map> validateToken(@RequestParam String token) throws Exception {
+        // System.out.println(token);
+        DecodedJWT verify = JwtUtil.verifyToken(token);
+        if(!verify.getClaim("type").asString().equals("user")) {
+            throw new JWTDecodeException("无法解析为用户对象");
+        }
+        Map<String, String> data = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        data.put("expiresAt", sdf.format(verify.getExpiresAt()));
+        return Result.success(data, StatusCodeEnum.JWT_OK);
+    }
+
 }
