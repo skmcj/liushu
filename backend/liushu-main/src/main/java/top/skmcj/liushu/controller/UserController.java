@@ -148,6 +148,29 @@ public class UserController {
     }
 
     /**
+     * 设置用户信息
+     * @param userInfo
+     * @return
+     */
+    @PostMapping("/info")
+    public Result<String> setUserInfo(@RequestBody UserInfo userInfo) {
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
+        UserInfo targetUser = userInfoService.getOne(queryWrapper);
+        targetUser.setAvatar(userInfo.getAvatar());
+        targetUser.setNickname(userInfo.getNickname());
+        targetUser.setSex(userInfo.getSex());
+        targetUser.setSignature(userInfo.getSignature());
+        targetUser.setBirthday(userInfo.getBirthday());
+        boolean flag = userInfoService.updateById(targetUser);
+        if(flag) {
+            return Result.success("用户信息修改成功");
+        } else {
+            return Result.error("用户信息修改失败");
+        }
+    }
+
+    /**
      * 获取注册所需验证码
      * @param to
      * @param request

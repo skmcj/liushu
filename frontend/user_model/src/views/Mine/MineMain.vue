@@ -22,7 +22,7 @@
         <div class="box" @mousewheel.stop="handleWalletBoxScroll" ref="scrollXBox">
           <!-- 零钱 -->
           <div class="wallet" @click.stop="handlePrevieward('wallet')">
-            <div class="text-box">{{ walletVisible ? keepTwoNum(userInfo.money) : '***' }}</div>
+            <div class="text-box">{{ walletVisible ? $keepTwoNum(userInfo.money) : '***' }}</div>
             <div class="title-box">
               <i class="ic-wallet"></i>
               <span>零钱</span>
@@ -135,7 +135,7 @@
       <div v-if="dialogTitle === '钱包'" class="wallet-dialog">
         <div class="main-dialog">
           <div class="title">我的零钱(元)</div>
-          <div class="money">{{ keepTwoNum(userInfo.money) }}</div>
+          <div class="money">{{ $keepTwoNum(userInfo.money) }}</div>
           <div class="btns">
             <div class="btn grey">充值</div>
             <div class="btn">提现</div>
@@ -155,7 +155,7 @@
                       add: item.change === 1,
                       reduce: item.change === 0
                     }"
-                    >{{ (item.change ? '+' : '-') + keepTwoNum(item.amount) }}</span
+                    >{{ (item.change ? '+' : '-') + $keepTwoNum(item.amount) }}</span
                   >
                 </div>
                 <span class="time">{{ item.updateTime }}</span>
@@ -182,8 +182,8 @@ export default {
     return {
       width: 0,
       userInfo: {
-        avatarUrl: 'https://img2.woyaogexing.com/2022/04/06/673fc7947e52420ca358b8701375ab24!400x400.jpeg',
-        nickname: '野原新之助',
+        avatarUrl: '',
+        nickname: '',
         money: 0,
         coupon: null
       },
@@ -201,27 +201,15 @@ export default {
   },
   mounted() {
     this.width = this.$el.offsetWidth;
+    this.getUserInfo();
   },
   methods: {
     /**
-     * 保留两位小数
+     * 获取用户信息
      */
-    keepTwoNum(num) {
-      // 四舍五入
-      let mNum = Math.round(num * 100) / 100;
-      let numStr = mNum.toString();
-      let dotIndex = numStr.indexOf('.');
-      // 当整数时，pos_decimal=-1 自动补0
-      if (dotIndex < 0) {
-        dotIndex = numStr.length;
-        numStr += '.';
-      }
-
-      // 当数字的长度< 小数点索引+2时，补0
-      while (numStr.length <= dotIndex + 2) {
-        numStr += '0';
-      }
-      return numStr;
+    getUserInfo() {
+      this.userInfo = this.$store.state.userInfo;
+      this.coupon = null;
     },
     /**
      * 横向滚动

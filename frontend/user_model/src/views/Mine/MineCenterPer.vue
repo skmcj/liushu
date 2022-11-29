@@ -90,14 +90,14 @@ export default {
       ],
       // 个人信息
       perForm: {
-        username: 'yyxzz',
-        avatar: '673fc7947e52420ca358b8701375ab24!400x400.jpeg',
-        avatarUrl: 'https://img2.woyaogexing.com/2022/04/06/673fc7947e52420ca358b8701375ab24!400x400.jpeg',
-        nickname: '野原新之助',
-        sex: 1,
+        username: '',
+        avatar: '',
+        avatarUrl: '',
+        nickname: '',
+        sex: 0,
         money: 0,
         coupon: null,
-        birthday: '2001-03-15',
+        birthday: '',
         signature: ''
       },
       perRules: {},
@@ -105,8 +105,18 @@ export default {
       previewCoverVisible: false
     };
   },
+  created() {
+    this.initMess();
+  },
   methods: {
     uploadImagePlusApi,
+    /**
+     * 初始化信息
+     */
+    initMess() {
+      this.perForm = this.$store.state.userInfo;
+      this.coupon = null;
+    },
     /**
      * 改变性别
      */
