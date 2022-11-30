@@ -23,14 +23,27 @@ export const validateTokenApi = function(token) {
 }
 
 /**
- * 获取注册验证码
+ * 获取验证码
  * @param {*} email
  * @returns
  */
-export const getValidateCodeApi = function(email) {
-  return request.get('/user/logon/code', {
+export const getValidateCodeApi = function(email, type = 'logon') {
+  return request.get(`/user/code/${type}`, {
     params: {
       to: email
+    }
+  });
+}
+
+/**
+ * 校验验证码
+ * @param {*} code
+ * @returns
+ */
+export const checkValidateCodeApi = function(code) {
+  return request.get('/user/code/check', {
+    params: {
+      code
     }
   });
 }
@@ -51,6 +64,24 @@ export const userLogonApi = function(user) {
  */
 export const updateUserInfoApi = function(userInfo) {
   return request.put('/user/info', userInfo);
+}
+
+/**
+ * 修改更新用户邮箱
+ * @param {*} user
+ * @returns
+ */
+export const updateUserEmailApi = function(user) {
+  return request.put('/user/email', user);
+}
+
+/**
+ * 修改更新用户密码
+ * @param {*} user
+ * @returns
+ */
+export const updateUserPassApi = function(user) {
+  return request.put('/user/pass', user);
 }
 
 /**

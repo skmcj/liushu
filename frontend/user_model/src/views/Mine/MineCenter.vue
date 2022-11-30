@@ -43,6 +43,16 @@ export default {
       this.$router.push(`/mine/center/${item.value}`);
       // 获取指定订单
     }
+  },
+  watch: {
+    // 监听当前路由信息
+    $route: {
+      immediate: true,
+      handler(val) {
+        // console.log('route =>', val);
+        this.navCheck = val.meta.nav;
+      }
+    }
   }
 };
 </script>

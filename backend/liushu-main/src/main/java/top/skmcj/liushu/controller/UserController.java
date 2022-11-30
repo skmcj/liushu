@@ -255,23 +255,38 @@ public class UserController {
     }
 
     /**
-     * 获取注册所需验证码
+     * 获取验证码
      * @param to
      * @param request
      * @return
      */
-    @GetMapping("/logon/code")
-    public Result<String> validateCode(@RequestParam String to, HttpServletRequest request) {
+    @GetMapping("/code/{type}")
+    public Result<String> validateCode(@PathVariable String type, @RequestParam String to, HttpServletRequest request) {
+        System.out.println("type => " + type);
         // 验证邮箱是否已注册
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getEmail, to);
-        User oldUser = userService.getOne(queryWrapper);
-        if(oldUser != null) {
-            // 邮箱已注册
-            return Result.error(StatusCodeEnum.USER_EMAIL_EXIST);
+        if("logon".equals(type) || "newEmail".equals(type)) {
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getEmail, to);
+            User oldUser = userService.getOne(queryWrapper);
+            if(oldUser != null) {
+                // 邮箱已注册
+                return Result.error(StatusCodeEnum.USER_EMAIL_EXIST);
+            }
         }
         // 未注册，继续发送验证码
-        String cause = "感谢您注册流书网";
+        String cause = "感谢您使用流书网";
+        if("logon".equals(type)) {
+            cause = "感谢您注册流书网";
+        }
+        if("newEmail".equals(type)) {
+            cause = "您正在修改邮箱";
+        }
+        if("email".equals(type)) {
+            cause = "您正在修改邮箱";
+        }
+        if("pass".equals(type)) {
+            cause = "您正在修改密码";
+        }
         String code = ValidateCodeUtil.getValidateCodeNum(6);
         HttpSession session = request.getSession();
         session.setAttribute("code", code);
@@ -289,6 +304,32 @@ public class UserController {
             return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
         }
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
+    }
+
+    /**
+     * 校验验证码
+     * @param code
+     * @param request
+     * @return
+     */
+    @GetMapping("/code/check")
+    public Result<String> checkValidateCode(@RequestParam String code, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String realCode = (String) session.getAttribute("code");
+        Long codeTime = (Long) session.getAttribute("codeTime");
+        long nowTime = System.currentTimeMillis();
+        // 校验验证码
+        if(realCode == null) {
+            return Result.error("请先获取验证码");
+        }
+        if(realCode.equals(code) && nowTime <= codeTime) {
+            return Result.success(StatusCodeEnum.CHECK_CODE_OK);
+        } else if(nowTime > codeTime) {
+            // 过期
+            return Result.error(StatusCodeEnum.CHECK_CODE_EXPIRED);
+        } else {
+            return Result.error(StatusCodeEnum.CHECK_CODE_ERR);
+        }
     }
 
     /**

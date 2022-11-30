@@ -231,7 +231,8 @@ const routes = [
                 meta: {
                   title: '我的-个人信息',
                   rootLink: '/mine',
-                  aside: 'center'
+                  aside: 'center',
+                  nav: 'personal'
                 }
               },
               {
@@ -241,7 +242,8 @@ const routes = [
                 meta: {
                   title: '我的-账号安全',
                   rootLink: '/mine',
-                  aside: 'center'
+                  aside: 'center',
+                  nav: 'account'
                 }
               },
               {
@@ -251,7 +253,8 @@ const routes = [
                 meta: {
                   title: '我的-支付设置',
                   rootLink: '/mine',
-                  aside: 'center'
+                  aside: 'center',
+                  nav: 'pay'
                 }
               }
             ]
