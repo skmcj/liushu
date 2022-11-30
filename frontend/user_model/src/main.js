@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import store from '@/store';
 import md5 from 'js-md5';
+import { sha256 } from 'js-sha256';
 
 import { Message } from 'element-ui';
 
@@ -22,6 +23,8 @@ Vue.prototype.$noAvatarUrl = noAvatar;
 /** 封装一些工具到Vue上 */
 // 将md5绑定到vue上
 Vue.prototype.$md5 = md5;
+// 将sha256绑定到vue上
+Vue.prototype.$sha256 = sha256;
 
 /** 封装使用率高的工具函数 */
 /**

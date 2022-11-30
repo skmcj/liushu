@@ -76,11 +76,13 @@ public enum StatusCodeEnum {
      */
     USER_LOGON_OK(21101, "用户注册成功"),
     USER_LOGIN_OK(21102, "用户登录成功"),
+    USER_PAY_OK(21103, "支付密码正确"),
     USERNAME_EXIST(52101, "用户名已存在"),
     USER_EMAIL_EXIST(52102, "邮箱已注册"),
     USERNAME_NOT_EXIST(52103, "用户不存在"),
     USER_STATUS_ERR(52104, "用户已被封禁"),
     USER_PASS_ERR(52105, "用户密码错误"),
+    USER_PAY_ERR(52106, "支付密码错误"),
     /**
      * 图片上传状态
      */

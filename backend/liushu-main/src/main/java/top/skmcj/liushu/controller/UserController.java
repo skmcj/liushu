@@ -255,6 +255,72 @@ public class UserController {
     }
 
     /**
+     * 修改支付密码
+     * @param userInfo
+     * @return
+     */
+    @PutMapping("/payPass")
+    public Result<String> updateUserPayPass(@RequestBody UserInfo userInfo) {
+        if(userInfo.getPayPass() == null || userInfo.getPayPass().length() == 0) {
+            return Result.error("支付密码不能为空");
+        }
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
+        UserInfo info = userInfoService.getOne(queryWrapper);
+        if(info == null) {
+            return Result.error("用户信息有误");
+        }
+        UserInfo targetInfo = new UserInfo();
+        targetInfo.setId(info.getId());
+        targetInfo.setPayPass(userInfo.getPayPass());
+        boolean flag = userInfoService.updateById(targetInfo);
+        if(!flag) return Result.error("支付密码修改失败");
+        return Result.success(StatusCodeEnum.UPDATE_OK);
+    }
+
+    /**
+     * 验证支付密码
+     * @param userInfo
+     * @return
+     */
+    @PostMapping("/validate/pay")
+    public Result<String> validatePayPass(@RequestBody UserInfo userInfo) {
+        if(userInfo.getPayPass() == null || userInfo.getPayPass().length() == 0) {
+            return Result.error("支付密码不能为空");
+        }
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
+        UserInfo info = userInfoService.getOne(queryWrapper);
+        if(info == null) {
+            return Result.error("用户信息有误");
+        }
+        if(userInfo.getPayPass().equals(info.getPayPass())) {
+            return Result.success(StatusCodeEnum.USER_PAY_OK);
+        } else {
+            return Result.error(StatusCodeEnum.USER_PAY_ERR);
+        }
+    }
+
+    /**
+     * 查询是否已设置支付密码
+     * @param userInfo
+     * @return
+     */
+    @PostMapping("/has/pay")
+    public Result<String> hasUserPayPass(@RequestBody UserInfo userInfo) {
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
+        UserInfo info = userInfoService.getOne(queryWrapper);
+        if(info == null) {
+            return Result.error("查无用户");
+        }
+        if(info.getPayPass() == null || info.getPayPass().length() == 0) {
+            return Result.error("未设置支付密码");
+        }
+        return Result.success("已设置支付密码");
+    }
+
+    /**
      * 获取验证码
      * @param to
      * @param request
