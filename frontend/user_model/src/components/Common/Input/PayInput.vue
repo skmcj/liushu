@@ -201,6 +201,16 @@ export default {
       }
     }
   }
+  &.is-error {
+    .sk-input-pay-box {
+      .sk-input-pay-item {
+        border-color: #cd5e3c;
+      }
+    }
+    .sk-input-pay-tip {
+      color: #cd5e3c;
+    }
+  }
   @keyframes flash {
     from {
       opacity: 0;

@@ -328,7 +328,7 @@ public class UserController {
      */
     @GetMapping("/code/{type}")
     public Result<String> validateCode(@PathVariable String type, @RequestParam String to, HttpServletRequest request) {
-        System.out.println("type => " + type);
+        // System.out.println("type => " + type);
         // 验证邮箱是否已注册
         if("logon".equals(type) || "newEmail".equals(type)) {
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
@@ -352,6 +352,9 @@ public class UserController {
         }
         if("pass".equals(type)) {
             cause = "您正在修改密码";
+        }
+        if("payPass".equals(type)) {
+            cause = "您正在设置支付密码";
         }
         String code = ValidateCodeUtil.getValidateCodeNum(6);
         HttpSession session = request.getSession();

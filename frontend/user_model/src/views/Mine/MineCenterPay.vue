@@ -30,23 +30,34 @@
               </div>
               <div class="captcha">
                 <el-input
-                  v-model="authCode"
+                  v-model="captcha"
                   placeholder="请输入验证码"
                   style="width: 62%"
                   @input="resetCodeTip"
                   :class="dialogCodeTip ? 'is-error' : ''"></el-input>
-                <el-button class="cap-btn" plain :disabled="isGetCaptcha" @click="getCaptcha()">{{
-                  codeBtnText
+                <el-button class="cap-btn" plain :disabled="captchaBtnFlag" @click="getCaptcha()">{{
+                  captchaBtnText
                 }}</el-button>
                 <div class="tip">{{ dialogCodeTip }}</div>
               </div>
             </template>
             <!-- 如果设置过支付密码，需输入之前的支付密码验证身份 -->
-            <PayInput v-if="isSetPayPass" v-model="payPass" tip="请输入 6 位数字的旧支付密码" />
+            <PayInput
+              :class="{
+                'is-error': payPassErrorFlag
+              }"
+              v-if="isSetPayPass"
+              v-model="payPass"
+              tip="请输入 6 位数字的旧支付密码" />
           </div>
           <div v-if="active === 1" class="step">
             <!-- 密码 -->
-            <PayInput v-model="payPass" tip="请输入 6 位数字的新支付密码" />
+            <PayInput
+              :class="{
+                'is-error': payPassErrorFlag
+              }"
+              v-model="payPass"
+              tip="请输入 6 位数字的新支付密码" />
           </div>
           <!-- 结果 -->
           <div v-if="active >= 2" class="step step-three">
@@ -74,6 +85,13 @@
 import Steps from '@/components/Common/Steps/Steps';
 import Step from '@/components/Common/Steps/Step';
 import PayInput from '@/components/Common/Input/PayInput';
+import {
+  getValidateCodeApi,
+  checkValidateCodeApi,
+  validatePayPassApi,
+  hasUserPayPassApi,
+  updateUserPayPassApi
+} from '@/api/userApi';
 
 export default {
   components: {
@@ -86,7 +104,8 @@ export default {
       // 是否设置过支付密码
       isSetPayPass: false,
       payPass: '',
-      email: '4567891231@qq.com',
+      email: '',
+      payPassErrorFlag: false,
       // 换绑对话框
       dialogVisible: false,
       // 步骤
@@ -94,13 +113,14 @@ export default {
       // 是否换绑成功
       isEditSuccess: false,
       editFailText: '当前网络较为繁忙，请稍后再试',
+      // 对话框按钮文本
       dialogBtnText: '下一步',
       // 验证码按钮的文本
-      codeBtnText: '获取验证码',
+      captchaBtnText: '获取验证码',
       // 是否已发送验证码
-      isGetCaptcha: false,
+      captchaBtnFlag: false,
       // 用户输入验证码
-      authCode: '',
+      captcha: '',
       // 用户输入验证码提示
       dialogCodeTip: '',
       // 计时器
@@ -109,7 +129,25 @@ export default {
       counter: 60
     };
   },
+  created() {
+    this.initMess();
+  },
   methods: {
+    /**
+     * 初始化信息
+     */
+    initMess() {
+      this.email = this.$store.state.userInfo.email;
+      this.setPayPass();
+    },
+    setPayPass() {
+      let userInfo = this.$store.state.userInfo;
+      hasUserPayPassApi(userInfo.id).then(res => {
+        if (res.data.flag) {
+          this.isSetPayPass = true;
+        }
+      });
+    },
     /**
      * 包装邮箱账号显示
      * @param {String} email
@@ -123,23 +161,70 @@ export default {
       this.dialogVisible = true;
       this.initChangeMess();
     },
-    nextStep() {
+    async nextStep() {
       if (this.active === 0) {
         // 验证身份
         // isSetPayPass
         if (this.isSetPayPass) {
           // 验证旧的支付密码是否正确
+          if (!this.validatePayPassInput(this.payPass.substring(0, 6))) {
+            this.payPassErrorFlag = true;
+            this.$showMsg('支付密码需为6位数字', { type: 'warning' });
+          } else {
+            let userInfo = this.$store.state.userInfo;
+            let info = {
+              userId: userInfo.id,
+              payPass: this.$sha256(this.payPass.substring(0, 6))
+            };
+            let { data } = await validatePayPassApi(info);
+            if (data.flag) {
+              // 校验失败
+              this.active += 1;
+            } else {
+              this.$showMsg('支付密码错误', { type: 'warning' });
+            }
+            this.payPass = '';
+            this.payPassErrorFlag = false;
+          }
         } else {
           // 验证邮箱验证码是否正确
+          let cData = await this.testCaptcha(this.captcha);
+          if (!cData.flag) {
+            // 验证码校验失败
+            this.dialogCodeTip = cData.tip;
+          } else {
+            this.resetTimer();
+            this.active += 1;
+          }
         }
-        // 都正确进入下一步
-        this.active += 1;
       } else if (this.active === 1) {
-        // 设置支付密码
-        this.active += 1;
-        this.dialogBtnText = '返回';
+        if (!this.validatePayPassInput(this.payPass.substring(0, 6))) {
+          this.payPassErrorFlag = true;
+          this.$showMsg('支付密码需为6位数字', { type: 'warning' });
+        } else {
+          // 设置支付密码
+          let userInfo = this.$store.state.userInfo;
+          let info = {
+            userId: userInfo.id,
+            payPass: this.$sha256(this.payPass.substring(0, 6))
+          };
+          let { data } = await updateUserPayPassApi(info);
+          // console.log('data', data);
+          if (data.flag) {
+            // 修改成功
+            this.isEditSuccess = true;
+          } else {
+            this.isEditSuccess = false;
+          }
+          this.active += 1;
+          this.dialogBtnText = '返回';
+          this.payPass = '';
+          this.payPassErrorFlag = false;
+        }
       } else if (this.active >= 2) {
         this.dialogVisible = false;
+        this.payPass = '';
+        this.payPassErrorFlag = false;
       }
     },
     /**
@@ -149,63 +234,84 @@ export default {
       this.payPass = '';
       this.active = 0;
       this.dialogBtnText = '下一步';
-      this.isGetCaptcha = false;
+      this.captchaBtnFlag = false;
       this.resetChangeMess();
+    },
+    /**
+     * 校验验证码
+     */
+    async testCaptcha(code) {
+      let { data } = await checkValidateCodeApi(code);
+      // console.log('test code =>', data);
+      if (data.flag) {
+        return { flag: true };
+      } else {
+        if (data.code === 21020) {
+          return {
+            flag: false,
+            tip: '验证码错误'
+          };
+        }
+        if (data.code === 21022) {
+          return {
+            flag: false,
+            tip: '验证码已过期'
+          };
+        }
+        return {
+          flag: false,
+          tip: '验证码校验失败'
+        };
+      }
     },
     /**
      * 重置信息
      */
     resetChangeMess() {
-      this.authCode = '';
+      this.captcha = '';
       this.dialogCodeTip = '';
-      this.authReset();
+      this.resetTimer();
     },
     /**
      * 获取验证码
      */
-    async getCaptcha() {
+    getCaptcha() {
       // 发送验证码 ···
-      // let res = await sendValidateCodeApi('sce', this.email);
-      // if (res.data.flag) {
-      //   this.$showMsg('验证码已发送，请注意查收', { type: 'success' });
-      //   // 禁用按钮
-      //   this.isGetCaptcha = true;
-      //   // 开始60s倒计时
-      //   this.authCountDown();
-      // } else {
-      //   this.$showMsg('验证码获取失败，请稍候再试', { type: 'warning' });
-      // }
-      // 测试
-      // 禁用按钮
-      this.isGetCaptcha = true;
-      // 开始60s倒计时
-      this.authCountDown();
+      getValidateCodeApi(this.email, 'payPass').then(res => {
+        // console.log('code => ', res);
+        if (res.data.flag) {
+          this.$showMsg('验证码已发送，请注意查收', { type: 'success' });
+          this.captchaBtnFlag = true;
+          this.timeCountDown();
+        } else {
+          this.$showMsg('验证码获取失败，请稍候再试', { type: 'warning' });
+        }
+      });
     },
     /**
      * 验证码发送后计时
      */
-    authCountDown() {
-      // console.log('counter');
+    timeCountDown() {
       // 将setInterval()方法赋值给前面定义的timer计时器对象，方便后续操作
       this.timer = setInterval(() => {
         // 替换文本，秒实时改变
-        this.codeBtnText = `${this.counter}秒后可重新获取`;
+        this.captchaBtnText = `${this.counter}秒后可重新获取`;
         this.counter--;
         if (this.counter < 0) {
           // 当计时小于零时，取消该计时器
           clearInterval(this.timer);
-          this.authReset('重新获取');
+          this.resetTimer('重新获取');
         }
       }, 1000);
     },
     /**
      * 重置验证码相关参数
      */
-    authReset(text = '获取验证码') {
+    resetTimer(text = '获取验证码') {
       // 按钮可用
-      this.isGetCaptcha = false;
+      this.captchaBtnFlag = false;
       // 重置文本内容
-      this.codeBtnText = text;
+      this.captchaBtnText = text;
       if (this.timer) {
         // 存在计时器对象，则清除
         clearInterval(this.timer);
@@ -217,6 +323,10 @@ export default {
     },
     resetCodeTip() {
       this.dialogCodeTip = '';
+    },
+    validatePayPassInput(text) {
+      const REGEX_PAY = /^\d{6}$/;
+      return REGEX_PAY.test(text);
     }
   }
 };
@@ -345,6 +455,16 @@ export default {
           //   justify-content: center;
           //   color: var(--main-font);
           width: 35%;
+        }
+        :deep(.el-input) {
+          &.is-error {
+            .el-input__inner {
+              border-color: var(--error);
+            }
+          }
+        }
+        .tip {
+          color: var(--error);
         }
       }
       .pay-box {

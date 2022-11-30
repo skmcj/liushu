@@ -96,3 +96,32 @@ export const getUserInfoApi = function(userId) {
     }
   });
 }
+
+/**
+ * 是否已设置了支付密码
+ * @param {*} userId
+ * @returns
+ */
+export const hasUserPayPassApi = function(userId) {
+  return request.post('/user/has/pay', {
+    userId
+  });
+}
+
+/**
+ * 验证支付密码
+ * @param {*} userinfo
+ * @returns
+ */
+export const validatePayPassApi = function(userInfo) {
+  return request.post('/user/validate/pay', userInfo);
+}
+
+/**
+ * 修改支付密码
+ * @param {*} userInfo
+ * @returns
+ */
+export const updateUserPayPassApi = function(userInfo) {
+  return request.put('/user/payPass', userInfo);
+}
