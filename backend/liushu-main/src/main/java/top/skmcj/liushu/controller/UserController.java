@@ -19,7 +19,6 @@ import top.skmcj.liushu.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -152,17 +151,17 @@ public class UserController {
      * @param userInfo
      * @return
      */
-    @PostMapping("/info")
+    @PutMapping("/info")
     public Result<String> updateUserInfo(@RequestBody UserInfo userInfo) {
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
-        UserInfo targetUser = userInfoService.getOne(queryWrapper);
+        UserInfo targetUser = new UserInfo();
         targetUser.setAvatar(userInfo.getAvatar());
         targetUser.setNickname(userInfo.getNickname());
         targetUser.setSex(userInfo.getSex());
         targetUser.setSignature(userInfo.getSignature());
         targetUser.setBirthday(userInfo.getBirthday());
-        boolean flag = userInfoService.updateById(targetUser);
+        boolean flag = userInfoService.update(targetUser, queryWrapper);
         if(flag) {
             return Result.success("用户信息修改成功");
         } else {
@@ -199,6 +198,60 @@ public class UserController {
         userDto.setSignature(userInfo.getSignature());
         userDto.setSex(userInfo.getSex());
         return Result.success(userDto, StatusCodeEnum.GET_OK);
+    }
+
+    /**
+     * 修改密码
+     * @param user
+     * @return
+     */
+    @PutMapping("/pass")
+    public Result<String> updateUserPassword(@RequestBody User user) {
+        if(user.getPassword() == null || user.getPassword().length() == 0) {
+            return Result.error("新密码不能为空");
+        }
+        User oldUser = userService.getById(user.getId());
+        if(oldUser == null) {
+            return Result.error("用户信息有误");
+        }
+        if(!oldUser.getEmail().equals(user.getEmail())) {
+            return Result.error("用户信息有误");
+        }
+        if(!oldUser.getUsername().equals(user.getUsername())) {
+            return Result.error("用户信息有误");
+        }
+        // 用户信息校验正常，修改密码
+        User newUser = new User();
+        newUser.setId(oldUser.getId());
+        newUser.setPassword(user.getPassword());
+        boolean flag = userService.updateById(newUser);
+        if(!flag) return Result.error("系统繁忙，请稍后再试");
+        return Result.success(StatusCodeEnum.UPDATE_OK);
+    }
+
+    /**
+     * 修改邮箱
+     * @return
+     */
+    @PutMapping("/email")
+    public Result<String> updateUserEmail(@RequestBody User user) {
+        if(user.getEmail() == null || user.getEmail().length() == 0) {
+            return Result.error("用户邮箱不可为空");
+        }
+        User oldUser = userService.getById(user.getId());
+        if(oldUser == null) {
+            return Result.error("用户信息有误");
+        }
+        if(!oldUser.getUsername().equals(user.getUsername())) {
+            return Result.error("用户信息有误");
+        }
+        // 用户信息校验正常，修改邮箱
+        User newUser = new User();
+        newUser.setId(oldUser.getId());
+        newUser.setEmail(user.getEmail());
+        boolean flag = userService.updateById(newUser);
+        if(!flag) return Result.error("系统繁忙，请稍后再试");
+        return Result.success(StatusCodeEnum.UPDATE_OK);
     }
 
     /**

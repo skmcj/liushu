@@ -50,7 +50,7 @@ export const userLogonApi = function(user) {
  * @returns
  */
 export const updateUserInfoApi = function(userInfo) {
-  return request.post('/user/info', userInfo);
+  return request.put('/user/info', userInfo);
 }
 
 /**

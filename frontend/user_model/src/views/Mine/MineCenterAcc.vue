@@ -144,8 +144,8 @@ export default {
         callback(new Error('请输入验证码'));
       } else if (value.length !== 6) {
         callback(new Error('请输入6位验证码'));
-      } else if (!this.isCaptchaRight) {
-        callback(new Error('请输入正确的验证码'));
+      } else if (!this.captchaErrorFlag) {
+        callback(new Error(this.captchaErrorTip));
       } else {
         callback();
       }
@@ -211,7 +211,8 @@ export default {
       // 是否已发送验证码
       isGetCaptcha: false,
       // 验证码是否正确
-      isCaptchaRight: false,
+      captchaErrorFlag: false,
+      captchaErrorTip: '验证码校验失败',
       // 用户输入验证码
       authCode: '',
       // 用户输入密码/手机号

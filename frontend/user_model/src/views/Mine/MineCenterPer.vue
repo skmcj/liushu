@@ -155,7 +155,7 @@ export default {
       };
       updateUserInfoApi(userInfo).then(
         res => {
-          console.log('userInfo => ', res.data.data);
+          // console.log('userInfo => ', res.data.data);
           if (res.data.flag) {
             this.$showMsg('修改成功', { type: 'success' });
             this.getUserInfo();
