@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { validateTokenApi } from '@/api/userApi';
+import { validateTokenApi, getUserInfoApi } from '@/api/userApi';
 
 export default {
   created() {
@@ -20,18 +20,29 @@ export default {
      */
     initUserInfo() {
       // console.log('app init');
-      const userInfo = JSON.parse(window.localStorage.getItem('userInfo'));
+      const userInfo = this.$store.state.userInfo;
       // 查看本地是否有用户信息
       // 无，直接返回
       if (!userInfo) return;
       // 有，则发送请求，验证token是否有效
-      const token = userInfo.token;
+      const token = this.$store.state.token;
       validateTokenApi(token).then(res => {
         if (res.data.flag) {
           // 有效，设置会话默认值
           // console.log('token => ', res.data);
-          this.$store.dispatch('setUserInfo', userInfo);
+          this.getUserInfo();
           this.$store.dispatch('setLoginFlag', true);
+        }
+      });
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      getUserInfoApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // 获取成功
+          this.$store.dispatch('setUserInfo', res.data.data);
         }
       });
     }

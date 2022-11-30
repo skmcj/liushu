@@ -153,7 +153,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/info")
-    public Result<String> setUserInfo(@RequestBody UserInfo userInfo) {
+    public Result<String> updateUserInfo(@RequestBody UserInfo userInfo) {
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserId, userInfo.getUserId());
         UserInfo targetUser = userInfoService.getOne(queryWrapper);
@@ -168,6 +168,37 @@ public class UserController {
         } else {
             return Result.error("用户信息修改失败");
         }
+    }
+
+    /**
+     * 获取用户信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/info")
+    public Result<UserDto> getUserInfo(@RequestParam String id, HttpServletRequest request) {
+        UserDto userDto = new UserDto();
+        User user = userService.getById(id);
+        if(user == null) {
+            return Result.error("用户获取失败");
+        }
+        LambdaQueryWrapper<UserInfo> infoQueryWrapper = new LambdaQueryWrapper<>();
+        infoQueryWrapper.eq(UserInfo::getUserId, user.getId());
+        UserInfo userInfo = userInfoService.getOne(infoQueryWrapper);
+        if (userInfo.getAvatar() != null) {
+            String url = CommonUtil.getImgDoMain(request) + userInfo.getAvatar();
+            userDto.setAvatar(userInfo.getAvatar());
+            userDto.setAvatarUrl(url);
+        }
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setEmail(user.getEmail());
+        userDto.setNickname(userInfo.getNickname());
+        userDto.setBirthday(userInfo.getBirthday());
+        userDto.setMoney(userInfo.getMoney());
+        userDto.setSignature(userInfo.getSignature());
+        userDto.setSex(userInfo.getSex());
+        return Result.success(userDto, StatusCodeEnum.GET_OK);
     }
 
     /**

@@ -105,8 +105,10 @@ export default {
                 // console.log('user login => ', res);
                 if (res.data.flag) {
                   window.localStorage.setItem('userInfo', JSON.stringify(res.data.data));
+                  window.localStorage.setItem('userToken', JSON.stringify(res.data.data.token));
                   this.$store.dispatch('setUserInfo', res.data.data);
                   this.$store.dispatch('setLoginFlag', true);
+                  this.$store.dispatch('setToken', res.data.data.token);
                   this.$showMsg('登录成功', {
                     type: 'success',
                     closeFunc: () => {

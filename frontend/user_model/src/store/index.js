@@ -32,6 +32,11 @@ const actions = {
   setLoginFlag(context, value) {
     // 'setLoginFlag' 是mutations中相应操作的名称
     context.commit('setLoginFlag', value);
+  },
+  // 发出设置token的动作
+  setToken(context, value) {
+    // 'setToken' 是mutations中相应操作的名称
+    context.commit('setToken', value);
   }
 };
 // 准备mutations -> 用于操作数据(state)
@@ -48,7 +53,7 @@ const mutations = {
   },
   // 设置 userInfo 值
   setUserInfo(state, value) {
-    sessionStorage.setItem('userInfo', JSON.stringify(value));
+    localStorage.setItem('userInfo', JSON.stringify(value));
     state.userInfo = value;
   },
   // 设置logon的from路径
@@ -60,6 +65,11 @@ const mutations = {
   setLoginFlag(state, value) {
     sessionStorage.setItem('loginFlag', JSON.stringify(value));
     state.loginFlag = value;
+  },
+  // 设置 token 的值
+  setToken(state, value) {
+    localStorage.setItem('userToken', JSON.stringify(value));
+    state.token = value;
   }
 };
 // 准备state -> 用于存储数据
@@ -70,11 +80,13 @@ const state = {
   // 选中地址
   checkedAddress: JSON.parse(sessionStorage.getItem('checkedAddress')) || {},
   // 用户信息
-  userInfo: JSON.parse(sessionStorage.getItem('userInfo')) || {},
+  userInfo: JSON.parse(localStorage.getItem('userInfo')) || {},
   // 用户登录的from路径
   loginFromPath: JSON.parse(sessionStorage.getItem('loginFromPath')) || '/',
   // 用户是否登录
-  loginFlag: JSON.parse(sessionStorage.getItem('loginFlag')) || false
+  loginFlag: JSON.parse(sessionStorage.getItem('loginFlag')) || false,
+  // 用户token
+  token: JSON.parse(localStorage.getItem('userToken')) || ''
 };
 
 // 待优化

@@ -20,7 +20,7 @@
             class="avatar-uploader"
             action=""
             :http-request="uploadImagePlusApi"
-            :data="{ type: 'user' }"
+            :data="{ type: 'ua' }"
             :show-file-list="false"
             :on-success="uploadCoverSuccess"
             :on-error="uploadCoverError"
@@ -78,6 +78,7 @@
 
 <script>
 import { uploadImagePlusApi } from '@/api/commonApi';
+import { updateUserInfoApi, getUserInfoApi } from '@/api/userApi';
 
 export default {
   data() {
@@ -114,8 +115,24 @@ export default {
      * 初始化信息
      */
     initMess() {
-      this.perForm = this.$store.state.userInfo;
-      this.coupon = null;
+      this.getUserInfo();
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      // console.log('id => ', this.$store.state.userInfo.id);
+      getUserInfoApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // 获取成功
+          this.$store.dispatch('setUserInfo', res.data.data);
+          this.perForm = this.$store.state.userInfo;
+          this.coupon = null;
+        } else {
+          this.perForm = this.$store.state.userInfo;
+          this.coupon = null;
+        }
+      });
     },
     /**
      * 改变性别
@@ -128,7 +145,28 @@ export default {
      */
     submitForm() {
       // 如果昵称为空，则默认等于用户名
-      this.perForm.nickname = this.perForm.nickname === '' ? this.perForm.username : this.perForm.nickname;
+      let userInfo = {
+        userId: this.perForm.id,
+        avatar: this.perForm.avatar,
+        nickname: this.perForm.nickname ? this.perForm.nickname : this.perForm.username,
+        sex: this.perForm.sex,
+        signature: this.perForm.signature,
+        birthday: this.perForm.birthday
+      };
+      updateUserInfoApi(userInfo).then(
+        res => {
+          console.log('userInfo => ', res.data.data);
+          if (res.data.flag) {
+            this.$showMsg('修改成功', { type: 'success' });
+            this.getUserInfo();
+          } else {
+            this.$showMsg('系统繁忙，请稍后再试', { type: 'warning' });
+          }
+        },
+        err => {
+          this.$showMsg('未知错误', { type: 'error' });
+        }
+      );
     },
     /**
      * 图片上传成功后的操作

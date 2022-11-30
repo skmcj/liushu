@@ -97,6 +97,9 @@ public class ImageHandlerController {
             case "com":
                 name = "common/";
                 break;
+            case "ua":
+                name = "user_about/";
+                break;
             default:
                 name = "other/";
                 break;
@@ -131,6 +134,9 @@ public class ImageHandlerController {
                 break;
             case "com":
                 imgPath = rootPath + "common/";
+                break;
+            case "ua":
+                imgPath = rootPath + "user_about/";
                 break;
             default:
                 imgPath = rootPath + "other/";

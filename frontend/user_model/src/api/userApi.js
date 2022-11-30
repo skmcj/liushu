@@ -43,3 +43,25 @@ export const getValidateCodeApi = function(email) {
 export const userLogonApi = function(user) {
   return request.post('/user/logon', user);
 }
+
+/**
+ * 修改更新用户信息
+ * @param {*} userInfo
+ * @returns
+ */
+export const updateUserInfoApi = function(userInfo) {
+  return request.post('/user/info', userInfo);
+}
+
+/**
+ * 获取用户信息
+ * @param {*} userId
+ * @returns
+ */
+export const getUserInfoApi = function(userId) {
+  return request.get('/user/info', {
+    params: {
+      id: userId
+    }
+  });
+}
