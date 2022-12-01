@@ -17,12 +17,12 @@
                     style="position: relative; width: 100%; height: 196px; background-color: #83ccd2; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     <div
                         style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
-                        <img style="width: 100%;" src="https://voidtech.cn/i/2022/11/28/x422bx.png"
+                        <img style="width: 100%;" src="https://i.328888.xyz/img/2022/12/01/ipsJa.png"
                             alt="logo" />
                     </div>
                     <div id="waves"
                         style="width: 100%; position: absolute; bottom: -0.6875rem; -webkit-tap-highlight-color: transparent;">
-                        <img style="width: 100%;" src='https://voidtech.cn/i/2022/11/28/wekkfe.gif'
+                        <img style="width: 100%;" src='https://i.328888.xyz/img/2022/12/01/ipoXw.gif'
                             alt="waves" />
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         <div
                             style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
                             <img style="width: 100%; height: 100%;"
-                                src="https://voidtech.cn/i/2022/11/28/x4mcgy.png" alt="tip" />
+                                src="https://i.328888.xyz/img/2022/12/01/ip9Dx.png" alt="tip" />
                         </div>
                         <span style="font-size: 14px; color: #b2b6b6;">
                             <#if result  == "0">

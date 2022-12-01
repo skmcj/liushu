@@ -46,6 +46,11 @@ public class Link implements Serializable {
     private String profile;
 
     /**
+     * 链接类型
+     */
+    private String type;
+
+    /**
      * 审核标志，0-待审核；1-审核通过；2-审核失败
      */
     private Integer flag;
@@ -61,5 +66,15 @@ public class Link implements Serializable {
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    /**
+     * 审核状态
+     * @return
+     */
+    public String getProcess() {
+        if(flag == 0) return "待审核";
+        if(flag == 1) return "审核通过";
+        return "审核不通过";
+    }
 
 }

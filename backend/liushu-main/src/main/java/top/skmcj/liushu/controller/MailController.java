@@ -6,9 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.entity.Bookstore;
+import top.skmcj.liushu.entity.Link;
 import top.skmcj.liushu.service.BookstoreService;
+import top.skmcj.liushu.service.LinkService;
 import top.skmcj.liushu.util.MailServerUtil;
 import top.skmcj.liushu.util.ValidateCodeUtil;
+import top.skmcj.liushu.vo.LinkVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -24,6 +27,9 @@ public class MailController {
 
     @Autowired
     private BookstoreService bookstoreService;
+
+    @Autowired
+    private LinkService linkService;
 
     @Autowired
     private MailServerUtil mailServerUtil;
@@ -65,7 +71,8 @@ public class MailController {
      * @return
      */
     @GetMapping("/sendExamine")
-    public Result<String> sendExamineNotice(@RequestParam String storeId) {
+    public Result<String> sendExamineNotice(@RequestParam Long storeId) {
+        // 一些身份验证
         Bookstore store = bookstoreService.getById(storeId);
         Map<String, String> data = new HashMap<>();
         data.put("cause", "您之前所提交的书店审核资料结果已出");
@@ -79,6 +86,32 @@ public class MailController {
         }
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
+
+    /**
+     * 发送友情链接审核状态通知邮件
+     * @param linkId
+     * @return
+     */
+    @GetMapping("/sendLinkEN")
+    public Result<String> sendLinkProcessNotice(@RequestParam Long linkId) {
+        if(linkId == null) {
+            return Result.error("链接ID不能为空");
+        }
+        Link link = linkService.getById(linkId);
+        if(link == null) return Result.error("找不到相应的链接");
+        Map<String, String> data = new HashMap<>();
+        data.put("cause", "您之前所提交的友情链接审核结果已出");
+        data.put("result", link.getFlag() == 1 ? "通过" : "不通过");
+        try {
+            // 发送邮件
+            mailServerUtil.sendPrTemplateMail(link.getEmail(), "审核状态", data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
+        }
+        return Result.success(StatusCodeEnum.MAIL_SEND_OK);
+    }
+
 
     /**
      * 校验验证码

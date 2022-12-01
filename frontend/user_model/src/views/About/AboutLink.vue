@@ -198,7 +198,10 @@ export default {
     }
   }
   .about-link-text {
-    margin-top: 24px;
+    // margin-top: 24px;
+    .title {
+      padding-top: 24px;
+    }
     .about-link-content {
       display: flex;
       flex-wrap: wrap;

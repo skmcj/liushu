@@ -41,6 +41,11 @@ public enum StatusCodeEnum {
     GET_OK(20041, "获取成功"),
     GET_ERR(20040, "获取失败"),
     /**
+     * 添加成功、失败
+     */
+    ADD_OK(20051, "添加成功"),
+    ADD_ERR(20050, "添加失败"),
+    /**
      * 系统相关状态
      */
     SYSTEM_ERR(52001, "系统异常"),

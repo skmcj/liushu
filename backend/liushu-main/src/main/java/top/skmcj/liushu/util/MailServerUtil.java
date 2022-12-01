@@ -120,4 +120,31 @@ public class MailServerUtil {
         // 发送邮件
         mailSender.send(message);
     }
+
+    /**
+     * 发送通知模板邮件
+     * @param to 收件人邮箱
+     * @param subject 主题
+     * @param data 模板替换数据
+     *             - cause 发件原因
+     *             - vCode 验证码
+     *             - validTime 验证码有效时间
+     */
+    public void sendPrTemplateMail(String to, String subject, Map data) throws Exception {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+        // 导入模板，获取邮件内容
+        Template template = configuration.getTemplate("pemail.ftl");
+        String content = FreeMarkerTemplateUtils.processTemplateIntoString(template, data);
+        /* 设置邮件重要级别 */
+        message.setHeader("Importance", "High");
+        // 设置相关参数
+        messageHelper.setFrom(nickname + '<' + from + '>');
+        messageHelper.setTo(to);
+        messageHelper.setSubject(subject);
+        messageHelper.setText(content, true);
+        // 发送邮件
+        mailSender.send(message);
+    }
+
 }
