@@ -83,8 +83,8 @@
                     <el-form-item label="网站名称：" prop="name">
                       <el-input v-model="linkForm.name" placeholder="请输入网站名称"></el-input>
                     </el-form-item>
-                    <el-form-item label="网站链接：" prop="url">
-                      <el-input v-model="linkForm.url" placeholder="请输入网站链接"></el-input>
+                    <el-form-item label="网站链接：" prop="link">
+                      <el-input v-model="linkForm.link" placeholder="请输入网站链接"></el-input>
                     </el-form-item>
                     <el-form-item label="网站Logo：" prop="logo">
                       <el-input v-model="linkForm.logo" placeholder="请输入网站Logo"></el-input>
@@ -117,32 +117,51 @@
 
 <script>
 import Wave from '@/components/Common/Wave';
+import { addLinkApi } from '@/api/linkApi';
+import { REGEX } from '@/utils/commonEnums';
 
 export default {
   components: {
     Wave
   },
   data() {
+    const validateUrl = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入网站地址'));
+      } else if (!REGEX.URL.test(value)) {
+        callback(new Error('请输入正确的网址'));
+      } else {
+        callback();
+      }
+    };
+    const validateLogo = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入Logo网址'));
+      } else if (!REGEX.URL.test(value)) {
+        callback(new Error('请输入正确的Logo网址'));
+      } else {
+        callback();
+      }
+    };
     return {
       activeAside: 'profile',
       title: '本站简介',
       linkForm: {
         name: '',
-        url: '',
+        link: '',
         logo: '',
         email: '',
-        prefile: '',
+        profile: '',
         type: ''
       },
       linkRule: {
         name: [{ required: true, message: '请输入网站名称', trigger: 'blur' }],
-        url: [{ required: true, message: '请输入网站地址', trigger: 'blur' }],
-        logo: [{ required: true, message: '请输入网站Logo', trigger: 'blur' }],
+        link: [{ required: true, validator: validateUrl, trigger: 'blur' }],
+        // logo: [{ required: true, validator: validateLogo, trigger: 'blur' }],
         email: [
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
         ],
-        prefile: [{ required: true, message: '请输入网站简介', trigger: 'blur' }],
         type: [{ required: true, message: '请选择链接类型', trigger: 'blur' }]
       }
     };
@@ -176,6 +195,18 @@ export default {
       this.$refs.linkForm.validate(valid => {
         if (valid) {
           console.log('link form =>', this.linkForm);
+          addLinkApi(this.linkForm).then(res => {
+            if (res.data.flag) {
+              this.$showMsg('您的友情链接已提交，待审核通过后即可显示', {
+                type: 'success',
+                closeFunc: () => {
+                  this.$refs.linkForm.resetFields();
+                }
+              });
+            } else {
+              this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+            }
+          });
         }
       });
     }

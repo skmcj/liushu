@@ -11,7 +11,7 @@
           class="about-link-item"
           v-for="(item, index) in links.image"
           :key="'about-img-link-' + index"
-          @click.stop="openLink(item.url)">
+          @click.stop="openLink(item.link)">
           <img :src="item.logo" :alt="item.name" />
         </div>
       </div>
@@ -26,7 +26,7 @@
           class="about-link-item"
           v-for="(item, index) in links.text"
           :key="'about-text-link-' + index"
-          @click.stop="openLink(item.url)">
+          @click.stop="openLink(item.link)">
           <div class="text-link">
             <div class="img">
               <img v-if="item.logo" :src="item.logo" :alt="item.name" />
@@ -42,57 +42,59 @@
 
 <script>
 import Masonry from 'masonry-layout';
+import { getLinkByTypeApi } from '@/api/linkApi';
 
 export default {
   data() {
     return {
       links: {
-        image: [
-          {
-            // 图片链接
-            id: '1',
-            name: '美团外卖',
-            url: 'https://waimai.meituan.com/',
-            logo: 'https://p0.meituan.net/openhfiveimages/073cf4ab03d6bc6fa117b53157f3622e4898.png',
-            type: 'image'
-          },
-          {
-            // 图片链接
-            id: '1',
-            name: '中图网',
-            url: 'http://www.bookschina.com/',
-            logo: 'http://www.bookschina.com/Images/Head/images/images/logo.gif',
-            type: 'image'
-          }
-        ],
-        text: [
-          {
-            // 文本链接
-            id: '2',
-            name: '美团外卖',
-            url: 'https://waimai.meituan.com/',
-            logo: '',
-            type: 'text'
-          }
-        ]
-      }
+        image: [],
+        text: []
+      },
+      linkDom: null,
+      mLink: null
     };
   },
-  mounted() {
-    const linkDom = document.getElementById('aboutLinks');
-    const mLink = new Masonry(linkDom, {
-      // options...
-      itemSelector: '.about-link-item',
-      columnWidth: 156,
-      gutter: 10
-    });
+  created() {
+    this.getLinks();
+  },
+  mounted() {},
+  updated() {
+    this.getMasonry();
   },
   methods: {
+    getMasonry() {
+      this.linkDom = document.getElementById('aboutLinks');
+      this.mLink = new Masonry(this.linkDom, {
+        // options...
+        itemSelector: '.about-link-item',
+        columnWidth: 156,
+        gutter: 10,
+        animate: true
+      });
+    },
     /**
      * 新标签页打开链接
      */
     openLink(link) {
       window.open(link, '_blank');
+    },
+    /**
+     * 获取友情链接
+     */
+    getLinks() {
+      this.getLinkByType('image');
+      this.getLinkByType('text');
+    },
+    /**
+     * 根据类型获取友情链接
+     */
+    getLinkByType(type) {
+      getLinkByTypeApi(type).then(res => {
+        if (res.data.flag) {
+          this.links[type] = res.data.data.rows;
+        }
+      });
     }
   }
 };
@@ -130,6 +132,7 @@ export default {
     .about-link-content {
       position: relative;
       width: 100%;
+      // height: 100% !important;
     }
     .about-link-item {
       cursor: pointer;
