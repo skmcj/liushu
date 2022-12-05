@@ -14,7 +14,7 @@ const request = Axios.create({
 // http request拦截器 添加一个请求拦截器
 request.interceptors.request.use((config) => {
   // 将token添加到请求头
-  let token = window.localStorage.getItem('userToken');
+  let token = JSON.parse(window.localStorage.getItem('userToken'));
   if (token) {
     config.headers.Authorization = token;
     return config;

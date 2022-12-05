@@ -14,6 +14,7 @@ import top.skmcj.liushu.util.CommonUtil;
 import top.skmcj.liushu.vo.AddressVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @RequestMapping("/address")
@@ -21,6 +22,23 @@ public class AddressController {
 
     @Autowired
     private AddressService addressService;
+
+    /**
+     * 获取所有地址
+     * @param request
+     * @return
+     */
+    @GetMapping("/all")
+    public Result<List> getAll(HttpServletRequest request) throws Exception {
+        User user = CommonUtil.getTokenMessByUser(request);
+        LambdaQueryWrapper<Address> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Address::getUserId, user.getId());
+        // 排序，保证默认地址在前面
+        queryWrapper.orderByDesc(Address::getIsDefault);
+        queryWrapper.orderByDesc(Address::getUpdateTime);
+        List<Address> list = addressService.list(queryWrapper);
+        return Result.success(list, StatusCodeEnum.GET_OK);
+    }
 
     /**
      * 分页查询
@@ -48,7 +66,7 @@ public class AddressController {
      * @return
      */
     @GetMapping
-    public Result<Address> getById(int id) {
+    public Result<Address> getById(Long id) {
         Address address = addressService.getById(id);
         return Result.success(address, StatusCodeEnum.GET_OK);
     }
@@ -97,9 +115,9 @@ public class AddressController {
         }
         if(address.getIsDefault() == 1) {
             addressService.setDefault(address.getId(), user.getId());
+            address.setIsDefault(null);
         }
         address.setUserId(null);
-        address.setIsDefault(null);
         address.setCreateTime(null);
         address.setUpdateTime(null);
         boolean flag = addressService.updateById(address);
@@ -113,7 +131,7 @@ public class AddressController {
      * @return
      */
     @DeleteMapping
-    public Result<String> deleteAddress(int id) {
+    public Result<String> deleteAddress(Long id) {
         boolean flag = addressService.removeById(id);
         if(!flag) return Result.error(StatusCodeEnum.DELETE_ERR);
         return Result.success(StatusCodeEnum.DELETE_OK);

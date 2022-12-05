@@ -27,7 +27,7 @@
           <div class="mess-box">
             <div class="mess-item">
               <span class="label">联系人：</span>
-              <span class="text">{{ item.consignee + ' ' + (item.sex ? '先生' : '女士') }}</span>
+              <span class="text">{{ item.consignee + ' ' + (item.sex ? '女士' : '先生') }}</span>
             </div>
             <div class="mess-item">
               <span class="label">联系电话：</span>
@@ -48,7 +48,7 @@
             <i class="ic-delete"></i>
           </div>
           <div class="t-btns">
-            <div class="t-btn" @click.stop="handleEdit(item.id)">
+            <div class="t-btn" @click.stop="handleEdit(item)">
               <i class="ic-edit"></i>
             </div>
             <div class="t-btn" v-if="item.isDefault !== 1" @click.stop="handleDefault(item.id)">
@@ -58,6 +58,7 @@
         </div>
       </div>
     </div>
+
     <el-dialog
       :title="dialogTitle"
       :visible.sync="dialogVisible"
@@ -154,6 +155,14 @@
 </template>
 
 <script>
+import {
+  getAllAddressApi,
+  editAddressApi,
+  addAddressApi,
+  deleteAddressByIdApi,
+  setDefaultAddressApi
+} from '@/api/addressApi';
+
 export default {
   data() {
     return {
@@ -165,7 +174,6 @@ export default {
         { label: '中国台湾', value: '+866' }
       ],
       addressForm: {
-        id: '',
         consignee: '',
         sex: 0,
         areaCode: '+86',
@@ -179,6 +187,7 @@ export default {
         consignee: [{ required: true, message: '请输入联系人姓名', trigger: 'blur' }],
         phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
         location: [{ required: true, message: '请输入收货地址', trigger: 'blur' }],
+        detail: [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
         label: [{ required: true, message: '请输入地址标签', trigger: 'blur' }]
       },
       dialogTitle: '新增地址',
@@ -195,27 +204,20 @@ export default {
     });
   },
   created() {
-    this.address = this.getAddressTest(5);
+    this.getAddress();
   },
   methods: {
-    getAddressTest(n) {
-      let list = [];
-      for (let i = 0; i < n; i++) {
-        let address = {
-          id: i,
-          consignee: '张三',
-          sex: i % 2,
-          areaCode: '+86',
-          phone: '13489568956',
-          location: '广东省韶关市韶关大学',
-          detail: '西区曼陀罗苑',
-          label: '学校',
-          isDefault: 0
-        };
-        list.push(address);
-      }
-      list[0].isDefault = 1;
-      return list;
+    /**
+     * 获取用户地址
+     */
+    getAddress() {
+      getAllAddressApi().then(res => {
+        if (res.data.flag) {
+          this.address = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙，请稍后再试', { type: 'warning' });
+        }
+      });
     },
     /**
      * 选中地址
@@ -232,13 +234,32 @@ export default {
      * 保存地址
      */
     handleSave() {
-      this.dialogVisible = false;
-      console.log('保存地址');
       this.$refs.addressForm.validate(valid => {
         if (valid) {
           // 验证通过
-          this.dialogVisible = false;
-          console.log('address form =>', this.dialogType, this.addressForm);
+          if (this.dialogType === 'add') {
+            addAddressApi(this.addressForm).then(res => {
+              if (res.data.flag) {
+                this.$showMsg('添加成功', { type: 'success' });
+                this.dialogVisible = false;
+                this.resetForm();
+                this.getAddress();
+              } else {
+                this.$showMsg('网络繁忙，请稍后再试', { type: 'warning' });
+              }
+            });
+          } else {
+            editAddressApi(this.addressForm).then(res => {
+              if (res.data.flag) {
+                this.$showMsg('修改成功', { type: 'success' });
+                this.dialogVisible = false;
+                this.resetForm();
+                this.getAddress();
+              } else {
+                this.$showMsg('网络繁忙，请稍后再试', { type: 'warning' });
+              }
+            });
+          }
         }
       });
     },
@@ -254,6 +275,14 @@ export default {
       })
         .then(() => {
           // 删除操作
+          deleteAddressByIdApi(id).then(res => {
+            if (res.data.flag) {
+              this.$showMsg('删除成功', { type: 'success' });
+              this.getAddress();
+            } else {
+              this.$showMsg('网络繁忙，请稍后再试', { type: 'warning' });
+            }
+          });
         })
         .catch(() => {
           // 取消删除
@@ -271,11 +300,11 @@ export default {
     /**
      * 编辑地址
      */
-    handleEdit(id) {
+    handleEdit(item) {
       this.dialogTitle = '编辑地址';
       this.dialogType = 'edit';
       this.dialogVisible = true;
-      this.addressForm = this.address[id];
+      this.addressForm = item;
     },
     /**
      * 设置默认地址
@@ -288,6 +317,14 @@ export default {
       })
         .then(() => {
           // 删除操作
+          setDefaultAddressApi(id).then(res => {
+            if (res.data.flag) {
+              this.$showMsg('设置成功', { type: 'success' });
+              this.getAddress();
+            } else {
+              this.$showMsg('网络繁忙，请稍后再试', { type: 'warning' });
+            }
+          });
         })
         .catch(() => {
           // 取消删除
