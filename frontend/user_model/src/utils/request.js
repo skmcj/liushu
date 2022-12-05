@@ -12,20 +12,20 @@ const request = Axios.create({
 });
 
 // http request拦截器 添加一个请求拦截器
-// request.interceptors.request.use((config) => {
-//   // 将token添加到请求头
-//   let info = JSON.parse(window.localStorage.getItem('employeeInfo'));
-//   if (info) {
-//     config.headers.Authorization = info.token;
-//     return config;
-//     // 这里经常搭配token使用，将token值配置到tokenkey中，将tokenkey放在请求头中
-//     // config.headers['accessToken'] = Token;
-//   }
-//   return config;
-// }, (error) => {
-//   // Do something with request error
-//   return Promise.reject(error);
-// });
+request.interceptors.request.use((config) => {
+  // 将token添加到请求头
+  let token = window.localStorage.getItem('userToken');
+  if (token) {
+    config.headers.Authorization = token;
+    return config;
+    // 这里经常搭配token使用，将token值配置到tokenkey中，将tokenkey放在请求头中
+    // config.headers['accessToken'] = Token;
+  }
+  return config;
+}, (error) => {
+  // Do something with request error
+  return Promise.reject(error);
+});
 
 // http response 拦截器
 // request.interceptors.response.use(

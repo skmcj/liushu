@@ -1,5 +1,7 @@
 package top.skmcj.liushu.util;
 
+import top.skmcj.liushu.entity.User;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -21,5 +23,16 @@ public class CommonUtil {
      */
     public static String getImgDoMain(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/";
+    }
+
+    /**
+     * 获取token信息
+     * @param request
+     * @return
+     */
+    public static User getTokenMessByUser(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        User user = JwtUtil.verifyTokenOfUser(token);
+        return user;
     }
 }
