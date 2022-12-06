@@ -15,7 +15,6 @@ import top.skmcj.liushu.service.BookDetailService;
 import top.skmcj.liushu.service.BookService;
 import top.skmcj.liushu.service.BookstoreService;
 import top.skmcj.liushu.service.CartService;
-import top.skmcj.liushu.util.CommonUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -144,5 +143,16 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
             return cartDto;
         }).collect(Collectors.toList());
         return cartDtos;
+    }
+
+    /**
+     * 批量删除购物车项
+     * @param ids
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean deleteCart(List<Long> ids) {
+        return this.removeByIds(ids);
     }
 }

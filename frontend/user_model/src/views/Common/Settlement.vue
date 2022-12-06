@@ -241,6 +241,7 @@ export default {
      * 去付款
      */
     handleSettlement() {
+      // 发送请求，删除购物车中选中项
       // 发送请求，生成订单
       for (const key in this.orderObj) {
         this.orderObj[key].createTime = new Date();

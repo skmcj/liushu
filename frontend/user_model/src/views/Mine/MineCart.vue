@@ -120,9 +120,13 @@
 </template>
 
 <script>
+import { getAllCartApi, updateCartMessApi, deleteCartApi } from '@/api/cartApi';
+
 export default {
   data() {
     return {
+      // 购物车信息是否有改变
+      changeFlag: false,
       // 是否全选
       checkAll: false,
       // 购物车图书选中数量
@@ -145,45 +149,47 @@ export default {
     };
   },
   created() {
-    this.cartList = this.getCartItemTest(7);
-    this.cartObj = this.packingCartObj(this.cartList);
+    this.getCartMess();
   },
   methods: {
-    getCartItemTest(n) {
-      let list = [];
-      let storeNameList = ['片刻书店', '晓荷书屋', '旋风书店'];
-      for (let i = 0; i < n; i++) {
-        let cartItem = {
-          id: '134' + i,
-          userId: '135' + i,
-          bookId: '136' + i,
-          storeId: '137' + (i % 3),
-          storeName: storeNameList[i % 3],
-          bookName: '数学之美',
-          bookCover: 'http://image12.bookschina.com/2020/20200706/2/8302516.jpg',
-          bookOutline:
-            '这是一本备受推崇的经典科普作品，被央视推荐为数学学科的敲门砖，是信息领域大学生的必读好书。 数学既是对于自然界事实的总结和归纳，又是抽象思考的结果。在《数学之美》里，吴军博士集中阐述了他对数学和信息处理这些专业学科的理解，把数学在IT领域，特别是语音识别、自然语言处理和信息搜索等方面的美丽之处予以了精彩表达，这些都是智能时代的热门技术话题。 本书还用了大量篇幅介绍各个领域的典故，是文科生也可以看懂的科普读物。成为一个领域的大师有其偶然性，但更有其必然性。其必然性就是大师们的思维方法。通过本书，可以了解他们的平凡与卓越，理解他们取得成功的原因，感受那些真正懂得数学之美的人们所拥有的美好人生。 本书先后荣获国家图书馆第八届文津图书奖、第五届中华优秀出版物奖图书提名奖、入选广电总局“2014年向全国青少年推荐百种优秀图书书目”、*版曾荣获2012-2013年度全行业畅销书，《数学之美》多次被中央电视台、学习强国平台、新华书店推选为必读书。《数学之美》给广大读者，尤其是在校读大学甚至读高中的年轻人带去了美的数学启示，作者更希望中国做工程的年轻人，能够从《数学之美》中体会到在信息技术行业做事情的正确方法，以便在职业和生活上都获得成功。 第三版增加了三章新内容，分别介绍当今非常热门的三个主题：区块链的数学基础，量子通信的原理，以及人工智能的数学极限。',
-          borrowTime: 30,
-          borrowCost: 0,
-          packingCost: 2,
-          deposit: 48,
-          amount: 50,
-          quantity: 1,
-          // 图书库存
-          inventory: 5,
-          // 0 - 未选中， 1 - 选中
-          checked: 0,
-          createTime: '2022-11-19 22:21',
-          updateTime: '2022-11-19 22:22'
-        };
-        list.push(cartItem);
-      }
-      return list;
+    /**
+     * 获取购物车信息
+     */
+    getCartMess() {
+      this.initAboutData();
+      getAllCartApi().then(
+        res => {
+          if (res.data.flag) {
+            this.cartList = res.data.data;
+            this.cartObj = this.packingCartObj(this.cartList);
+          } else {
+            this.$showMsg('网络繁忙，请稍后刷新重试', { type: 'warning' });
+          }
+        },
+        err => {
+          this.$showMsg('出错啦~', { type: 'error' });
+        }
+      );
     },
     /**
      * 初始化相关参数
      */
-    initAboutData() {},
+    initAboutData() {
+      this.changeFlag = false;
+      this.checkAll = false;
+      this.cartCount = 0;
+      this.orderSet = {};
+      // 总借阅费
+      this.allBorrowCost = 0;
+      // 总包装费
+      this.allPackingCost = 0;
+      // 总配送费
+      this.allDeliverFee = 0;
+      // 押金
+      this.allDeposit = 0;
+      // 总金额
+      this.allAmount = 0;
+    },
     /**
      * 包装
      * @param {Array} list
@@ -263,6 +269,7 @@ export default {
      */
     handleQuantity(item, currentVal, oldVal) {
       // console.log('change quantity =>', item, currentVal, oldVal, currentVal - oldVal);
+      this.changeFlag = true;
       let q = currentVal - oldVal;
       let updateAmount = (item.borrowCost + item.packingCost + item.deposit) * q;
       item.amount += updateAmount;
@@ -383,7 +390,37 @@ export default {
      * 删除购物车项
      */
     handleDeleteItem() {
-      // 只留下未选中的项
+      this.$confirm('是否确认删除选中项, 此操作不可恢复?', '提示', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'danger'
+      })
+        .then(() => {
+          let checkList = [];
+          // 只留下未选中的项
+          this.cartList.forEach(item => {
+            if (item.checked) {
+              checkList.push(item.id);
+            }
+          });
+          if (checkList.length > 0) {
+            let ids = checkList.join(',');
+            deleteCartApi(ids).then(res => {
+              if (res.data.flag) {
+                this.$showMsg('删除成功', {
+                  type: 'success',
+                  closeFunc: () => {
+                    this.getCartMess();
+                  }
+                });
+              } else {
+                this.$showMsg('网络繁忙，请稍后再试', { type: 'error' });
+              }
+            });
+          }
+        })
+        .catch(() => {});
     },
     /**
      * 结算
@@ -439,6 +476,18 @@ export default {
         });
       }
       return checkedObj;
+    },
+    /**
+     * 更新购物车信息
+     * @param {Array} carts
+     */
+    updateCart(carts) {
+      updateCartMessApi(carts).then(res => {});
+    }
+  },
+  beforeDestroy() {
+    if (this.changeFlag) {
+      this.updateCart(this.cartList);
     }
   },
   watch: {

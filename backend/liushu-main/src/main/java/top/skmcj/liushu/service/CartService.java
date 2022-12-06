@@ -33,4 +33,12 @@ public interface CartService extends IService<Cart> {
      */
     @Transactional
     List<CartDto> getCartAll(Long userId, String coverPrefix);
+
+    /**
+     * 批量删除购物车项
+     * @param ids
+     * @return
+     */
+    @Transactional
+    boolean deleteCart(List<Long> ids);
 }

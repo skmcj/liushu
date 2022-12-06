@@ -9,7 +9,6 @@ import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.dto.CartDto;
 import top.skmcj.liushu.entity.Cart;
 import top.skmcj.liushu.entity.User;
-import top.skmcj.liushu.service.BookService;
 import top.skmcj.liushu.service.CartService;
 import top.skmcj.liushu.util.CommonUtil;
 
@@ -93,6 +92,19 @@ public class CartController {
         User user = CommonUtil.getTokenMessByUser(request);
         cartService.updateCart(carts, user.getId());
         return Result.success(StatusCodeEnum.UPDATE_OK);
+    }
+
+    /**
+     * 删除购物车项
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public Result<String> deleteCartItem(@RequestParam List<Long> ids) {
+        System.out.println("ids => " + ids);
+        boolean flag = cartService.deleteCart(ids);
+        if(!flag) return Result.error(StatusCodeEnum.DELETE_ERR);
+        return Result.success(StatusCodeEnum.DELETE_OK);
     }
 
 }
