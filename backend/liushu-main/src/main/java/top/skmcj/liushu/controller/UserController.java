@@ -419,4 +419,15 @@ public class UserController {
         return Result.success(data, StatusCodeEnum.JWT_OK);
     }
 
+    /**
+     * 获取TIM 服务的 UserSig
+     * @param userId
+     * @return
+     */
+    @GetMapping("/im/sig")
+    public Result<String> getUserSig(@RequestParam String userId) {
+        String userSig = TLSSigUtil.genUserSig(userId);
+        return Result.success(userSig, StatusCodeEnum.GET_OK);
+    }
+
 }

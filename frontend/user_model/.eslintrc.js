@@ -26,6 +26,7 @@ module.exports = {
     'node/handle-callback-err': 'off',
     'operator-linebreak': 'off',
     'array-bracket-spacing': 'off',
-    'padded-blocks': 'off'
+    'padded-blocks': 'off',
+    'no-unneeded-ternary': 'off'
   }
 }

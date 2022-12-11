@@ -37,21 +37,29 @@
         </div>
       </div>
     </div>
+    <ChatWindow :title="chatTitle" :visible.sync="chatVisible" />
   </div>
 </template>
 
 <script>
 import Wave from '@/components/Common/Wave';
+import ChatWindow from '@/views/Common/ChatWindow';
 
 export default {
   components: {
-    Wave
+    Wave,
+    ChatWindow
   },
   data() {
     return {
       activeAside: '',
-      activeTitle: ''
+      activeTitle: '',
+      chatVisible: false,
+      chatTitle: undefined
     };
+  },
+  mounted() {
+    this.$bus.$on('openChatWindow', this.openChatWindow);
   },
   methods: {
     /**
@@ -86,6 +94,16 @@ export default {
           this.activeTitle = '';
           break;
       }
+    },
+    /**
+     * 打开聊天窗口
+     */
+    openChatWindow(val) {
+      console.log('chat', val);
+      if (val === 'sys' || val === 'owner') {
+        this.chatTitle = val;
+      }
+      this.chatVisible = true;
     }
   },
   watch: {

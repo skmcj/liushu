@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { validateTokenApi, getUserInfoApi } from '@/api/userApi';
+import { validateTokenApi, getUserInfoApi, getTIMUserSigApi } from '@/api/userApi';
 
 export default {
   created() {
@@ -31,6 +31,7 @@ export default {
           // 有效，设置会话默认值
           // console.log('token => ', res.data);
           this.getUserInfo();
+          this.getTIMUserSig();
           this.$store.dispatch('setLoginFlag', true);
         }
       });
@@ -45,6 +46,50 @@ export default {
           this.$store.dispatch('setUserInfo', res.data.data);
         }
       });
+    },
+    /**
+     * 获取TIM的UserSig
+     */
+    getTIMUserSig() {
+      getTIMUserSigApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // userSig 获取成功
+          let userSig = res.data.data;
+          this.timLogin(this.$store.state.userInfo.id, userSig);
+        }
+      });
+    },
+    /**
+     * 登录TIM
+     */
+    timLogin(userId, userSig) {
+      this.tim
+        .login({
+          userID: userId,
+          userSig: userSig
+        })
+        .then(() => {
+          this.loading = false;
+          this.$store.commit('toggleIsLogin', true);
+          this.$store.commit('startComputeCurrent');
+          // this.$store.commit('showMessage', { type: 'success', message: '登录成功' });
+          this.$store.commit({
+            type: 'GET_USER_INFO',
+            userID: userId,
+            userSig: userSig,
+            sdkAppID: 1400779173
+          });
+          // this.$store.commit('showMessage', {
+          //   type: 'success',
+          //   message: '登录成功'
+          // });
+        })
+        .catch(error => {
+          this.$store.commit('showMessage', {
+            message: 'TIM登录失败：' + error.message,
+            type: 'error'
+          });
+        });
     }
   }
 };
@@ -61,6 +106,11 @@ body {
   color: var(--primary-text);
   background-color: var(--default-bg);
   box-sizing: border-box;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 // 选中时的背景色
 ::selection {

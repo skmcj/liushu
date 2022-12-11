@@ -2,7 +2,7 @@
   <!-- 我的-消息-私信组件 -->
   <div class="mine-mess-per">
     <div class="per-mess-list">
-      <div class="per-mess-item">
+      <div class="per-mess-item" @click="handleClickCoversation">
         <div class="mess-cover">
           <img src="https://voidtech.cn/i/2022/11/17/pjyfse.jpg" alt="cover" />
         </div>
@@ -19,7 +19,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    handleClickCoversation() {
+      this.$bus.$emit('openChatWindow', 'owner');
+    }
+  }
+};
 </script>
 
 <style lang="less" scoped>

@@ -125,3 +125,15 @@ export const validatePayPassApi = function(userInfo) {
 export const updateUserPayPassApi = function(userInfo) {
   return request.put('/user/payPass', userInfo);
 }
+
+/**
+ * 获取TIM服务的UserSig
+ * @param {*} userId
+ */
+export const getTIMUserSigApi = function(userId) {
+  return request.get('/user/im/sig', {
+    params: {
+      userId
+    }
+  });
+}

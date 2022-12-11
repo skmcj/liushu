@@ -40,7 +40,7 @@
 <script>
 import Footer from '@/components/Footer/Footer';
 import { REGEX } from '@/utils/commonEnums';
-import { userLoginApi } from '@/api/userApi';
+import { userLoginApi, getTIMUserSigApi } from '@/api/userApi';
 
 export default {
   components: {
@@ -156,6 +156,50 @@ export default {
      */
     handleReturn() {
       this.$router.replace(this.$store.state.loginFromPath);
+    },
+    /**
+     * 获取TIM的UserSig
+     */
+    getTIMUserSig() {
+      getTIMUserSigApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // userSig 获取成功
+          let userSig = res.data.data;
+          this.timLogin(this.$store.state.userInfo.id, userSig);
+        }
+      });
+    },
+    /**
+     * 登录TIM
+     */
+    timLogin(userId, userSig) {
+      this.tim
+        .login({
+          userID: userId,
+          userSig: userSig
+        })
+        .then(() => {
+          this.loading = false;
+          this.$store.commit('toggleIsLogin', true);
+          this.$store.commit('startComputeCurrent');
+          // this.$store.commit('showMessage', { type: 'success', message: '登录成功' });
+          this.$store.commit({
+            type: 'GET_USER_INFO',
+            userID: userId,
+            userSig: userSig,
+            sdkAppID: 1400779173
+          });
+          // this.$store.commit('showMessage', {
+          //   type: 'success',
+          //   message: '登录成功'
+          // });
+        })
+        .catch(error => {
+          this.$store.commit('showMessage', {
+            message: 'TIM登录失败：' + error.message,
+            type: 'error'
+          });
+        });
     }
   }
 };

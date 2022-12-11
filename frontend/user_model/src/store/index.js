@@ -3,6 +3,14 @@ import Vue from 'vue';
 // 引入 Vuex
 import Vuex from 'vuex';
 
+import conversation from './modules/conversation';
+import group from './modules/group';
+import user from './modules/user';
+import video from './modules/video';
+import friend from './modules/friend';
+import blacklist from './modules/blacklist';
+import { Message } from 'element-ui';
+
 // Vue.use(Vuex) 必须在 store 创建前执行
 Vue.use(Vuex);
 
@@ -70,6 +78,27 @@ const mutations = {
   setToken(state, value) {
     localStorage.setItem('userToken', JSON.stringify(value));
     state.token = value;
+  },
+  // TIM 相关
+  startComputeCurrent(state) {
+    state.intervalID = setInterval(() => {
+      state.current = Date.now();
+    }, 500);
+  },
+  stopComputeCurrent(state) {
+    clearInterval(state.intervalID);
+    state.intervalID = 0;
+  },
+  showMessage(state, options) {
+    if (state.message) {
+      state.message.close();
+    }
+    state.message = Message({
+      message: options.message,
+      type: options.type || 'success',
+      duration: options.duration || 2000,
+      offset: 40
+    });
   }
 };
 // 准备state -> 用于存储数据
@@ -86,7 +115,30 @@ const state = {
   // 用户是否登录
   loginFlag: JSON.parse(sessionStorage.getItem('loginFlag')) || false,
   // 用户token
-  token: JSON.parse(localStorage.getItem('userToken')) || ''
+  token: JSON.parse(localStorage.getItem('userToken')) || '',
+  // TIM 相关
+  current: Date.now(), // 当前时间
+  intervalID: 0,
+  message: undefined
+};
+
+const getters = {
+  hidden(state) {
+    // eslint-disable-next-line no-unused-vars
+    const temp = state.current;
+    if (typeof document.hasFocus !== 'function') {
+      return document.hidden;
+    }
+    return !document.hasFocus();
+  }
+};
+const modules = {
+  conversation,
+  group,
+  friend,
+  blacklist,
+  user,
+  video
 };
 
 // 待优化
@@ -136,5 +188,7 @@ const storeMaker = (state) => {
 export default new Vuex.Store({
   actions,
   mutations,
-  state
+  state,
+  getters,
+  modules
 });

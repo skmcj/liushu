@@ -4,6 +4,9 @@ import router from './router';
 import store from '@/store';
 import md5 from 'js-md5';
 import { sha256 } from 'js-sha256';
+// TIM
+import tim from '@/packages/tim-sdk/tim';
+import TIM from '@/packages/tim-sdk/tim-js-friendship';
 
 import { Message } from 'element-ui';
 
@@ -93,6 +96,19 @@ Vue.prototype.$keepTwoNum = function(num) {
   }
   return numStr;
 }
+
+/**
+ * TIM 服务
+ */
+window.tim = tim;
+window.TIM = TIM;
+
+Vue.prototype.tim = tim;
+Vue.prototype.TIM = TIM;
+Vue.prototype.$bus = new Vue();
+// 图床域名
+Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
+
 
 /** 加载插件 */
 // const VueMasonryPlugin = window['vue-masonry-plugin'].VueMasonryPlugin;
