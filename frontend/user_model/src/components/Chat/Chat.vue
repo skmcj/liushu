@@ -55,6 +55,9 @@ export default {
   },
   mounted() {
     this.$bus.$on('scroll-bottom', this.scrollMessageListToButtom);
+    if (this.showCurrentConversation) {
+      this.handleShow();
+    }
   },
   updated() {
     this.keepMessageListOnButtom();
@@ -68,6 +71,10 @@ export default {
       setTimeout(() => {
         this.showChat = false;
       }, 480);
+    },
+    handleShow() {
+      this.chatClassFlag = true;
+      this.showChat = true;
     },
     /**
      * 监听消息列表滚动
@@ -165,11 +172,10 @@ export default {
   },
   watch: {
     showCurrentConversation: {
-      immediate: true,
       handler(val) {
+        // console.log('val =>', val);
         if (val) {
-          this.chatClassFlag = true;
-          this.showChat = true;
+          this.handleShow();
         } else {
           this.handleHide();
         }

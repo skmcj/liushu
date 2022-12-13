@@ -8,11 +8,13 @@
         <Chat />
       </div>
     </div>
+    <SuspPanel class="susp-pos" @handleItem="handleSuspItem" />
     <ImagePreviewer />
   </div>
 </template>
 
 <script>
+import SuspPanel from '@/views/Common/SuspPanel';
 import Chat from '@/components/Chat/Chat';
 import Coversation from '@/components/Coversation/Coversation';
 import ImagePreviewer from '@/components/Chat/Message/ImagePreviewer';
@@ -20,6 +22,7 @@ import domHandle from '@/utils/domHandleUtil';
 
 export default {
   components: {
+    SuspPanel,
     Chat,
     Coversation,
     ImagePreviewer
@@ -86,11 +89,37 @@ export default {
       }
     },
     restoreBodyStyle() {
-      if (this.modal && this.withoutHiddenClass) {
+      if (this.withoutHiddenClass) {
         document.body.style.paddingRight = 0;
         domHandle.removeClass(document.body, 'sk-hidden-scroll');
       }
       this.withoutHiddenClass = true;
+    },
+    handleSuspItem(val) {
+      console.log('susp =>', val);
+      switch (val) {
+        case 'home':
+          this.handleClose();
+          this.$router.push('/');
+          break;
+        case 'cate':
+          this.handleClose();
+          this.$router.push('/cate');
+          break;
+        case 'about':
+          this.handleClose();
+          this.$router.push('/about');
+          break;
+        case 'mine':
+          this.handleClose();
+          this.$router.push('/mine');
+          break;
+        case 'close':
+          this.handleClose();
+          break;
+        default:
+          break;
+      }
     }
   },
   watch: {
@@ -145,6 +174,11 @@ export default {
       position: relative;
     }
   }
+}
+.susp-pos {
+  position: absolute;
+  left: 0;
+  bottom: 36px;
 }
 .window-show {
   animation: enlarge-in 0.5s ease-in-out;

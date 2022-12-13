@@ -22,8 +22,7 @@ export default {
   computed: {
     ...mapState({
       conversationList: state => state.conversation.conversationList,
-      currentConversation: state => state.conversation.currentConversation,
-      excludeCoversationList: state => state.conversation.excludeCoversationList
+      currentConversation: state => state.conversation.currentConversation
     })
   },
   mounted() {

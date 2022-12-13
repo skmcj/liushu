@@ -27,14 +27,22 @@ export default {
       asideItem: ''
     };
   },
+  created() {
+    this.initConversation();
+  },
   methods: {
     /**
      * 选择会话
      */
     selectConversation(text) {
       this.asideItem = text;
-      if (text === 'customer' && this.currentConversation.conversationID !== 'customerservice') {
+      if (text === 'customer' && this.currentConversation.conversationID !== 'C2Ccustomerservice') {
         this.$store.dispatch('checkoutConversation', 'C2Ccustomerservice');
+      }
+    },
+    initConversation() {
+      if (this.currentConversation.conversationID === 'C2Ccustomerservice') {
+        this.asideItem = 'customer';
       }
     }
   },

@@ -109,6 +109,7 @@ export default {
                   this.$store.dispatch('setUserInfo', res.data.data);
                   this.$store.dispatch('setLoginFlag', true);
                   this.$store.dispatch('setToken', res.data.data.token);
+                  this.getTIMUserSig();
                   this.$showMsg('登录成功', {
                     type: 'success',
                     closeFunc: () => {

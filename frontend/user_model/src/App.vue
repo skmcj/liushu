@@ -7,89 +7,172 @@
 </template>
 
 <script>
-import { validateTokenApi, getUserInfoApi, getTIMUserSigApi } from '@/api/userApi';
-
 export default {
   created() {
     // 应用初始化时
-    this.initUserInfo();
+    this.initListener();
+  },
+  beforeDestroy() {
+    this.tim.logout();
   },
   methods: {
-    /**
-     * 初始化用户登录信息
-     */
-    initUserInfo() {
-      // console.log('app init');
-      const userInfo = this.$store.state.userInfo;
-      // 查看本地是否有用户信息
-      // 无，直接返回
-      if (!userInfo) return;
-      // 有，则发送请求，验证token是否有效
-      const token = this.$store.state.token;
-      validateTokenApi(token).then(res => {
-        if (res.data.flag) {
-          // 有效，设置会话默认值
-          // console.log('token => ', res.data);
-          this.getUserInfo();
-          this.getTIMUserSig();
-          this.$store.dispatch('setLoginFlag', true);
-        }
-      });
+    initListener() {
+      // 登录成功后会触发 SDK_READY 事件，该事件触发后，可正常使用 SDK 接口
+      this.tim.on(this.TIM.EVENT.SDK_READY, this.onReadyStateUpdate, this);
+      // SDK NOT READT, 避免在 SDK_NOT_READY 中调用 login 接口，可能会造成循环互踢的情况。
+      this.tim.on(this.TIM.EVENT.SDK_NOT_READY, this.onReadyStateUpdate, this);
+      // 用户被踢下线时触发
+      this.tim.on(this.TIM.EVENT.KICKED_OUT, this.onKickOut);
+      // SDK内部出错
+      this.tim.on(this.TIM.EVENT.ERROR, this.onError);
+      // 收到新消息
+      this.tim.on(this.TIM.EVENT.MESSAGE_RECEIVED, this.onReceiveMessage);
+      // 会话列表更新
+      this.tim.on(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, this.onUpdateConversationList);
+      // 群组列表更新
+      // this.tim.on(this.TIM.EVENT.GROUP_LIST_UPDATED, this.onUpdateGroupList);
+      // 网络监测
+      this.tim.on(this.TIM.EVENT.NET_STATE_CHANGE, this.onNetStateChange);
+      // 已读回执
+      this.tim.on(this.TIM.EVENT.MESSAGE_READ_BY_PEER, this.onMessageReadByPeer);
+      // 黑名单更新
+      // this.tim.on(this.TIM.EVENT.FRIEND_LIST_UPDATED, this.onFriendListUpdated);
+      // 好友申请列表更新时触发
+      // this.tim.on(this.TIM.EVENT.FRIEND_APPLICATION_LIST_UPDATED, this.onFriendApplicationListUpdated);
+      // 好友分组列表更新时触发
+      // this.tim.on(this.TIM.EVENT.FRIEND_GROUP_LIST_UPDATED, this.onFriendGroupListUpdated);
     },
     /**
-     * 获取用户信息
+     * TIM SDK ready 状态更新
      */
-    getUserInfo() {
-      getUserInfoApi(this.$store.state.userInfo.id).then(res => {
-        if (res.data.flag) {
-          // 获取成功
-          this.$store.dispatch('setUserInfo', res.data.data);
-        }
-      });
-    },
-    /**
-     * 获取TIM的UserSig
-     */
-    getTIMUserSig() {
-      getTIMUserSigApi(this.$store.state.userInfo.id).then(res => {
-        if (res.data.flag) {
-          // userSig 获取成功
-          let userSig = res.data.data;
-          this.timLogin(this.$store.state.userInfo.id, userSig);
-        }
-      });
-    },
-    /**
-     * 登录TIM
-     */
-    timLogin(userId, userSig) {
-      this.tim
-        .login({
-          userID: userId,
-          userSig: userSig
-        })
-        .then(() => {
-          this.loading = false;
-          this.$store.commit('toggleIsLogin', true);
-          this.$store.commit('startComputeCurrent');
-          // this.$store.commit('showMessage', { type: 'success', message: '登录成功' });
-          this.$store.commit({
-            type: 'GET_USER_INFO',
-            userID: userId,
-            userSig: userSig,
-            sdkAppID: 1400779173
+    onReadyStateUpdate({ name }) {
+      const isSDKReady = name === this.TIM.EVENT.SDK_READY ? true : false;
+      this.$store.commit('toggleIsSDKReady', isSDKReady);
+
+      if (isSDKReady) {
+        this.tim
+          .getMyProfile()
+          .then(({ data }) => {
+            this.$store.commit('updateCurrentUserProfile', data);
+          })
+          .catch(error => {
+            this.$store.commit('showMessage', {
+              type: 'error',
+              message: error.message
+            });
           });
-          // this.$store.commit('showMessage', {
-          //   type: 'success',
-          //   message: '登录成功'
-          // });
-        })
-        .catch(error => {
-          this.$store.commit('showMessage', {
-            message: 'TIM登录失败：' + error.message,
-            type: 'error'
-          });
+        this.$store.dispatch('getBlacklist');
+        // 登录trtc calling - 实时音视频功能
+        /**
+        this.trtcCalling.login({
+          sdkAppID: this.sdkAppID,
+          userID: this.userID,
+          userSig: this.userSig
         });
+        */
+      }
+    },
+    /**
+     * 用户被踢出
+     */
+    onKickOut(event) {
+      this.$store.commit('showMessage', {
+        message: `${this.kickedOutReason(event.data.type)}被踢出，请重新登录。`,
+        type: 'error'
+      });
+      this.$store.commit('toggleIsLogin', false);
+      this.$store.commit('reset');
+    },
+    kickedOutReason(type) {
+      switch (type) {
+        case this.TIM.TYPES.KICKED_OUT_MULT_ACCOUNT:
+          return '由于多实例登录';
+        case this.TIM.TYPES.KICKED_OUT_MULT_DEVICE:
+          return '由于多设备登录';
+        case this.TIM.TYPES.KICKED_OUT_USERSIG_EXPIRED:
+          return '由于 userSig 过期';
+        default:
+          return '';
+      }
+    },
+    /**
+     * SDk 出错
+     */
+    onError({ data }) {
+      if (data.message !== 'Network Error') {
+        this.$store.commit('showMessage', {
+          message: data.message,
+          type: 'error'
+        });
+      }
+    },
+    /**
+     * 收到新消息
+     */
+    onReceiveMessage({ data: messageList }) {
+      // this.handleVideoMessage(messageList);
+      // this.handleQuitGroupTip(messageList);
+      // this.handleCloseGroupLive(messageList);
+      this.$store.commit('pushCurrentMessageList', messageList);
+      // this.$store.commit('pushAvChatRoomMessageList', messageList);
+    },
+    /**
+     * 会话列表更新
+     */
+    onUpdateConversationList(event) {
+      this.$store.commit('updateConversationList', event.data);
+    },
+    /**
+     * 网络监测
+     */
+    onNetStateChange(event) {
+      this.$store.commit('showMessage', this.checkoutNetState(event.data.state));
+    },
+    checkoutNetState(state) {
+      switch (state) {
+        case this.TIM.TYPES.NET_STATE_CONNECTED:
+          return { message: '已接入网络', type: 'success' };
+        case this.TIM.TYPES.NET_STATE_CONNECTING:
+          return { message: '当前网络不稳定', type: 'warning' };
+        case this.TIM.TYPES.NET_STATE_DISCONNECTED:
+          return { message: '当前网络不可用', type: 'error' };
+        default:
+          return '';
+      }
+    },
+    /**
+     * 已读回执
+     */
+    onMessageReadByPeer() {},
+    /**
+     * 使用 window.Notification 进行全局的系统通知
+     * @param {Message} message
+     */
+    notifyMe(message) {
+      // 需检测浏览器支持和用户授权
+      if (!('Notification' in window)) {
+        return '';
+      } else if (window.Notification.permission === 'granted') {
+        this.handleNotify(message);
+      } else if (window.Notification.permission !== 'denied') {
+        window.Notification.requestPermission().then(permission => {
+          // 如果用户同意，就可以向他们发送通知
+          if (permission === 'granted') {
+            this.handleNotify(message);
+          }
+        });
+      }
+    },
+    handleNotify(message) {
+      const notification = new window.Notification('有人提到了你', {
+        icon: 'https://web.sdk.qcloud.com/im/assets/images/logo.png',
+        body: message.payload.text
+      });
+      notification.onclick = () => {
+        window.focus();
+        this.$store.dispatch('checkoutConversation', message.conversationID);
+        notification.close();
+      };
     }
   }
 };

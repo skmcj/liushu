@@ -297,7 +297,8 @@ const routes = [
                 meta: {
                   title: '我的-系统消息',
                   rootLink: '/mine',
-                  aside: 'mess'
+                  aside: 'mess',
+                  nav: 'sys'
                 }
               },
               {
@@ -307,7 +308,8 @@ const routes = [
                 meta: {
                   title: '我的-私信',
                   rootLink: '/mine',
-                  aside: 'mess'
+                  aside: 'mess',
+                  nav: 'personal'
                 }
               }
             ]

@@ -93,14 +93,19 @@ export default {
             });
           break;
         case 'delete':
-          // this.showConversationList = true;
-          // this.$store.commit('setRelayType', 1);
-          // this.$store.commit('showConversationList', true);
-          // this.$store.commit('setRelayMessage', this.message);
+          this.tim.deleteMessage([this.message]).catch(err => {
+            this.$store.commit('showMessage', {
+              message: err,
+              type: 'warning'
+            });
+          });
           break;
         // 引用
         case 'quote':
-          this.$emit('quoteSelected', true);
+          this.$store.commit('showMessage', {
+            message: '暂不支持，抱歉~',
+            type: 'warning'
+          });
           break;
         default:
           break;

@@ -20,8 +20,10 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
+import { validateTokenApi, getUserInfoApi, getTIMUserSigApi } from '@/api/userApi';
 
 export default {
   components: {
@@ -32,6 +34,9 @@ export default {
     return {
       scrollH: 0
     };
+  },
+  created() {
+    this.initUserInfo();
   },
   mounted() {
     // 监听页面高度
@@ -79,6 +84,98 @@ export default {
           });
         })
         .catch(() => {});
+    },
+    /**
+     * 初始化用户登录信息
+     */
+    initUserInfo() {
+      // console.log('app init');
+      const userInfo = this.$store.state.userInfo;
+      // 查看本地是否有用户信息
+      // 无，直接返回
+      if (!userInfo) return;
+      // 有，则发送请求，验证token是否有效
+      const token = this.$store.state.token;
+      validateTokenApi(token).then(res => {
+        if (res.data.flag) {
+          // 有效，设置会话默认值
+          // console.log('token => ', res.data);
+          this.getUserInfo();
+          this.getTIMUserSig();
+          this.$store.dispatch('setLoginFlag', true);
+        }
+      });
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      getUserInfoApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // 获取成功
+          this.$store.dispatch('setUserInfo', res.data.data);
+        }
+      });
+    },
+    /**
+     * 获取TIM的UserSig
+     */
+    getTIMUserSig() {
+      getTIMUserSigApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // userSig 获取成功
+          let userSig = res.data.data;
+          this.timLogin(this.$store.state.userInfo.id, userSig);
+        }
+      });
+    },
+    /**
+     * 登录TIM
+     */
+    timLogin(userId, userSig) {
+      this.tim
+        .login({
+          userID: userId,
+          userSig: userSig
+        })
+        .then(() => {
+          this.loading = false;
+          this.$store.commit('toggleIsLogin', true);
+          this.$store.commit('startComputeCurrent');
+          // this.$store.commit('showMessage', { type: 'success', message: '登录成功' });
+          this.$store.commit({
+            type: 'GET_USER_INFO',
+            userID: userId,
+            userSig: userSig,
+            sdkAppID: 1400779173
+          });
+          // this.$store.commit('showMessage', {
+          //   type: 'success',
+          //   message: '登录成功'
+          // });
+        })
+        .catch(error => {
+          this.$store.commit('showMessage', {
+            message: 'TIM登录失败：' + error.message,
+            type: 'error'
+          });
+        });
+    }
+  },
+  computed: {
+    ...mapState({
+      currentUserProfile: state => state.user.currentUserProfile,
+      currentConversation: state => state.conversation.currentConversation,
+      isLogin: state => state.user.isLogin,
+      isSDKReady: state => state.user.isSDKReady,
+      isBusy: state => state.video.isBusy,
+      userID: state => state.user.userID,
+      userSig: state => state.user.userSig,
+      sdkAppID: state => state.user.sdkAppID
+    }),
+    // 是否显示 Loading 状态
+    showLoading() {
+      return !this.isSDKReady;
     }
   }
 };

@@ -2,28 +2,107 @@
   <!-- 我的-消息-私信组件 -->
   <div class="mine-mess-per">
     <div class="per-mess-list">
-      <div class="per-mess-item" @click="handleClickCoversation">
-        <div class="mess-cover">
-          <img src="https://voidtech.cn/i/2022/11/17/pjyfse.jpg" alt="cover" />
-        </div>
-        <div class="mess-content">
-          <div class="title">
-            <div class="text">片刻书店</div>
-            <div class="time">2022-12-11 23:24</div>
+      <template v-for="item in conversationList">
+        <div
+          class="per-mess-item"
+          :key="item.conversationID"
+          v-if="!excludeCoversationList[item.conversationID]"
+          @click="handleClickCoversation(item)">
+          <div class="mess-cover">
+            <Avatar style="width: 96px; height: 96px" :src="avatar(item)" shape="circle" :type="item.type" />
           </div>
-          <div class="tip">你好，请问是订单有什么问题吗</div>
+          <div class="mess-content">
+            <div class="title">
+              <div class="text" :title="item.userProfile.nick || item.userProfile.userID">
+                {{ item.remark || item.userProfile.nick || item.userProfile.userID }}
+              </div>
+              <div class="time">{{ date(item) }}</div>
+            </div>
+            <div class="tip">{{ messageForShow(item) }}</div>
+            <!-- 未读数 -->
+            <div class="unread-count" v-if="showUnreadCount(item)">
+              <span>{{ item.unreadCount > 99 ? '99+' : item.unreadCount }}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapState } from 'vuex';
+import { isToday, getDate, getTime } from '@/utils/im/imHandle';
+import Avatar from '@/components/Chat/Message/Avatar';
+
 export default {
+  components: {
+    Avatar
+  },
   methods: {
-    handleClickCoversation() {
+    handleClickCoversation(conversation) {
       this.$bus.$emit('openChatWindow', 'owner');
+      if (conversation.conversationID !== this.currentConversation.conversationID) {
+        this.$store.dispatch('checkoutConversation', conversation.conversationID);
+      }
+    },
+    avatar(conversation) {
+      switch (conversation.type) {
+        case 'GROUP':
+          return conversation.groupProfile.avatar;
+        case 'C2C':
+          return conversation.userProfile.avatar;
+        default:
+          return '';
+      }
+    },
+    /**
+     * 日期
+     */
+    date(conversation) {
+      if (!conversation.lastMessage || !conversation.lastMessage.lastTime) {
+        return '';
+      }
+      const date = new Date(conversation.lastMessage.lastTime * 1000);
+      if (isToday(date)) {
+        return getTime(date);
+      }
+      return getDate(date);
+    },
+    /**
+     * 最新消息预览
+     */
+    messageForShow(conversation) {
+      if (conversation.lastMessage.isRevoked) {
+        if (conversation.lastMessage.fromAccount === this.currentUserProfile.userID) {
+          return '你撤回了一条消息';
+        }
+        if (conversation.type === this.TIM.TYPES.CONV_C2C) {
+          return '对方撤回了一条消息';
+        }
+        return `${conversation.lastMessage.fromAccount}撤回了一条消息`;
+      }
+      return conversation.lastMessage.messageForShow;
+    },
+    /**
+     * 未读数量
+     */
+    showUnreadCount(conversation) {
+      if (this.$store.getters.hidden) {
+        return conversation.unreadCount > 0;
+      }
+      // 是否显示未读计数。当前会话和未读计数为0的会话，不显示。
+      return this.currentConversation.conversationID !== conversation.conversationID && conversation.unreadCount > 0;
     }
+  },
+  computed: {
+    ...mapState({
+      conversationList: state => state.conversation.conversationList,
+      currentConversation: state => state.conversation.currentConversation,
+      currentUserProfile: state => state.user.currentUserProfile,
+      excludeCoversationList: state => state.conversation.excludeCoversationList
+    }),
+    ...mapGetters(['toAccount'])
   }
 };
 </script>
@@ -63,15 +142,10 @@ export default {
     .mess-cover {
       width: 96px;
       height: 96px;
-      border-radius: 50%;
-      overflow: hidden;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+      position: relative;
     }
     .mess-content {
+      position: relative;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -102,6 +176,22 @@ export default {
         flex-grow: 1;
         font-size: 16px;
         color: var(--placeholder-text);
+      }
+      .unread-count {
+        position: absolute;
+        bottom: 0;
+        right: 6px;
+        padding: 0 6px;
+        height: 18px;
+        border-radius: 10px;
+        background-color: #f35f5f;
+        overflow: hidden;
+        text-align: center;
+        line-height: 18px;
+        span {
+          color: #fff;
+          font-size: 10px;
+        }
       }
     }
   }

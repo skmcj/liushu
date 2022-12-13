@@ -1,5 +1,5 @@
 <template>
-  <div class="message-wrapper" :class="messagePosition">
+  <div class="message-wrapper" :class="messagePosition" v-if="!message.isDeleted">
     <!-- 单聊模式 -->
     <div class="c2c-layout" :class="messagePosition">
       <Avatar v-if="showAvatar" :src="avatar" :text="message.nick" />

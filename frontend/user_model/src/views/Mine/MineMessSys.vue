@@ -2,77 +2,18 @@
   <!-- 我的-消息-系统消息组件 -->
   <div class="mine-mess-sys">
     <div class="sys-mess-list">
-      <!-- 活动通知 -->
-      <div class="sys-mess-item">
-        <div class="mess-cover">
-          <svg
-            t="1668668890412"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="11720">
-            <path d="M512 512m-448 0a448 448 0 1 0 896 0 448 448 0 1 0-896 0Z" fill="#FE5D64" p-id="11721"></path>
-            <path d="M1024 622L696 1024 512 492z" fill="#FFFFFF" opacity=".2" p-id="11722"></path>
-            <path
-              d="M459.803 296a183.37 183.37 0 0 1-5.544 13.518l-1.01 2.16-1.037 2.137a161.11 161.11 0 0 1-3.292 6.304l-1.163 2.075a167.268 167.268 0 0 1-3.703 6.165l-1.308 2.044-1.352 2.044c-0.458 0.68-0.92 1.361-1.39 2.042l-1.436 2.047-0.734 1.026-1.5 2.051c-0.508 0.688-1.024 1.376-1.545 2.064l-1.598 2.073c-0.538 0.693-1.086 1.388-1.641 2.085l-1.697 2.1c-0.572 0.7-1.154 1.407-1.745 2.117l-1.798 2.133-1.854 2.158-1.907 2.18-1.967 2.205-2.025 2.235-2.082 2.262-1.062 1.144-2.177 2.312-2.24 2.348-2.303 2.385-2.37 2.426-2.435 2.466-2.503 2.51-2.575 2.559-2.646 2.606-2.717 2.655-4.214 4.086-5.397 5.132-3.179 3.043-3.033 2.93-2.943 2.87-2.848 2.812-2.765 2.76-2.68 2.711-1.305 1.34-2.559 2.647c-9.227 9.63-16.88 18.483-23.563 27.452l-1.798 2.45a209.86 209.86 0 0 0-10.71 16.34l-0.909 1.554c-15.608 26.979-23.687 56.294-23.52 89.946l0.017 1.624 0.005-0.294c-1.12 50.428 18.405 98.641 54.051 136.04l1.369 1.419c42.26 42.26 99.211 65.938 159.166 65.938 59.803 0 110.963-19.35 147.692-56.543l1.316-1.351 1.185-1.267c35.75-38.617 55.625-89.06 54.961-140.433l-0.019-1.025-0.034 0.637c0.48-8.617 0.321-17.957-0.55-27.908l-0.282-3.005c-0.259-2.56-0.558-5.117-0.898-7.668l-0.435-3.128c-4.284-29.358-14.433-63.177-32.141-99.182l-0.447-0.87c-6.66-12.651-18.927-21.649-33.536-24.859l-1.564-0.328c-12.227-2.443-25.093 0.459-35.457 7.653l-0.348 0.247-0.203-1.029c-12.83-63.38-43.888-105.296-86.516-127.807l-0.828-0.43-0.46-0.393c-0.254-0.206-0.511-0.407-0.773-0.603l-0.574-0.418c-1.936-1.368-4.038-2.44-6.447-3.05l-0.345-0.08-0.43-0.15c-24.157-8.201-50.438 4.864-59.696 29.554z"
-              fill="#FFFFFF"
-              p-id="11723"></path>
-            <path
-              d="M514.383 742.543c-30.951 0-60.153-12.265-81.762-33.872-18.104-18.69-28.615-43.217-28.032-69.498-0.583-40.88 22.776-63.656 45.553-85.265 16.352-15.769 32.705-32.12 41.464-56.064 3.505-9.346 13.433-14.017 22.194-10.512 0.583 0 1.165 0.583 1.75 1.166 19.857 9.928 42.633 32.705 47.306 82.931 2.918-2.337 5.839-5.84 9.928-9.345 4.088-4.088 9.929-5.84 15.184-4.67 5.839 1.165 10.511 4.67 12.847 9.343 17.521 35.625 18.69 63.072 18.106 73.583 0.583 26.865-9.928 53.147-28.617 73.001-18.69 19.274-44.969 29.202-75.921 29.202z"
-              fill="#F8B8BB"
-              p-id="11724"></path>
-          </svg>
-        </div>
-        <div class="mess-content">
-          <div class="title">
-            <div class="text">活动通知</div>
-            <div class="time">2022-12-12 23:21</div>
-          </div>
-          <div class="tip">
-            <span>18号外卖节领5元优惠卷</span>
-          </div>
-        </div>
-      </div>
       <!-- 客服通知 -->
-      <div class="sys-mess-item">
+      <div class="sys-mess-item" @click="handleClickCoversation('customerService')">
         <div class="mess-cover">
-          <svg
-            t="1668670741137"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="20160">
-            <path
-              d="M511.744 508.4672m-440.2688 0a440.2688 440.2688 0 1 0 880.5376 0 440.2688 440.2688 0 1 0-880.5376 0Z"
-              fill="#FF8E29"
-              p-id="20161"></path>
-            <path
-              d="M889.856 357.12c0-29.44-2.6112-58.3168-7.5776-86.3232-78.2848-121.8048-214.9376-202.5984-370.5344-202.5984-243.1488 0-440.2688 197.12-440.2688 440.2688 0 108.9536 39.68 208.5888 105.216 285.44 66.8672 34.2016 142.6432 53.504 222.8736 53.504 270.7968 0 490.2912-219.4944 490.2912-490.2912z"
-              fill="#FF9F3E"
-              p-id="20162"></path>
-            <path
-              d="M71.5264 508.4672c0 24.4224 2.0992 48.3328 5.888 71.68 62.208 35.6864 134.2464 56.1664 211.0976 56.1664 234.7008 0 424.96-190.2592 424.96-424.96 0-34.56-4.2496-68.096-11.9808-100.2496-57.4464-27.4944-121.7536-42.9056-189.696-42.9056-243.2 0-440.2688 197.12-440.2688 440.2688z"
-              fill="#FFBC65"
-              p-id="20163"></path>
-            <path
-              d="M83.7632 405.3504c31.488 9.8304 65.024 15.1552 99.7888 15.1552 184.4224 0 333.9776-149.504 333.9776-333.9776 0-6.0928-0.2048-12.1856-0.512-18.2272-1.7408 0-3.4816-0.1536-5.2736-0.1536-207.616 0.0512-381.5424 143.8208-427.9808 337.2032z"
-              fill="#FFD07F"
-              p-id="20164"></path>
-            <path
-              d="M746.0864 407.5008c-2.8672-116.8896-100.864-211.1488-221.0816-211.1488-119.808 0-217.5488 93.6448-221.0304 210.0224-32.5632 11.4688-55.9616 42.3936-55.9616 78.848v87.4496c0 46.1312 37.5296 83.6096 83.6096 83.6096h31.8464c11.3152 0 20.48-9.1648 20.48-20.48V422.0416c0-11.3152-9.1648-20.48-20.48-20.48h-18.2784c5.9392-91.5456 84.3264-164.2496 179.8144-164.2496 95.5392 0 173.8752 72.704 179.8144 164.2496h-21.3504c-11.3152 0-20.48 9.1648-20.48 20.48v213.7088c0 10.8032 8.3968 19.5584 19.0464 20.3264-20.2752 23.2448-58.4704 56.4224-116.5824 66.0992a35.73248 35.73248 0 0 0-26.8288-12.1856h-24.5248a35.7888 35.7888 0 0 0 0 71.5776h24.5248a35.84 35.84 0 0 0 31.3856-18.5856c105.0624-16.1792 156.416-95.5392 164.5056-109.1072 36.9152-8.704 64.4608-41.8304 64.4608-81.3056V485.1712c0-35.2256-21.9648-65.3824-52.8896-77.6704z m-403.0976 207.7696h-11.3664c-23.5008 0-42.6496-19.1488-42.6496-42.6496V485.1712c0-23.5008 19.1488-42.6496 42.6496-42.6496h11.3664v172.7488z m415.0272-42.6496c0 23.5008-19.1488 42.6496-42.6496 42.6496h-11.3664V442.5216h11.3664c23.5008 0 42.6496 19.1488 42.6496 42.6496v87.4496z"
-              fill="#FFFFFF"
-              p-id="20165"></path>
-          </svg>
+          <img :src="customerSA" alt="cover" />
         </div>
         <div class="mess-content">
           <div class="title">
-            <div class="text">客服消息</div>
-            <div class="time">2022-12-12 23:21</div>
+            <div class="text">在线客服</div>
+            <div class="time" v-if="customerConversation">{{ date(customerConversation) }}</div>
           </div>
           <div class="tip">
-            <span></span>
+            <span v-if="customerConversation">{{ messageForShow(customerConversation) }}</span>
           </div>
         </div>
       </div>
@@ -81,14 +22,100 @@
 </template>
 
 <script>
+import { mapGetters, mapState } from 'vuex';
+import { isToday, getDate, getTime } from '@/utils/im/imHandle';
+import customerSA from '@/assets/images/svg/customer-service.svg';
+
 export default {
   data() {
     return {
+      customerSA,
       // 主要分为 订单动态 | 客服消息 | 活动通知
-      sysMess: []
+      customerConversation: undefined
     };
   },
-  methods: {}
+  created() {
+    this.handleCL();
+  },
+  methods: {
+    handleCL() {
+      this.conversationList.forEach(item => {
+        if (item.conversationID === 'C2Ccustomerservice') {
+          this.customerConversation = item;
+        }
+      });
+    },
+    handleClickCoversation(text) {
+      this.$bus.$emit('openChatWindow', 'sys');
+      let conversationID = '';
+      switch (text) {
+        case 'customerService':
+          conversationID = 'C2Ccustomerservice';
+          break;
+        default:
+          break;
+      }
+      if (conversationID !== this.currentConversation.conversationID) {
+        this.$store.dispatch('checkoutConversation', conversationID);
+      }
+    },
+    avatar(conversation) {
+      switch (conversation.type) {
+        case 'GROUP':
+          return conversation.groupProfile.avatar;
+        case 'C2C':
+          return conversation.userProfile.avatar;
+        default:
+          return '';
+      }
+    },
+    /**
+     * 日期
+     */
+    date(conversation) {
+      if (!conversation.lastMessage || !conversation.lastMessage.lastTime) {
+        return '';
+      }
+      const date = new Date(conversation.lastMessage.lastTime * 1000);
+      if (isToday(date)) {
+        return getTime(date);
+      }
+      return getDate(date);
+    },
+    /**
+     * 最新消息预览
+     */
+    messageForShow(conversation) {
+      if (conversation.lastMessage.isRevoked) {
+        if (conversation.lastMessage.fromAccount === this.currentUserProfile.userID) {
+          return '你撤回了一条消息';
+        }
+        if (conversation.type === this.TIM.TYPES.CONV_C2C) {
+          return '对方撤回了一条消息';
+        }
+        return `${conversation.lastMessage.fromAccount}撤回了一条消息`;
+      }
+      return conversation.lastMessage.messageForShow;
+    },
+    /**
+     * 未读数量
+     */
+    showUnreadCount(conversation) {
+      if (this.$store.getters.hidden) {
+        return conversation.unreadCount > 0;
+      }
+      // 是否显示未读计数。当前会话和未读计数为0的会话，不显示。
+      return this.currentConversation.conversationID !== conversation.conversationID && conversation.unreadCount > 0;
+    }
+  },
+  computed: {
+    ...mapState({
+      conversationList: state => state.conversation.conversationList,
+      currentConversation: state => state.conversation.currentConversation,
+      currentUserProfile: state => state.user.currentUserProfile,
+      excludeCoversationList: state => state.conversation.excludeCoversationList
+    })
+  }
 };
 </script>
 
@@ -127,6 +154,7 @@ export default {
     .mess-cover {
       width: 96px;
       height: 96px;
+      img,
       .icon {
         width: 100%;
         height: 100%;
