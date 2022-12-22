@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.skmcj.liushu.common.GlobalData;
 import top.skmcj.liushu.common.Result;
+import top.skmcj.liushu.dto.BookCardDto;
 import top.skmcj.liushu.dto.BookDto;
 import top.skmcj.liushu.entity.Book;
 import top.skmcj.liushu.entity.User;
@@ -94,9 +95,9 @@ public class FrontendBookController {
      * @return
      */
     @GetMapping("/recommend")
-    public Result<List<Book>> getBookByRecommend(int size, HttpServletRequest request) throws Exception {
+    public Result<List<BookCardDto>> getBookByRecommend(int size, HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization");
-        List<Book> books = new ArrayList<>();
+        List<BookCardDto> books = new ArrayList<>();
         System.out.println("token ==>" + token);
         if(token != null && token.length() > 0) {
             // 已登录，推荐 + 随机
@@ -119,21 +120,21 @@ public class FrontendBookController {
             }
             // 获取推荐图书数据
             if(recommendIds != null && recommendIds.size() > 0) {
-                List<Book> recommendBooks = bookService.getBookByIds(recommendIds);
+                List<BookCardDto> recommendBooks = bookService.getBookCardByIds(recommendIds);
                 recommendBooks.stream().forEach(item -> {
                     books.add(item);
                 });
             }
             int randomSize = size - books.size();
             if(randomSize > 0) {
-                List<Book> randomBooks = bookService.getBookByRandom(randomSize);
+                List<BookCardDto> randomBooks = bookService.getBookByRandom(randomSize);
                 randomBooks.stream().forEach(item -> {
                     books.add(item);
                 });
             }
         } else {
             // 未登录，随机
-            List<Book> randomBooks = bookService.getBookByRandom(size);
+            List<BookCardDto> randomBooks = bookService.getBookByRandom(size);
             randomBooks.stream().forEach(item -> {
                 books.add(item);
             });
@@ -146,8 +147,8 @@ public class FrontendBookController {
     }
 
     @GetMapping("/cate")
-    public Result<List<Book>> getBookByCate(int size, Long cateId, HttpServletRequest request) {
-        List<Book> books = bookService.getBookByRandomOfType(size, cateId);
+    public Result<List<BookCardDto>> getBookByCate(int size, Long cateId, HttpServletRequest request) {
+        List<BookCardDto> books = bookService.getBookByRandomOfType(size, cateId);
         String coverDomain = CommonUtil.getImgDoMain(request);
         books.stream().forEach(item -> {
             item.setCoverUrl(coverDomain + item.getCover());

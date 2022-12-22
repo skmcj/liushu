@@ -8,3 +8,16 @@ import request from '@/utils/request';
 export const getShopDetailApi = function(storeId) {
   return request.get('/data/businessDetail.json');
 }
+
+/**
+ * 获取推荐商家
+ * @param {*} size
+ * @returns
+ */
+export const getShopByRecommendApi = function(size) {
+  return request.get('/frontend/store', {
+    params: {
+      size
+    }
+  });
+}

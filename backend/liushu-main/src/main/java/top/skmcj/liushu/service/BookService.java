@@ -2,6 +2,7 @@ package top.skmcj.liushu.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import top.skmcj.liushu.dto.BookCardDto;
 import top.skmcj.liushu.dto.BookDto;
 import top.skmcj.liushu.entity.Book;
 import top.skmcj.liushu.vo.BookPageVo;
@@ -24,10 +25,12 @@ public interface BookService extends IService<Book> {
 
     List<Book> getBookByMba(int start, int size);
 
-    List<Book> getBookByRandom(int size);
+    List<BookCardDto> getBookByRandom(int size);
 
-    List<Book> getBookByRandomOfType(int size, Long cateId);
+    List<BookCardDto> getBookByRandomOfType(int size, Long cateId);
 
     List<Book> getBookByIds(List<Long> ids);
+
+    List<BookCardDto> getBookCardByIds(List<Long> ids);
 
 }

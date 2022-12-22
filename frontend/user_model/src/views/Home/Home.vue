@@ -11,27 +11,27 @@
           <div class="card-box">
             <!-- 渲染推荐图书 -->
             <BookCard
-              v-for="index of 6"
-              :key="index"
-              :cover="book.cover"
-              :title="book.title"
+              v-for="(book, index) in books"
+              :key="'book-recommend-' + index"
+              :cover="book.coverUrl"
+              :title="book.name"
               :author="book.author"
-              :profile="book.profile"
+              :profile="book.outline ? book.outline : '暂无'"
               :store-name="book.storeName"
-              :handle-book="() => clickBook(index)"
-              :handle-store="() => clickStore(1)" />
+              :handle-book="() => clickBook(book.id)"
+              :handle-store="() => clickStore(book.storeId)" />
           </div>
         </ContentBlock>
         <!-- 推荐商家 -->
         <ContentBlock class="block" title="推荐商家" :handleChange="handleChangeShop">
           <div class="card-box">
             <ShopCard
-              v-for="index of 6"
-              :key="index"
-              :cover="shop.cover"
+              v-for="(shop, index) in shops"
+              :key="'shop-recommend-' + index"
+              :cover="shop.coverUrl"
               :name="shop.storeName"
               :score="shop.score"
-              :hanle-click="() => clickStore(1)" />
+              :hanle-click="() => clickStore(shop.id)" />
           </div>
         </ContentBlock>
         <!-- 分类图书 -->
@@ -43,13 +43,15 @@
           </template>
           <div class="card-box">
             <BookCard
-              v-for="index of 6"
-              :key="index"
-              :cover="book.cover"
-              :title="book.title"
+              v-for="(book, index) in cateBooks"
+              :key="'book-cate-' + index"
+              :cover="book.coverUrl"
+              :title="book.name"
               :author="book.author"
-              :profile="book.profile"
-              :store-name="book.storeName" />
+              :profile="book.outline ? book.outline : '暂无'"
+              :store-name="book.storeName"
+              :handle-book="() => clickBook(book.id)"
+              :handle-store="() => clickStore(book.storeId)" />
           </div>
         </ContentBlock>
       </div>
@@ -64,6 +66,8 @@ import BookCard from '@/components/Card/BookCard';
 import ShopCard from '@/components/Card/ShopCard';
 import Wave from '@/components/Common/Wave';
 import Tool from '@/components/Tool/Tool';
+import { getBookByRecommendApi, getBookByCateApi } from '@/api/bookApi';
+import { getShopByRecommendApi } from '@/api/shopAPi';
 
 export default {
   components: {
@@ -75,6 +79,8 @@ export default {
   },
   created() {
     this.getRecommendingBook();
+    this.getRecommendingShop();
+    this.getBookByCate();
   },
   data() {
     return {
@@ -186,25 +192,63 @@ export default {
      */
     getRecommendingBook() {
       let num = this.getReqNum();
+      getBookByRecommendApi(num * 2).then(res => {
+        if (res.data.flag) {
+          // console.log(res.data.data);
+          this.books = res.data.data;
+        }
+      });
+      // 请求 num * 2 的图书
+    },
+    /**
+     * 获取推荐商家
+     */
+    getRecommendingShop() {
+      let num = this.getReqNum();
+      getShopByRecommendApi(num * 2).then(res => {
+        if (res.data.flag) {
+          // console.log(res.data.data);
+          this.shops = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙');
+        }
+      });
+      // 请求 num * 2 的图书
+    },
+    /**
+     * 获取分类图书
+     */
+    getBookByCate() {
+      let num = this.getReqNum();
+      getBookByCateApi(num * 2, this.selectCate).then(res => {
+        if (res.data.flag) {
+          // console.log(res.data.data);
+          this.cateBooks = res.data.data;
+        }
+      });
       // 请求 num * 2 的图书
     },
     /**
      * 处理点击换一换按钮
      */
     handleChangeBook() {
-      console.log('change book');
+      // console.log('change book');
+      this.getRecommendingBook();
     },
     handleChangeCate() {
-      console.log('change cate');
+      // console.log('change cate');
+      this.getBookByCate();
     },
     handleChangeShop() {
-      console.log('change shop');
+      // console.log('change shop');
+      this.getRecommendingShop();
     },
     /**
      * 选择分类
      */
     handleSelectCate() {
-      console.log('cate =>', this.selectCate);
+      // console.log('cate =>', this.selectCate);
+      this.getBookByCate();
     }
   }
 };

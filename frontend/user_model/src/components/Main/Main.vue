@@ -66,14 +66,15 @@ export default {
         type: 'error'
       })
         .then(() => {
-          // 清除store里的信息
-          this.$store.dispatch('setLoginFlag', false);
-          this.$store.dispatch('setUserInfo', {});
-          // 清除会话存储
-          window.sessionStorage.removeItem('userInfo');
-          window.sessionStorage.removeItem('loginFlag');
-          // 清除本地存储
-          window.localStorage.removeItem('userInfo');
+          // // 清除store里的信息
+          // this.$store.dispatch('setLoginFlag', false);
+          // this.$store.dispatch('setUserInfo', {});
+          // // 清除会话存储
+          // window.sessionStorage.removeItem('userInfo');
+          // window.sessionStorage.removeItem('loginFlag');
+          // // 清除本地存储
+          // window.localStorage.removeItem('userInfo');
+          this.$clearLoginInfo();
           this.$showMsg('退出成功', {
             type: 'success',
             closeFunc: () => {
@@ -93,7 +94,7 @@ export default {
       const userInfo = this.$store.state.userInfo;
       // 查看本地是否有用户信息
       // 无，直接返回
-      if (!userInfo) return;
+      if (this.$isEmpty(userInfo)) return;
       // 有，则发送请求，验证token是否有效
       const token = this.$store.state.token;
       validateTokenApi(token).then(res => {

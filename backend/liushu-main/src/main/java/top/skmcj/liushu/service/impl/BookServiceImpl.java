@@ -9,24 +9,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.skmcj.liushu.common.exception.BusinessException;
 import top.skmcj.liushu.dao.mapper.BookMapper;
+import top.skmcj.liushu.dto.BookCardDto;
 import top.skmcj.liushu.dto.BookDto;
-import top.skmcj.liushu.entity.Book;
-import top.skmcj.liushu.entity.BookCost;
-import top.skmcj.liushu.entity.BookDetail;
-import top.skmcj.liushu.entity.BookInfo;
-import top.skmcj.liushu.service.BookCostService;
-import top.skmcj.liushu.service.BookDetailService;
-import top.skmcj.liushu.service.BookInfoService;
-import top.skmcj.liushu.service.BookService;
+import top.skmcj.liushu.entity.*;
+import top.skmcj.liushu.service.*;
 import top.skmcj.liushu.vo.BookPageVo;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
 public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
+
+    @Autowired
+    private BookstoreService bookstoreService;
 
     @Autowired
     private BookInfoService bookInfoService;
@@ -197,8 +194,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
      * @return
      */
     @Override
-    public List<Book> getBookByRandom(int size) {
+    public List<BookCardDto> getBookByRandom(int size) {
         long total = this.count();
+        List<BookCardDto> bookCards = new ArrayList<>();
         List<Book> books = new ArrayList<>();
         SecureRandom random = new SecureRandom();
         // 将 size 分为 3 份，分 3 次获取
@@ -212,7 +210,36 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 books.add(item);
             });
         }
-        return books;
+        books.stream().forEach(item -> {
+            BookCardDto bookCard = new BookCardDto();
+            // 拷贝图书信息
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail itemDetail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(itemDetail.getOutline());
+            // 获取商家名
+            Bookstore store = bookstoreService.getById(item.getStoreId());
+            bookCard.setStoreName(store.getStoreName());
+            bookCards.add(bookCard);
+        });
+        return bookCards;
     }
 
     /**
@@ -222,7 +249,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
      * @return
      */
     @Override
-    public List<Book> getBookByRandomOfType(int size, Long cateId) {
+    public List<BookCardDto> getBookByRandomOfType(int size, Long cateId) {
+        List<BookCardDto> bookCards = new ArrayList<>();
         LambdaQueryWrapper<Book> countWrapper = new LambdaQueryWrapper<>();
         countWrapper.eq(Book::getBookCateId, cateId);
         long total = this.count(countWrapper);
@@ -240,7 +268,36 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 books.add(item);
             });
         }
-        return books;
+        books.stream().forEach(item -> {
+            BookCardDto bookCard = new BookCardDto();
+            // 拷贝图书信息
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail itemDetail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(itemDetail.getOutline());
+            // 获取商家名
+            Bookstore store = bookstoreService.getById(item.getStoreId());
+            bookCard.setStoreName(store.getStoreName());
+            bookCards.add(bookCard);
+        });
+        return bookCards;
     }
 
     /**
@@ -254,5 +311,48 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         queryWrapper.in(Book::getId, ids);
         List<Book> books = this.list(queryWrapper);
         return books;
+    }
+
+    /**
+     * 根据ID列表查询图书
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<BookCardDto> getBookCardByIds(List<Long> ids) {
+        List<BookCardDto> bookCards = new ArrayList<>();
+        LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Book::getId, ids);
+        List<Book> books = this.list(queryWrapper);
+        books.stream().forEach(item -> {
+            BookCardDto bookCard = new BookCardDto();
+            // 拷贝图书信息
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail itemDetail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(itemDetail.getOutline());
+            // 获取商家名
+            Bookstore store = bookstoreService.getById(item.getStoreId());
+            bookCard.setStoreName(store.getStoreName());
+            bookCards.add(bookCard);
+        });
+        return bookCards;
     }
 }

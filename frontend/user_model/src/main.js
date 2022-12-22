@@ -98,6 +98,20 @@ Vue.prototype.$keepTwoNum = function(num) {
 }
 
 /**
+ * 通用操作
+ */
+Vue.prototype.$clearLoginInfo = function() {
+  // 清除store里的信息
+  store.dispatch('setLoginFlag', false);
+  store.dispatch('setUserInfo', {});
+  // 清除会话存储
+  window.sessionStorage.removeItem('userInfo');
+  window.sessionStorage.removeItem('loginFlag');
+  // 清除本地存储
+  window.localStorage.removeItem('userInfo');
+}
+
+/**
  * TIM 服务
  */
 window.tim = tim;
@@ -114,8 +128,10 @@ Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
 // const VueMasonryPlugin = window['vue-masonry-plugin'].VueMasonryPlugin;
 // Vue.use(VueMasonryPlugin);
 
-new Vue({
+const MainApp = new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app');
+
+export default MainApp;

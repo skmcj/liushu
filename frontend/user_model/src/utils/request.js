@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import Vue from '@/main';
 
 // 创建请求实例并配置根路径
 const request = Axios.create({
@@ -28,28 +29,35 @@ request.interceptors.request.use((config) => {
 });
 
 // http response 拦截器
-// request.interceptors.response.use(
-//   res => {
-//     if(res.data) {
-//       if(!res.data.flag) {
-//         switch(res.data.code) {
-//           case 52901:
-//             // token过期
-//         }
-//       }
-//     }
-//     return res;
-//   },
-//   err => {
-//     // if (error.response) {
-//     //   switch (error.response.status) {
-//     //     case 401:
-//     //       // 返回 401 清除token信息并跳转到登录页面
-//     //       router.replace()
-//     //   }
-//     // }
-//     return Promise.reject(err.response.data)   // 返回接口返回的错误信息
-//   });
+request.interceptors.response.use(
+  res => {
+    if(res.data) {
+      if(!res.data.flag) {
+        switch(res.data.code) {
+          case 52901:
+            // token过期
+            Vue.$showMsg('Token已过期', {
+              type: 'warning',
+              duration: 1200,
+              closeFunc: () => {
+                Vue.$clearLoginInfo();
+              }
+            });
+        }
+      }
+    }
+    return res;
+  },
+  err => {
+    // if (error.response) {
+    //   switch (error.response.status) {
+    //     case 401:
+    //       // 返回 401 清除token信息并跳转到登录页面
+    //       router.replace()
+    //   }
+    // }
+    return Promise.reject(err.response.data)   // 返回接口返回的错误信息
+  });
 
 
 // 导出请求模块

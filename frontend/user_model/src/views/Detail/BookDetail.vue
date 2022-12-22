@@ -209,7 +209,7 @@ import BookMessCard from '@/components/Card/BookMessCard';
 import ShopMessCard from '@/components/Card/ShopMessCard';
 import BookComment from '@/components/Comment/BookComment';
 import domHandle from '@/utils/domHandleUtil';
-import { getBookDetailApi } from '@/api/bookApi';
+import { getBookDetailByIdApi } from '@/api/bookApi';
 import { getBookCateApi } from '@/api/cateApi';
 import { getShopDetailApi } from '@/api/shopAPi';
 import { getCommentByBookId } from '@/api/commentApi';
@@ -283,7 +283,7 @@ export default {
     if (this.bookId) {
       // 发起请求
       this.getBookCate();
-      this.getBookDetal(1);
+      this.getBookDetail(this.bookId);
       this.getShopMess();
       this.getComment();
     }
@@ -362,13 +362,12 @@ export default {
     /**
      * 获取图书详情
      */
-    getBookDetal(id) {
-      getBookDetailApi(id).then(res => {
+    getBookDetail(id) {
+      getBookDetailByIdApi(id).then(res => {
         // res.data.flag
         if (res.data.flag) {
           // 获取成功
           this.bookData = res.data.data;
-          this.bookData.book.coverUrl = null;
         } else {
           //
         }
