@@ -21,3 +21,27 @@ export const getShopByRecommendApi = function(size) {
     }
   });
 }
+
+/**
+ * 获取商家基本信息
+ * @param {*} id
+ * @returns
+ */
+export const getShopByIdApi = function(id) {
+  return request.get(`/frontend/store/${id}`);
+}
+
+/**
+ * 获取商家借阅量排行榜
+ * @param {*} storeId
+ * @param {*} size
+ * @returns
+ */
+export const getBookRankOfShopApi = function(storeId, size) {
+  return request.get('/frontend/store/rank', {
+    params: {
+      storeId,
+      size
+    }
+  });
+}

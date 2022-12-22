@@ -149,6 +149,7 @@ public class Bookstore implements Serializable {
      * @return
      */
     public String getDistributionStr() {
+        if(distribution == null) return null;
         if(distribution == 0) {
             return "由 商家 配送";
         }

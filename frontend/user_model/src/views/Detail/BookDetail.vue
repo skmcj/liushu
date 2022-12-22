@@ -16,7 +16,7 @@
             :pubDate="bookData.book.pubDate"
             :size="bookData.book.size"
             :page="bookData.book.pages"
-            :cate-name="bookCateObj[bookData.book.bookCateId]"
+            :cate-name="bookData.bookCateName"
             :borrowCost="bookData.bookCost.borrowCost"
             :freeDay="bookData.bookCost.freeDay"
             :inventory="bookData.book.inventory"
@@ -123,7 +123,7 @@
                     <!-- 分类 -->
                     <div class="detail-info-item item-cate" @click.stop="handleCate">
                       <span class="info-tit">所属分类：</span>
-                      <span class="info-link">{{ bookCateObj[bookData.book.bookCateId] }}</span>
+                      <span class="info-link">{{ bookData.bookCateName }}</span>
                     </div>
                   </div>
                 </div>
@@ -211,7 +211,7 @@ import BookComment from '@/components/Comment/BookComment';
 import domHandle from '@/utils/domHandleUtil';
 import { getBookDetailByIdApi } from '@/api/bookApi';
 import { getBookCateApi } from '@/api/cateApi';
-import { getShopDetailApi } from '@/api/shopAPi';
+import { getShopByIdApi, getBookRankOfShopApi } from '@/api/shopAPi';
 import { getCommentByBookId } from '@/api/commentApi';
 
 export default {
@@ -252,16 +252,10 @@ export default {
         amount: 0,
         labelList: []
       },
-      bookCate: [],
-      bookCateObj: {},
       width: 0,
       activeTab: 'detail',
       activeAside: 0,
-      bookRank: [
-        { id: 9001, name: '数学之美' },
-        { id: 9002, name: '深度学习' },
-        { id: 9003, name: '人声就是欢声和泪盈' }
-      ],
+      bookRank: [],
       asideTop: 120,
       comment: [],
       /** @type {HTMLElement} */
@@ -282,9 +276,7 @@ export default {
     this.bookId = this.$route.query.id;
     if (this.bookId) {
       // 发起请求
-      this.getBookCate();
       this.getBookDetail(this.bookId);
-      this.getShopMess();
       this.getComment();
     }
   },
@@ -368,35 +360,28 @@ export default {
         if (res.data.flag) {
           // 获取成功
           this.bookData = res.data.data;
+          this.getShopMess(res.data.data.book.storeId);
         } else {
-          //
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
         }
-      });
-    },
-    /**
-     * 获取图书类别
-     */
-    getBookCate() {
-      getBookCateApi().then(res => {
-        if (res.data.flag) {
-          this.bookCate = res.data.data;
-          this.handleCateObj(res.data.data);
-        }
-      });
-    },
-    handleCateObj(arr) {
-      arr.forEach(item => {
-        this.bookCateObj[item.id] = item.name;
       });
     },
     /**
      * 获取商家信息
      */
-    getShopMess() {
-      getShopDetailApi(1).then(res => {
+    getShopMess(id) {
+      getShopByIdApi(id).then(res => {
         if (res.data.flag) {
-          this.shopData = res.data.data.bookstore;
-          this.shopData.coverUrl = null;
+          this.shopData = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+        }
+      });
+      getBookRankOfShopApi(id, 3).then(res => {
+        if (res.data.flag) {
+          this.bookRank = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
         }
       });
     },

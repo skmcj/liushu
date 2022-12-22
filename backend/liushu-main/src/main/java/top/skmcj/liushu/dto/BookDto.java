@@ -38,4 +38,13 @@ public class BookDto implements Serializable {
      * 图书费用信息
      */
     private BookCost bookCost;
+
+    /**
+     * 其它信息
+     */
+
+    /**
+     * 图书类别名称
+     */
+    private String bookCateName;
 }

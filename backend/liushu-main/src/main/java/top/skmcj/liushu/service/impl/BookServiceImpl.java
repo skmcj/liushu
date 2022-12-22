@@ -23,6 +23,9 @@ import java.util.List;
 public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
 
     @Autowired
+    private BookCateService bookCateService;
+
+    @Autowired
     private BookstoreService bookstoreService;
 
     @Autowired
@@ -138,6 +141,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             queryWrapper2.eq(BookDetail::getBookId, id);
             LambdaQueryWrapper<BookCost> queryWrapper3 = new LambdaQueryWrapper<>();
             queryWrapper3.eq(BookCost::getBookId, id);
+            BookCate bookCate = bookCateService.getById(book.getBookCateId());
             BookInfo bookInfo = bookInfoService.getOne(queryWrapper1);
             BookDetail bookDetail = bookDetailService.getOne(queryWrapper2);
             BookCost bookCost = bookCostService.getOne(queryWrapper3);
@@ -145,6 +149,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             bookDto.setBookInfo(bookInfo);
             bookDto.setBookDetail(bookDetail);
             bookDto.setBookCost(bookCost);
+            bookDto.setBookCateName(bookCate.getName());
         }
         return bookDto;
     }

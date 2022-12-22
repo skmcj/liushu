@@ -196,6 +196,8 @@ export default {
         if (res.data.flag) {
           // console.log(res.data.data);
           this.books = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
         }
       });
       // 请求 num * 2 的图书
@@ -210,7 +212,7 @@ export default {
           // console.log(res.data.data);
           this.shops = res.data.data;
         } else {
-          this.$showMsg('网络繁忙');
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
         }
       });
       // 请求 num * 2 的图书
@@ -224,6 +226,8 @@ export default {
         if (res.data.flag) {
           // console.log(res.data.data);
           this.cateBooks = res.data.data;
+        } else {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
         }
       });
       // 请求 num * 2 的图书
