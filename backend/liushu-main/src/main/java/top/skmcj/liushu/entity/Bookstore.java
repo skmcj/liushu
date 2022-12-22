@@ -115,6 +115,11 @@ public class Bookstore implements Serializable {
     private Integer auditStatus;
 
     /**
+     * 月借阅量
+     */
+    private Integer mba;
+
+    /**
      * 店铺前缀
      */
     private String prefix;

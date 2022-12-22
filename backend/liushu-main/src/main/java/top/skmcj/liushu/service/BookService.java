@@ -22,4 +22,12 @@ public interface BookService extends IService<Book> {
 
     Page getBookPage(BookPageVo bookPageVo, Long storeId);
 
+    List<Book> getBookByMba(int start, int size);
+
+    List<Book> getBookByRandom(int size);
+
+    List<Book> getBookByRandomOfType(int size, Long cateId);
+
+    List<Book> getBookByIds(List<Long> ids);
+
 }

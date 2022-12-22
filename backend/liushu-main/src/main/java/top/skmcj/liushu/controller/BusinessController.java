@@ -102,7 +102,7 @@ public class BusinessController {
                 statisticalService.updateById(statistical);
                 // 获取新增商家id
                 session.setAttribute("storeId", store.getId());
-                System.out.println("storeId => " + store.getId());
+                // System.out.println("storeId => " + store.getId());
                 // 注册员工，权限为店长
                 Employee employee = new Employee();
                 employee.setStoreId(store.getId());
@@ -468,12 +468,14 @@ public class BusinessController {
         }
         Long storeId = lEmployee.getStoreId();
         Bookstore store = storeService.getById(storeId);
+        Bookstore uStore = new Bookstore();
+        uStore.setId(store.getId());
         Integer status = store.getStatus();
         if(status == 1) {
             // 关店，status 1 -> 0
             // 直接修改，无需校验
-            store.setStatus(0);
-            storeService.updateById(store);
+            uStore.setStatus(0);
+            storeService.updateById(uStore);
             return Result.success("店铺营业状态修改成功");
         } else {
             // 开店，status 0 -> 1
@@ -484,8 +486,8 @@ public class BusinessController {
                 // 校验失败
                 return Result.error("店铺信息尚不完善，完善后才可以开店");
             } else {
-                store.setStatus(1);
-                storeService.updateById(store);
+                uStore.setStatus(1);
+                storeService.updateById(uStore);
                 return Result.success("店铺营业状态修改成功");
             }
         }

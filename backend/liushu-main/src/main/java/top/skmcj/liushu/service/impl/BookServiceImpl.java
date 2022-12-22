@@ -20,6 +20,9 @@ import top.skmcj.liushu.service.BookInfoService;
 import top.skmcj.liushu.service.BookService;
 import top.skmcj.liushu.vo.BookPageVo;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -33,6 +36,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     @Autowired
     private BookCostService bookCostService;
+
+    @Autowired
+    private BookMapper bookMapper;
 
     /**
      * 新增图书
@@ -170,5 +176,83 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         this.page(pageInfo, queryWrapper);
 
         return pageInfo;
+    }
+
+    /**
+     * 根据借阅量获取指定条数
+     * @param start
+     * @param size
+     * @return
+     */
+    @Override
+    public List<Book> getBookByMba(int start, int size) {
+        List<Book> books = bookMapper.getBookLimit(start, size);
+        return books;
+    }
+
+    /**
+     * 随机获取指定条数的图书
+     * BUG - 有可能随机重复的记录
+     * @param size 条数
+     * @return
+     */
+    @Override
+    public List<Book> getBookByRandom(int size) {
+        long total = this.count();
+        List<Book> books = new ArrayList<>();
+        SecureRandom random = new SecureRandom();
+        // 将 size 分为 3 份，分 3 次获取
+        int[] sizeArr = new int[]{ size / 3, size / 3, size - 2 * (size / 3) };
+
+        for(int i = 0; i < sizeArr.length; i++) {
+            LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int)(total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
+            List<Book> list = this.list(queryWrapper);
+            list.stream().forEach(item -> {
+                books.add(item);
+            });
+        }
+        return books;
+    }
+
+    /**
+     * 根据类型ID获取随机图书
+     * @param size
+     * @param cateId
+     * @return
+     */
+    @Override
+    public List<Book> getBookByRandomOfType(int size, Long cateId) {
+        LambdaQueryWrapper<Book> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(Book::getBookCateId, cateId);
+        long total = this.count(countWrapper);
+        List<Book> books = new ArrayList<>();
+        SecureRandom random = new SecureRandom();
+        // 将 size 分为 3 份，分 3 次获取
+        int[] sizeArr = new int[]{ size / 3, size / 3, size - 2 * (size / 3) };
+
+        for(int i = 0; i < sizeArr.length; i++) {
+            LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Book::getBookCateId, cateId);
+            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int)(total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
+            List<Book> list = this.list(queryWrapper);
+            list.stream().forEach(item -> {
+                books.add(item);
+            });
+        }
+        return books;
+    }
+
+    /**
+     * 根据ID列表查询图书
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Book> getBookByIds(List<Long> ids) {
+        LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Book::getId, ids);
+        List<Book> books = this.list(queryWrapper);
+        return books;
     }
 }

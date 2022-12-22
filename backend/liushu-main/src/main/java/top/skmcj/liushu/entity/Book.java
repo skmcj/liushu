@@ -91,6 +91,16 @@ public class Book implements Serializable {
     private Integer status;
 
     /**
+     * 月借阅量
+     */
+    private Integer mba;
+
+    /**
+     * 总借阅量
+     */
+    private Integer tba;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

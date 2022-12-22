@@ -3,6 +3,7 @@ package top.skmcj.liushu.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import top.skmcj.liushu.common.GlobalData;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.dto.BookDto;
@@ -16,7 +17,10 @@ import top.skmcj.liushu.util.JwtUtil;
 import top.skmcj.liushu.vo.BookPageVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 图书相关接口
@@ -91,6 +95,8 @@ public class BookController {
         bookDto.setBook(book);
         return Result.success(bookDto);
     }
+
+
 
     /**
      * 分页获取图书信息
