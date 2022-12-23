@@ -35,7 +35,7 @@
             :label="shopData.labelList"
             :rank="bookRank"
             @clickRankItem="handleRankItem"
-            @clickStoreName="handleStoreName" />
+            @clickStoreName="handleStoreName(shopData.id)" />
         </div>
         <div class="tab-box" id="bookTabBox">
           <!-- 选项卡 -->
@@ -273,7 +273,6 @@ export default {
     };
   },
   created() {
-    console.log(this.$route.params);
     this.bookId = this.$route.query.id;
     if (this.bookId) {
       // 发起请求
@@ -428,8 +427,9 @@ export default {
     /**
      * 点击商家名称
      */
-    handleStoreName() {
-      console.log('商家名');
+    handleStoreName(id) {
+      // console.log('商家名');
+      this.$router.push({ path: '/shop', query: { id } });
     },
     /**
      * 点击nav

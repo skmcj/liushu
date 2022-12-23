@@ -32,6 +32,19 @@ export const getShopByIdApi = function(id) {
 }
 
 /**
+ * 获取商家完整信息
+ * @param {*} id
+ * @returns
+ */
+export const getShopMessByIdApi = function(id) {
+  return request.get('/frontend/store/mess', {
+    params: {
+      id
+    }
+  });
+}
+
+/**
  * 获取商家借阅量排行榜
  * @param {*} storeId
  * @param {*} size
@@ -54,7 +67,7 @@ export const getBookRankOfShopApi = function(storeId, size) {
  * @returns
  */
 export const getBookPageOfShopApi = function(storeId, currentPage, pageSize) {
-  return request.get('/frontent/store/book/page', {
+  return request.get('/frontend/store/book/page', {
     params: {
       storeId,
       currentPage,
@@ -81,3 +94,24 @@ export const getBookPageByCateOfShopApi = function(storeId, cateId, currentPage,
     }
   });
 }
+
+/**
+ * 搜索店内图书
+ * @param {*} storeId
+ * @param {*} text
+ * @param {*} currentPage
+ * @param {*} pageSize
+ * @returns
+ */
+export const getBookPageBySearchOfShopApi = function(storeId, text, currentPage, pageSize) {
+  return request.get('/frontend/store/book/search', {
+    params: {
+      storeId,
+      text,
+      currentPage,
+      pageSize
+    }
+  });
+}
+
+

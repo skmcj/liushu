@@ -14,7 +14,7 @@
           :name="shopData.bookstore.storeName"
           :cover="shopData.bookstore.coverUrl"
           :score="shopData.bookstore.score ? shopData.bookstore.score : 0"
-          :amount="shopData.amount"
+          :amount="shopData.bookstore.mba"
           :label="shopData.bookstore.labelList"
           :notice="shopData.bookstore.notice"
           :is-coll="isColl"
@@ -75,7 +75,7 @@
                     :key="'book-rank-' + index"
                     @click.stop="handleBookRank(item.id)">
                     <span class="num">{{ getSerialNo(index + 1) }}</span>
-                    <span class="text">{{ item.title }}</span>
+                    <span class="text">{{ item.name }}</span>
                     <i class="icon ic-more-1"></i>
                   </div>
                 </div>
@@ -85,14 +85,14 @@
                 <div v-else class="side-table">
                   <BookCard
                     class="card"
-                    v-for="(book, id) in bookPage"
-                    :key="'book-' + id"
-                    :cover="book.cover"
-                    :title="book.title"
+                    v-for="(book, index) in bookPage"
+                    :key="'book-' + index"
+                    :cover="book.coverUrl"
+                    :title="book.name"
                     :author="book.author"
-                    :profile="book.profile"
+                    :profile="book.outline"
                     :store-name="book.storeName"
-                    :handle-book="() => openBook(id)" />
+                    :handle-book="() => openBook(book.id)" />
                 </div>
                 <div class="page-tool">
                   <el-pagination
@@ -127,14 +127,14 @@
                 <div v-else class="side-table">
                   <BookCard
                     class="card"
-                    v-for="(book, id) in bookPage"
-                    :key="'book-' + id"
-                    :cover="book.cover"
-                    :title="book.title"
+                    v-for="(book, index) in bookPage"
+                    :key="'book-' + index"
+                    :cover="book.coverUrl"
+                    :title="book.name"
                     :author="book.author"
-                    :profile="book.profile"
+                    :profile="book.outline"
                     :store-name="book.storeName"
-                    :handle-book="() => openBook(id)" />
+                    :handle-book="() => openBook(book.id)" />
                 </div>
                 <div class="page-tool">
                   <el-pagination
@@ -155,14 +155,14 @@
               <div class="mid-table">
                 <BookCard
                   class="card"
-                  v-for="(book, id) in searchResult"
-                  :key="'book-' + id"
-                  :cover="book.cover"
-                  :title="book.title"
+                  v-for="(book, index) in searchResult"
+                  :key="'book-' + index"
+                  :cover="book.coverUrl"
+                  :title="book.name"
                   :author="book.author"
-                  :profile="book.profile"
+                  :profile="book.outline"
                   :store-name="book.storeName"
-                  :handle-book="() => openBook(id)" />
+                  :handle-book="() => openBook(book.id)" />
               </div>
               <div class="page-tool">
                 <el-pagination
@@ -189,7 +189,14 @@ import ShopMessCard from '@/components/Card/ShopMessCard';
 import BookCard from '@/components/Card/BookCard';
 import SvgPage from '@/components/Common/SvgPage';
 import domHandle from '@/utils/domHandleUtil';
-import { getShopDetailApi } from '@/api/shopAPi';
+import {
+  getShopMessByIdApi,
+  getBookRankOfShopApi,
+  getBookPageOfShopApi,
+  getBookPageByCateOfShopApi,
+  getBookPageBySearchOfShopApi
+} from '@/api/shopAPi';
+import { getGoodsCateApi } from '@/api/cateApi';
 
 export default {
   components: {
@@ -200,6 +207,7 @@ export default {
   },
   data() {
     return {
+      storeId: 0,
       width: 0,
       shopData: {
         bookstore: {},
@@ -225,20 +233,17 @@ export default {
       bookPage: [],
       currentPage: 1,
       pageSize: 15,
-      total: 25,
+      total: 0,
       // 分类
-      goodsCate: [
-        { id: 1, name: '言情小说' },
-        { id: 2, name: '悬疑小说' },
-        { id: 3, name: '计算机理论' }
-      ],
-      selectCate: 1
+      goodsCate: [],
+      selectCate: 0
     };
   },
   created() {
-    this.getShopDetail();
-    this.getBookRank();
-    this.getBookPageByHot();
+    this.storeId = this.$route.query.id;
+    if (this.storeId) {
+      this.initPageMess();
+    }
   },
   mounted() {
     this.width = document.getElementById('shopContent').offsetWidth;
@@ -260,6 +265,11 @@ export default {
     }
   },
   methods: {
+    initPageMess() {
+      this.getShopDetail();
+      this.getBookRank();
+      this.getBookPageByHot();
+    },
     /**
      * 监听滚动
      */
@@ -297,10 +307,9 @@ export default {
      * 获取商家信息
      */
     getShopDetail() {
-      getShopDetailApi(1).then(res => {
+      getShopMessByIdApi(this.storeId).then(res => {
         if (res.data.flag) {
           this.shopData = res.data.data;
-          this.shopData.bookstore.coverUrl = null;
         }
       });
     },
@@ -315,7 +324,8 @@ export default {
      */
     handleSearch() {
       this.activeTab = 'search';
-      console.log('search =>', this.searchContent);
+      this.currentPage = 1;
+      // console.log('search =>', this.searchContent);
       this.getBookPageBySearch();
     },
     /**
@@ -326,21 +336,9 @@ export default {
       if (text === 'hot') {
         this.currentPage = 1;
         this.getBookPageByHot();
-        // this.detailDom.scrollIntoView({ behavior: 'smooth' });
-        // let offsetPosition = this.getDomScrollTop(this.detailDom) - 88;
-        // window.scrollTo({
-        //   top: offsetPosition,
-        //   behavior: 'smooth'
-        // });
       } else if (text === 'cate') {
         this.currentPage = 1;
-        this.getBookPageByCate();
-        // this.commentDom.scrollIntoView({ behavior: 'smooth' });
-        // let offsetPosition = this.getDomScrollTop(this.commentDom) - 88;
-        // window.scrollTo({
-        //   top: offsetPosition,
-        //   behavior: 'smooth'
-        // });
+        this.getGoodsCate();
       }
     },
     openBook(id) {
@@ -351,20 +349,25 @@ export default {
      */
     handleBookRank(id) {
       this.openBook(id);
-      console.log('rank item =>', id);
+      // console.log('rank item =>', id);
     },
     /**
      * 点击图书分类
      */
     handleBookCate(id) {
       this.selectCate = id;
-      console.log('cate item =>', id);
+      this.getBookPageByCate();
+      // console.log('cate item =>', id);
     },
     // 页码改变时
     handleCurrentChange(val) {
       this.currentPage = val;
       if (this.activeTab === 'hot') {
         this.getBookPageByHot();
+      } else if (this.activeTab === 'cate') {
+        this.getBookPageByCate();
+      } else if (this.activeTab === 'search') {
+        this.getBookPageBySearch();
       }
     },
     /**
@@ -373,6 +376,16 @@ export default {
     getGoodsCate() {
       // this.goodsCate = [];
       // this.selectCate = this.goodsCate[0].id;
+      getGoodsCateApi(this.storeId).then(res => {
+        if (res.data.flag) {
+          this.goodsCate = res.data.data;
+          if (res.data.data.length > 0) {
+            this.handleBookCate(res.data.data[0].id);
+          }
+        } else {
+          this.$showMsg('店内分类获取失败', { type: 'warning' });
+        }
+      });
     },
     /**
      * 获取相应的图书列表
@@ -381,7 +394,14 @@ export default {
       // 传入所选分类
       let num = this.getReqNum();
       this.pageSize = num * 5;
-      this.bookPage = this.getBookDataTest(this.pageSize);
+      getBookPageByCateOfShopApi(this.storeId, this.selectCate, this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.bookPage = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('图书获取失败', { type: 'warning' });
+        }
+      });
     },
     /**
      * 获取热门图书列表
@@ -389,7 +409,14 @@ export default {
     getBookPageByHot() {
       let num = this.getReqNum();
       this.pageSize = num * 5;
-      this.bookPage = this.getBookDataTest(this.pageSize);
+      getBookPageOfShopApi(this.storeId, this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.bookPage = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('图书获取失败', { type: 'warning' });
+        }
+      });
     },
     /**
      * 搜索图书
@@ -397,33 +424,26 @@ export default {
     getBookPageBySearch() {
       let num = this.getReqNum();
       this.pageSize = (num + 1) * 5;
-      this.searchResult = this.getBookDataTest(this.pageSize);
+      getBookPageBySearchOfShopApi(this.storeId, this.searchContent, this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.searchResult = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('图书获取失败', { type: 'warning' });
+        }
+      });
     },
     /**
      * 获取排行榜信息
      */
     getBookRank() {
-      this.bookRank = this.getBookDataTest(10);
-    },
-    /**
-     * 用于测试
-     */
-    getBookDataTest(num) {
-      let list = [];
-      // 测试图书数据
-      let book = {
-        id: '1',
-        cover: null,
-        title: '数学之美',
-        author: '吴军著',
-        profile:
-          '这是一本备受推崇的经典科普作品，被央视推荐为数学学科的敲门砖，是信息领域大学生的必读好书。 数学既是对于自然界事实的总结和归纳，又是抽象思考的结果。在《数学之美》里，吴军博士集中阐述了他对数学和信息处理这些专业学科的理解，把数学在IT领域，特别是语音识别、自然语言处理和信息搜索等方面的美丽之处予以了精彩表达，这些都是智能时代的热门技术话题。 本书还用了大量篇幅介绍各个领域的典故，是文科生也可以看懂的科普读物。成为一个领域的大师有其偶然性，但更有其必然性。其必然性就是大师们的思维方法。通过本书，可以了解他们的平凡与卓越，理解他们取得成功的原因，感受那些真正懂得数学之美的人们所拥有的美好人生。 本书先后荣获国家图书馆第八届文津图书奖、第五届中华优秀出版物奖图书提名奖、入选广电总局“2014年向全国青少年推荐百种优秀图书书目”、*版曾荣获2012-2013年度全行业畅销书，《数学之美》多次被中央电视台、学习强国平台、新华书店推选为必读书。《数学之美》给广大读者，尤其是在校读大学甚至读高中的年轻人带去了美的数学启示，作者更希望中国做工程的年轻人，能够从《数学之美》中体会到在信息技术行业做事情的正确方法，以便在职业和生活上都获得成功。 第三版增加了三章新内容，分别介绍当今非常热门的三个主题：区块链的数学基础，量子通信的原理，以及人工智能的数学极限。',
-        storeName: '片刻书店'
-      };
-      for (let i = 0; i < num; i++) {
-        list.push(book);
-      }
-      return list;
+      getBookRankOfShopApi(this.storeId, 10).then(res => {
+        if (res.data.flag) {
+          this.bookRank = res.data.data;
+        } else {
+          this.$showMsg('榜单获取失败', { type: 'warning' });
+        }
+      });
     }
   },
   destroyed() {
