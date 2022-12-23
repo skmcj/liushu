@@ -5,5 +5,18 @@ import request from '@/utils/request';
  * @returns
  */
 export const getBookCateApi = function() {
-  return request.get('/data/bookcate.json');
+  return request.get('/cate/book');
+}
+
+/**
+ * 获取店内分类
+ * @param {*} storeId
+ * @returns
+ */
+export const getGoodsCateApi = function(storeId) {
+  return request.get('/cate/store', {
+    params: {
+      storeId
+    }
+  });
 }

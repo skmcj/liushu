@@ -273,11 +273,11 @@ export default {
     };
   },
   created() {
+    console.log(this.$route.params);
     this.bookId = this.$route.query.id;
     if (this.bookId) {
       // 发起请求
-      this.getBookDetail(this.bookId);
-      this.getComment();
+      this.initPageMess();
     }
   },
   mounted() {
@@ -292,6 +292,10 @@ export default {
     window.addEventListener('scroll', this.onScroll);
   },
   methods: {
+    initPageMess() {
+      this.getBookDetail(this.bookId);
+      this.getComment();
+    },
     /**
      * 处理图书信息
      */
@@ -417,7 +421,9 @@ export default {
      * 点击借阅榜项
      */
     handleRankItem(id) {
-      console.log('借阅榜项ID =>', id);
+      // console.log('借阅榜项ID =>', id);
+      // 捕获路由错误，但不暴露，防止重复路由控制台显示报错
+      this.$router.push({ path: '/book', query: { id } }).catch(err => err);
     },
     /**
      * 点击商家名称
@@ -493,6 +499,12 @@ export default {
       let style = {};
       style.width = this.tabBoxDom.clientWidth - 144 + 'px';
       return style;
+    }
+  },
+  watch: {
+    $route(to, from) {
+      this.bookId = to.query.id;
+      this.initPageMess();
     }
   },
   destroyed() {

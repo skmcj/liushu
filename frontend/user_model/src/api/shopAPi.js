@@ -45,3 +45,39 @@ export const getBookRankOfShopApi = function(storeId, size) {
     }
   });
 }
+
+/**
+ * 分页获取店内图书
+ * @param {*} storeId
+ * @param {*} currentPage
+ * @param {*} pageSize
+ * @returns
+ */
+export const getBookPageOfShopApi = function(storeId, currentPage, pageSize) {
+  return request.get('/frontent/store/book/page', {
+    params: {
+      storeId,
+      currentPage,
+      pageSize
+    }
+  });
+}
+
+/**
+ * 根据类别分页获取店内图书
+ * @param {*} storeId
+ * @param {*} cateId
+ * @param {*} currentPage
+ * @param {*} pageSize
+ * @returns
+ */
+export const getBookPageByCateOfShopApi = function(storeId, cateId, currentPage, pageSize) {
+  return request.get('/frontend/store/book/cate', {
+    params: {
+      storeId,
+      cateId,
+      currentPage,
+      pageSize
+    }
+  });
+}

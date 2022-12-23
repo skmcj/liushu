@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.exception.BusinessException;
 import top.skmcj.liushu.dao.mapper.BookMapper;
 import top.skmcj.liushu.dto.BookCardDto;
@@ -15,9 +16,11 @@ import top.skmcj.liushu.entity.*;
 import top.skmcj.liushu.service.*;
 import top.skmcj.liushu.vo.BookPageVo;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
@@ -42,8 +45,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 新增图书
+     *
      * @param bookDto
-     * @param storeId 商家id
+     * @param storeId    商家id
      * @param employeeId 创建者id
      * @return
      */
@@ -74,6 +78,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 修改图书
+     *
      * @param bookDto
      */
     @Override
@@ -91,6 +96,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 批量修改图书状态
+     *
      * @param ids
      * @param status
      */
@@ -106,6 +112,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 批量删除书籍
+     *
      * @param ids
      */
     @Override
@@ -115,7 +122,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         queryWrapper.in(Book::getId, ids);
         queryWrapper.eq(Book::getStatus, 1);
         long count = this.count(queryWrapper);
-        if(count > 0) {
+        if (count > 0) {
             // 还有图书处于在售状态，不给删除，抛出一个业务异常
             throw new BusinessException("所选图书存有在售图书，不能删除");
         }
@@ -125,6 +132,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 根据ID获取图书详情
+     *
      * @param id
      * @return
      */
@@ -134,7 +142,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         BookDto bookDto = new BookDto();
         Book book = this.getById(id);
         // 更加bookId获取图书其它信息
-        if(book != null) {
+        if (book != null) {
             LambdaQueryWrapper<BookInfo> queryWrapper1 = new LambdaQueryWrapper<>();
             queryWrapper1.eq(BookInfo::getBookId, id);
             LambdaQueryWrapper<BookDetail> queryWrapper2 = new LambdaQueryWrapper<>();
@@ -156,6 +164,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 分页获取图书
+     *
      * @param bookPageVo
      * @return
      */
@@ -182,6 +191,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 根据借阅量获取指定条数
+     *
      * @param start
      * @param size
      * @return
@@ -195,6 +205,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     /**
      * 随机获取指定条数的图书
      * BUG - 有可能随机重复的记录
+     *
      * @param size 条数
      * @return
      */
@@ -205,11 +216,11 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         List<Book> books = new ArrayList<>();
         SecureRandom random = new SecureRandom();
         // 将 size 分为 3 份，分 3 次获取
-        int[] sizeArr = new int[]{ size / 3, size / 3, size - 2 * (size / 3) };
+        int[] sizeArr = new int[]{size / 3, size / 3, size - 2 * (size / 3)};
 
-        for(int i = 0; i < sizeArr.length; i++) {
+        for (int i = 0; i < sizeArr.length; i++) {
             LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int)(total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
+            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int) (total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
             List<Book> list = this.list(queryWrapper);
             list.stream().forEach(item -> {
                 books.add(item);
@@ -249,6 +260,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 根据类型ID获取随机图书
+     *
      * @param size
      * @param cateId
      * @return
@@ -262,12 +274,12 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         List<Book> books = new ArrayList<>();
         SecureRandom random = new SecureRandom();
         // 将 size 分为 3 份，分 3 次获取
-        int[] sizeArr = new int[]{ size / 3, size / 3, size - 2 * (size / 3) };
+        int[] sizeArr = new int[]{size / 3, size / 3, size - 2 * (size / 3)};
 
-        for(int i = 0; i < sizeArr.length; i++) {
+        for (int i = 0; i < sizeArr.length; i++) {
             LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Book::getBookCateId, cateId);
-            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int)(total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
+            queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int) (total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
             List<Book> list = this.list(queryWrapper);
             list.stream().forEach(item -> {
                 books.add(item);
@@ -307,6 +319,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 根据ID列表查询图书
+     *
      * @param ids
      * @return
      */
@@ -320,6 +333,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
     /**
      * 根据ID列表查询图书
+     *
      * @param ids
      * @return
      */
@@ -359,5 +373,180 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             bookCards.add(bookCard);
         });
         return bookCards;
+    }
+
+    /**
+     * 分页获取店内图书
+     *
+     * @param storeId
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<BookCardDto> getBookCardOfStore(Long storeId, int currentPage, int pageSize) {
+        Page<BookCardDto> bookCardPage = new Page<>();
+        // 获取图书列表
+        LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
+        bookWrapper.eq(Book::getStoreId, storeId);
+        bookWrapper.orderByDesc(Book::getTba);
+        bookWrapper.orderByDesc(Book::getMba);
+        bookWrapper.orderByDesc(Book::getUpdateTime);
+        Page<Book> bookPage = new Page<>(currentPage, pageSize);
+        this.page(bookPage, bookWrapper);
+        // 获取商家信息
+        Bookstore store = bookstoreService.getById(storeId);
+        List<Book> books = bookPage.getRecords();
+        List<BookCardDto> bookCards = books.stream().map(item -> {
+            // 设置图书基本信息
+            BookCardDto bookCard = new BookCardDto();
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail detail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(detail.getOutline());
+            bookCard.setStoreName(store.getStoreName());
+            return bookCard;
+        }).collect(Collectors.toList());
+        bookCardPage.setRecords(bookCards);
+        bookCardPage.setTotal(bookPage.getTotal());
+        bookCardPage.setSize(bookPage.getSize());
+        bookCardPage.setCurrent(bookPage.getCurrent());
+        return bookCardPage;
+    }
+
+    /**
+     * 根据类型分页获取店内图书
+     *
+     * @param storeId
+     * @param cateId
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<BookCardDto> getBookCardByCateOfStore(Long storeId, Long cateId, int currentPage, int pageSize) {
+        Page<BookCardDto> bookCardPage = new Page<>();
+        // 获取图书页
+        Page<Book> bookPage = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
+        bookWrapper.eq(Book::getStoreId, storeId);
+        bookWrapper.eq(Book::getGoodsCateId, cateId);
+        bookWrapper.orderByDesc(Book::getUpdateTime);
+        this.page(bookPage, bookWrapper);
+        // 获取商家信息
+        Bookstore store = bookstoreService.getById(storeId);
+        List<Book> books = bookPage.getRecords();
+        // 封装图书卡片信息
+        List<BookCardDto> bookCards = books.stream().map(item -> {
+            // 设置图书基本信息
+            BookCardDto bookCard = new BookCardDto();
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail detail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(detail.getOutline());
+            bookCard.setStoreName(store.getStoreName());
+            return bookCard;
+        }).collect(Collectors.toList());
+        bookCardPage.setRecords(bookCards);
+        bookCardPage.setTotal(bookPage.getTotal());
+        bookCardPage.setSize(bookPage.getSize());
+        bookCardPage.setCurrent(bookPage.getCurrent());
+        return bookCardPage;
+    }
+
+    /**
+     * 分页搜索店内图书
+     *
+     * @param storeId
+     * @param text
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<BookCardDto> getBookPageBySearchOfStore(Long storeId, String text, int currentPage, int pageSize) {
+        Page<BookCardDto> bookCardPage = new Page<>();
+        // 获取图书页
+        Page<Book> bookPage = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Book> searchWrapper = new LambdaQueryWrapper<>();
+        boolean hasText = StringUtils.isNotEmpty(text);
+        searchWrapper.eq(Book::getStoreId, storeId);
+        if(hasText) {
+            searchWrapper.like(Book::getName, text);
+            searchWrapper.or().like(Book::getAuthor, text);
+            searchWrapper.or().like(Book::getPress, text);
+        }
+        searchWrapper.orderByDesc(Book::getTba);
+        searchWrapper.orderByDesc(Book::getUpdateTime);
+        this.page(bookPage, searchWrapper);
+        // 获取商家信息
+        Bookstore store = bookstoreService.getById(storeId);
+        List<Book> books = bookPage.getRecords();
+        List<BookCardDto> bookCards = books.stream().map(item -> {
+            // 设置图书基本信息
+            BookCardDto bookCard = new BookCardDto();
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail detail = bookDetailService.getOne(detailWrapper);
+            bookCard.setOutline(detail.getOutline());
+            bookCard.setStoreName(store.getStoreName());
+            return bookCard;
+        }).collect(Collectors.toList());
+        bookCardPage.setRecords(bookCards);
+        bookCardPage.setTotal(bookPage.getTotal());
+        bookCardPage.setSize(bookPage.getSize());
+        bookCardPage.setCurrent(bookPage.getCurrent());
+        return bookCardPage;
     }
 }

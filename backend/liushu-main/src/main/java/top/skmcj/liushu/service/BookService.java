@@ -7,6 +7,7 @@ import top.skmcj.liushu.dto.BookDto;
 import top.skmcj.liushu.entity.Book;
 import top.skmcj.liushu.vo.BookPageVo;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface BookService extends IService<Book> {
@@ -32,5 +33,11 @@ public interface BookService extends IService<Book> {
     List<Book> getBookByIds(List<Long> ids);
 
     List<BookCardDto> getBookCardByIds(List<Long> ids);
+
+    Page<BookCardDto> getBookCardOfStore(Long storeId, int currentPage, int pageSize);
+
+    Page<BookCardDto> getBookCardByCateOfStore(Long storeId, Long cateId, int currentPage, int pageSize);
+
+    Page<BookCardDto> getBookPageBySearchOfStore(Long storeId, String text, int currentPage, int pageSize);
 
 }
