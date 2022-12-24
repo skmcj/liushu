@@ -1,5 +1,6 @@
 package top.skmcj.liushu.controller.frontend;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ public class FrontendBookController {
     public Result<List<BookCardDto>> getBookByRecommend(int size, HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization");
         List<BookCardDto> books = new ArrayList<>();
-        System.out.println("token ==>" + token);
+        // System.out.println("token ==> " + token);
         if(token != null && token.length() > 0) {
             // 已登录，推荐 + 随机
             User user = JwtUtil.verifyTokenOfUser(token);
@@ -146,6 +147,13 @@ public class FrontendBookController {
         return Result.success(books);
     }
 
+    /**
+     * 根据分类获取指定数量的图书
+     * @param size
+     * @param cateId
+     * @param request
+     * @return
+     */
     @GetMapping("/cate")
     public Result<List<BookCardDto>> getBookByCate(int size, Long cateId, HttpServletRequest request) {
         List<BookCardDto> books = bookService.getBookByRandomOfType(size, cateId);
@@ -154,5 +162,42 @@ public class FrontendBookController {
             item.setCoverUrl(coverDomain + item.getCover());
         });
         return Result.success(books);
+    }
+
+    /**
+     * 根据类别分页获取图书
+     * @param cateId
+     * @param currentPage
+     * @param pageSize
+     * @param request
+     * @return
+     */
+    @GetMapping("/cate/page")
+    public Result<Page<BookCardDto>> getBookPageByCate(Integer cateId, int currentPage, int pageSize,
+                                                       HttpServletRequest request) {
+        Page<BookCardDto> bookCardPage = bookService.getBookCardPageByCate(cateId, currentPage, pageSize);
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        List<BookCardDto> bookCards = bookCardPage.getRecords();
+        bookCards.stream().forEach(item -> {
+            item.setCoverUrl(imgDoMain + item.getCover());
+        });
+        return Result.success(bookCardPage);
+    }
+
+    /**
+     * 根据分类获取图书借阅榜
+     * @param cateId
+     * @param size
+     * @param request
+     * @return
+     */
+    @GetMapping("/cate/rank")
+    public Result<List<Book>> getBookRankByCate(Integer cateId, int size, HttpServletRequest request) {
+        List<Book> bookRank = bookService.getBookRankByCate(cateId, size);
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        bookRank.stream().forEach(item -> {
+            item.setCoverUrl(imgDoMain + item.getCover());
+        });
+        return Result.success(bookRank);
     }
 }

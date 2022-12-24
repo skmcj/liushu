@@ -32,7 +32,11 @@ public interface BookService extends IService<Book> {
 
     List<Book> getBookByIds(List<Long> ids);
 
+    List<Book> getBookRankByCate(Integer cateId, int size);
+
     List<BookCardDto> getBookCardByIds(List<Long> ids);
+
+    Page<BookCardDto> getBookCardPageByCate(Integer cateId, int currentPage, int pageSize);
 
     Page<BookCardDto> getBookCardOfStore(Long storeId, int currentPage, int pageSize);
 

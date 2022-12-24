@@ -332,6 +332,23 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     }
 
     /**
+     * 根据类别获取图书销量榜
+     * @param cateId
+     * @return
+     */
+    @Override
+    public List<Book> getBookRankByCate(Integer cateId, int size) {
+        LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Book::getBookCateId, cateId);
+        queryWrapper.orderByDesc(Book::getTba);
+        queryWrapper.orderByDesc(Book::getMba);
+        queryWrapper.orderByDesc(Book::getUpdateTime);
+        queryWrapper.last("LIMIT " + String.valueOf(size));
+        List<Book> books = this.list(queryWrapper);
+        return books;
+    }
+
+    /**
      * 根据ID列表查询图书
      *
      * @param ids
@@ -373,6 +390,57 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             bookCards.add(bookCard);
         });
         return bookCards;
+    }
+
+    /**
+     * 根据类别分页获取图书
+     * @param cateId
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<BookCardDto> getBookCardPageByCate(Integer cateId, int currentPage, int pageSize) {
+        Page<BookCardDto> bookCardPage = new Page<>();
+        Page<Book> bookPage = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
+        bookWrapper.eq(Book::getBookCateId, cateId);
+        bookWrapper.orderByDesc(Book::getUpdateTime);
+        this.page(bookPage, bookWrapper);
+        List<Book> books = bookPage.getRecords();
+        List<BookCardDto> bookCards = books.stream().map(item -> {
+            // 设置图书基本信息
+            BookCardDto bookCard = new BookCardDto();
+            bookCard.setId(item.getId());
+            bookCard.setStoreId(item.getStoreId());
+            bookCard.setCover(item.getCover());
+            bookCard.setCoverUrl(item.getCoverUrl());
+            bookCard.setName(item.getName());
+            bookCard.setAuthor(item.getAuthor());
+            bookCard.setBookCateId(item.getBookCateId());
+            bookCard.setGoodsCateId(item.getGoodsCateId());
+            bookCard.setPress(item.getPress());
+            bookCard.setPubDate(item.getPubDate());
+            bookCard.setSize(item.getSize());
+            bookCard.setPages(item.getPages());
+            bookCard.setInventory(item.getInventory());
+            bookCard.setStatus(item.getStatus());
+            bookCard.setMba(item.getMba());
+            bookCard.setTba(item.getTba());
+            // 获取图书简介
+            LambdaQueryWrapper<BookDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(BookDetail::getBookId, item.getId());
+            BookDetail detail = bookDetailService.getOne(detailWrapper);
+            Bookstore store = bookstoreService.getById(item.getStoreId());
+            bookCard.setOutline(detail.getOutline());
+            bookCard.setStoreName(store.getStoreName());
+            return bookCard;
+        }).collect(Collectors.toList());
+        bookCardPage.setRecords(bookCards);
+        bookCardPage.setTotal(bookPage.getTotal());
+        bookCardPage.setSize(bookPage.getSize());
+        bookCardPage.setCurrent(bookPage.getCurrent());
+        return bookCardPage;
     }
 
     /**
