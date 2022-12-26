@@ -97,7 +97,8 @@
         :class="{
           'is-disabled': !inventory
         }"
-        :title="!inventory ? '库存不足' : ''">
+        :title="!inventory ? '库存不足' : ''"
+        @click.stop="addCart">
         <span>加入购物车</span>
       </div>
       <div
@@ -106,7 +107,8 @@
         :class="{
           'is-disabled': !inventory
         }"
-        :title="!inventory ? '库存不足' : ''">
+        :title="!inventory ? '库存不足' : ''"
+        @click.stop="borrowBuy">
         <span>立即借阅</span>
       </div>
     </div>
@@ -205,6 +207,31 @@ export default {
         }
       }
     },
+    /**
+     * 加入购物车
+     */
+    addCart() {
+      let cart = {
+        borrowTime: this.borrowTime,
+        borrowCost: this.rBorrowCost,
+        packingCost: this.rPackingCost,
+        deposit: this.rDeposit,
+        amount: this.rBorrowCost + this.rPackingCost + this.rDeposit,
+        quantity: this.quantity,
+        checked: 0
+      };
+      this.$emit('addCart', cart);
+    },
+    /**
+     * 借阅
+     */
+    borrowBuy() {
+      let orderItem = {};
+      this.$emit('borrowBuy', orderItem);
+    },
+    /**
+     * 精度计算
+     */
     accCom(val) {
       return parseFloat(val).toFixed(2);
     }

@@ -217,7 +217,9 @@
         :packing-cost="bookData.bookCost.packingCost"
         :deposit="bookData.bookCost.deposit"
         :deliver-fee="shopData.deliverFee"
-        :borrow-day="shopData.borrowDay" />
+        :borrow-day="shopData.borrowDay"
+        @addCart="handleAddCart"
+        @borrowBuy="handleBorrowBuy" />
     </el-dialog>
   </div>
 </template>
@@ -231,6 +233,7 @@ import BookBorrowDialog from '@/components/Dialog/BookBorrowDialog';
 import domHandle from '@/utils/domHandleUtil';
 import { getBookDetailByIdApi } from '@/api/bookApi';
 import { getBookCateApi } from '@/api/cateApi';
+import { addCartItemApi } from '@/api/cartApi';
 import { getShopByIdApi, getBookRankOfShopApi } from '@/api/shopAPi';
 import { getCommentByBookId } from '@/api/commentApi';
 
@@ -432,10 +435,29 @@ export default {
       this.dialogVisible = true;
       this.dialogType = 'borrow';
     },
+    handleBorrowBuy(orderItem) {
+      console.log('立即借阅', orderItem);
+      // 打开结算面板
+    },
     // 点击添加购物车
     handleAdd() {
       this.dialogVisible = true;
       this.dialogType = 'cart';
+    },
+    handleAddCart(cart) {
+      let userInfo = this.$store.state.userInfo;
+      cart.userId = userInfo.id;
+      cart.bookId = this.bookData.book.id;
+      cart.storeId = this.shopData.id;
+      console.log('加购物车', cart);
+      addCartItemApi(cart).then(res => {
+        if (res.data.flag) {
+          this.$showMsg('加入购物车成功', { type: 'success' });
+          this.dialogVisible = false;
+        } else {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+        }
+      });
     },
     // 点击购物车
     handleCar() {

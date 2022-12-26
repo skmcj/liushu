@@ -27,7 +27,7 @@ export const getCartByIdApi = function(id) {
  * @returns
  */
 export const addCartItemApi = function(cartItem) {
-  return request.post('/cart');
+  return request.post('/cart', cartItem);
 }
 
 /**
