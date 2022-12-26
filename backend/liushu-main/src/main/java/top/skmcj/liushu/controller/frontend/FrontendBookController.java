@@ -2,6 +2,7 @@ package top.skmcj.liushu.controller.frontend;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static top.skmcj.liushu.util.JwtUtil.verifyTokenOfUser;
 
 /**
  * 前端图书接口
@@ -62,7 +65,7 @@ public class FrontendBookController {
         String token = request.getHeader("Authorization");
         if(token != null && token.length() > 0) {
             // 用户已登录
-            User user = JwtUtil.verifyTokenOfUser(token);
+            User user = verifyTokenOfUser(token);
             userId = user.getId();
         } else {
             // 游客点击
@@ -96,42 +99,56 @@ public class FrontendBookController {
      * @return
      */
     @GetMapping("/recommend")
-    public Result<List<BookCardDto>> getBookByRecommend(int size, HttpServletRequest request) throws Exception {
+    public Result<List<BookCardDto>> getBookByRecommend(int size, HttpServletRequest request) throws TasteException {
         String token = request.getHeader("Authorization");
         List<BookCardDto> books = new ArrayList<>();
         // System.out.println("token ==> " + token);
         if(token != null && token.length() > 0) {
             // 已登录，推荐 + 随机
-            User user = JwtUtil.verifyTokenOfUser(token);
-            Long userId = user.getId();
-            HttpSession session = request.getSession();
-            // 存储推荐结果ID
-            List<Long> recommendIds = new ArrayList<>();
-            // 获取最近点击的几本图书
-            List<Long> recentBooks = (List<Long>) session.getAttribute("recentBooks");
-            if(recentBooks != null) {
-                for (int i = 0; i < recentBooks.size(); i++) {
-                    List<RecommendedItem> recommendedItems =
-                            GlobalData.getItemRecommender().recommendedBecause(userId, recentBooks.get(i), 2);
-                    for (RecommendedItem item : recommendedItems) {
-                        log.info("推荐图书 ==> " + item.getItemID());
-                        recommendIds.add(item.getItemID());
-                    }
-                }
+            User user = null;
+            try {
+                user = verifyTokenOfUser(token);
+            } catch (Exception e) {
+                log.info("api: /recommend => token verify err : " + e.getMessage());
             }
-            // 获取推荐图书数据
-            if(recommendIds != null && recommendIds.size() > 0) {
-                List<BookCardDto> recommendBooks = bookService.getBookCardByIds(recommendIds);
-                recommendBooks.stream().forEach(item -> {
-                    books.add(item);
-                });
-            }
-            int randomSize = size - books.size();
-            if(randomSize > 0) {
-                List<BookCardDto> randomBooks = bookService.getBookByRandom(randomSize);
+            if(user == null) {
+                // user token 验证失败，返回随机推荐结果
+                List<BookCardDto> randomBooks = bookService.getBookByRandom(size);
                 randomBooks.stream().forEach(item -> {
                     books.add(item);
                 });
+            } else {
+                // user token 验证成功
+                Long userId = user.getId();
+                HttpSession session = request.getSession();
+                // 存储推荐结果ID
+                List<Long> recommendIds = new ArrayList<>();
+                // 获取最近点击的几本图书
+                List<Long> recentBooks = (List<Long>) session.getAttribute("recentBooks");
+                if(recentBooks != null) {
+                    for (int i = 0; i < recentBooks.size(); i++) {
+                        List<RecommendedItem> recommendedItems =
+                                GlobalData.getItemRecommender().recommendedBecause(userId, recentBooks.get(i), 2);
+                        for (RecommendedItem item : recommendedItems) {
+                            log.info("推荐图书 ==> " + item.getItemID());
+                            recommendIds.add(item.getItemID());
+                        }
+                    }
+                }
+                // 获取推荐图书数据
+                if(recommendIds != null && recommendIds.size() > 0) {
+                    List<BookCardDto> recommendBooks = bookService.getBookCardByIds(recommendIds);
+                    recommendBooks.stream().forEach(item -> {
+                        books.add(item);
+                    });
+                }
+                int randomSize = size - books.size();
+                if(randomSize > 0) {
+                    List<BookCardDto> randomBooks = bookService.getBookByRandom(randomSize);
+                    randomBooks.stream().forEach(item -> {
+                        books.add(item);
+                    });
+                }
             }
         } else {
             // 未登录，随机

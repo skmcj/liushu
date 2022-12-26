@@ -70,6 +70,8 @@ public class FrontendStoreController {
         bookstore.setScore(store.getScore());
         bookstore.setMba(store.getMba());
         bookstore.setLabel(store.getLabel());
+        bookstore.setDeliverFee(store.getDeliverFee());
+        bookstore.setBorrowDay(store.getBorrowDay());
         return Result.success(bookstore);
     }
 

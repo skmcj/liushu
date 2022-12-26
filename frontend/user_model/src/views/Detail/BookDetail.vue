@@ -200,6 +200,25 @@
         </div>
       </div>
     </div>
+    <!-- 点击借阅或购物车弹窗 -->
+    <el-dialog class="dialog" :visible.sync="dialogVisible">
+      <BookBorrowDialog
+        :model="dialogType"
+        :cover="bookData.book.coverUrl"
+        :book-name="bookData.book.name"
+        :author="bookData.book.author"
+        :press="bookData.book.press"
+        :pub-date="bookData.book.pubDate"
+        :size="bookData.book.size"
+        :pages="bookData.book.pages"
+        :cate-name="bookData.bookCateName"
+        :free-day="bookData.bookCost.freeDay"
+        :borrow-cost="bookData.bookCost.borrowCost"
+        :packing-cost="bookData.bookCost.packingCost"
+        :deposit="bookData.bookCost.deposit"
+        :deliver-fee="shopData.deliverFee"
+        :borrow-day="shopData.borrowDay" />
+    </el-dialog>
   </div>
 </template>
 
@@ -208,6 +227,7 @@ import Wave from '@/components/Common/Wave';
 import BookMessCard from '@/components/Card/BookMessCard';
 import ShopMessCard from '@/components/Card/ShopMessCard';
 import BookComment from '@/components/Comment/BookComment';
+import BookBorrowDialog from '@/components/Dialog/BookBorrowDialog';
 import domHandle from '@/utils/domHandleUtil';
 import { getBookDetailByIdApi } from '@/api/bookApi';
 import { getBookCateApi } from '@/api/cateApi';
@@ -219,7 +239,8 @@ export default {
     Wave,
     BookMessCard,
     ShopMessCard,
-    BookComment
+    BookComment,
+    BookBorrowDialog
   },
   data() {
     return {
@@ -269,7 +290,9 @@ export default {
       // 商品详情项DOM
       detailListDom: [],
       /** @type {HTMLElement} */
-      commentDom: {}
+      commentDom: {},
+      dialogVisible: false,
+      dialogType: 'cart'
     };
   },
   created() {
@@ -406,15 +429,17 @@ export default {
     },
     // 点击借阅
     handleBuy() {
-      console.log('借阅');
+      this.dialogVisible = true;
+      this.dialogType = 'borrow';
     },
     // 点击添加购物车
     handleAdd() {
-      console.log('加购物车');
+      this.dialogVisible = true;
+      this.dialogType = 'cart';
     },
     // 点击购物车
     handleCar() {
-      console.log('购物车');
+      this.$router.push('/mine/cart');
     },
     /**
      * 点击借阅榜项
@@ -826,6 +851,11 @@ export default {
         }
       }
     }
+  }
+}
+.dialog {
+  :deep(.el-dialog) {
+    width: 64%;
   }
 }
 </style>

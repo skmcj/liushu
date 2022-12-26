@@ -333,6 +333,7 @@ export default {
      */
     handleNav(text) {
       this.activeTab = text;
+      this.searchContent = '';
       if (text === 'hot') {
         this.currentPage = 1;
         this.getBookPageByHot();

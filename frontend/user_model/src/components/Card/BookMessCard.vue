@@ -25,19 +25,19 @@
           <!-- 出版时间 -->
           <div class="sk-book-mess-card__item">
             <span class="sk-book-mess-card__item_title">出版时间：</span>
-            <span class="sk-book-mess-card__item_text">{{ pubDate }}</span>
+            <span class="sk-book-mess-card__item_text">{{ pubDate ? pubDate : '暂无' }}</span>
           </div>
         </div>
         <div class="sk-book-mess-card__line">
           <!-- 开本 -->
           <div class="sk-book-mess-card__item">
             <span class="sk-book-mess-card__item_title">开本：</span>
-            <span class="sk-book-mess-card__item_text">{{ size }}</span>
+            <span class="sk-book-mess-card__item_text">{{ size ? size : '暂无' }}</span>
           </div>
           <!-- 页数 -->
           <div class="sk-book-mess-card__item">
             <span class="sk-book-mess-card__item_title">页数：</span>
-            <span class="sk-book-mess-card__item_text">{{ page }}</span>
+            <span class="sk-book-mess-card__item_text">{{ page ? page + '页' : '暂无' }}</span>
           </div>
         </div>
         <div class="sk-book-mess-card__line">
@@ -58,10 +58,22 @@
         <span>库存：{{ inventory }}</span>
       </div>
       <div class="sk-book-mess-card-btns">
-        <div class="sk-book-mess-card-btn sk-book-mess-card__buy" @click.stop="handleBuy">
+        <div
+          class="sk-book-mess-card-btn sk-book-mess-card__buy"
+          @click.stop="handleBuy"
+          :class="{
+            'is-disabled': !inventory
+          }"
+          :title="!inventory ? '库存不足' : ''">
           <span>立即借阅</span>
         </div>
-        <div class="sk-book-mess-card-btn sk-book-mess-card__add" @click.stop="handleAdd">
+        <div
+          class="sk-book-mess-card-btn sk-book-mess-card__add"
+          @click.stop="handleAdd"
+          :class="{
+            'is-disabled': !inventory
+          }"
+          :title="!inventory ? '库存不足' : ''">
           <span>加入购物车</span>
         </div>
       </div>
@@ -275,6 +287,10 @@ export default {
           &:active {
             background-color: #9dbdb1;
           }
+        }
+        &.is-disabled {
+          cursor: not-allowed;
+          opacity: 0.7;
         }
       }
     }
