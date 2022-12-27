@@ -35,23 +35,23 @@ public class ScheduledTask {
     /**
      * 每日 00:00:00 执行
      */
-    // @Async
-    // @Scheduled(cron = "0 38 17 * * ?")
-    // public void taskDaily() {
-    //     log.info("每日任务执行 =>" + System.currentTimeMillis());
-    // }
+    /*@Async
+    @Scheduled(cron = "0 38 17 * * ?")
+    public void taskDaily() {
+        log.info("每日任务执行 =>" + System.currentTimeMillis());
+    }*/
 
     /**
      * 计算图书喜欢度
      * 每天7、15、23点执行
      */
-    @Async
+    /*@Async
     @Scheduled(cron = "0 27 7,15,23 ? * ?")
     public void taskCalculateBookPreference() {
         // 取出之前的喜好度
         // 保存缓存中的喜好度
         // 根据之前的喜好度计算图书相似矩阵
-    }
+    }*/
 
     /**
      * 每 15 分钟 执行
