@@ -226,14 +226,21 @@ export default {
      * 借阅
      */
     borrowBuy() {
-      let orderItem = {};
+      let orderItem = {
+        borrowTime: this.borrowTime,
+        borrowCost: this.rBorrowCost,
+        packingCost: this.rPackingCost,
+        deposit: this.rDeposit,
+        amount: this.accCom(this.rBorrowCost + this.rPackingCost + this.rDeposit),
+        quantity: this.quantity
+      };
       this.$emit('borrowBuy', orderItem);
     },
     /**
      * 精度计算
      */
     accCom(val) {
-      return parseFloat(val).toFixed(2);
+      return parseFloat(parseFloat(val).toFixed(2));
     }
   }
 };

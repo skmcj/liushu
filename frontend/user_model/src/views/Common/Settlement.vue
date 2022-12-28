@@ -158,6 +158,7 @@
 import Wave from '@/components/Common/Wave';
 import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
 import commonUtil from '@/utils/common';
+import { getDefaultAddressApi } from '@/api/addressApi';
 
 export default {
   components: {
@@ -208,7 +209,7 @@ export default {
     getAddress() {
       // console.log('address =>', this.$store.state.checkedAddress);
       if (this.$isEmpty(this.$store.state.checkedAddress)) {
-        this.address = this.getDefaultAddress();
+        this.getDefaultAddress();
       } else {
         this.address = this.$store.state.checkedAddress;
       }
@@ -218,18 +219,16 @@ export default {
      */
     getDefaultAddress() {
       // 发送请求，获取默认地址
-      // 测试
-      return {
-        id: 123,
-        consignee: '张三',
-        sex: 0,
-        areaCode: '+86',
-        phone: '13489568956',
-        location: '广东省韶关市韶关大学',
-        detail: '西区曼陀罗苑',
-        label: '学校',
-        isDefault: 0
-      };
+      let address = {};
+      getDefaultAddressApi()
+        .then(res => {
+          if (res.data.flag) {
+            address = res.data.data;
+          }
+        })
+        .finally(() => {
+          this.address = address;
+        });
     },
     /**
      * 选择地址
@@ -241,6 +240,7 @@ export default {
      * 去付款
      */
     handleSettlement() {
+      // 判断类型，borrow | cart
       // 发送请求，删除购物车中选中项
       // 发送请求，生成订单
       for (const key in this.orderObj) {

@@ -436,8 +436,13 @@ export default {
       this.dialogType = 'borrow';
     },
     handleBorrowBuy(orderItem) {
-      console.log('立即借阅', orderItem);
+      // console.log('立即借阅', orderItem);
       // 打开结算面板
+      // 存储选中对象
+      let orderData = this.packingOrder(orderItem);
+      // console.log('order ==>', orderData);
+      this.$store.dispatch('setSettlementObj', orderData);
+      this.$router.push('/settlement');
     },
     // 点击添加购物车
     handleAdd() {
@@ -534,6 +539,51 @@ export default {
         list.push(item.offsetTop + inc);
       });
       return list;
+    },
+    /**
+     * 包装订单数据
+     */
+    packingOrder(item) {
+      // 待结算数据
+      let settlementObj = {};
+      // 订单对象
+      let orderObj = {};
+      // 订单数据
+      let orderData = {
+        storeId: this.shopData.id,
+        storeName: this.shopData.storeName,
+        deliverFee: this.shopData.deliverFee,
+        products: []
+      };
+      let orderItem = item;
+
+      let userInfo = this.$store.state.userInfo;
+      // 处理item
+      orderItem.userId = userInfo.id;
+      orderItem.storeId = this.shopData.id;
+      orderItem.storeName = this.shopData.storeName;
+      orderItem.bookId = this.bookData.book.id;
+      orderItem.bookCover = this.bookData.book.coverUrl;
+      orderItem.bookName = this.bookData.book.name;
+      orderItem.bookOutline = this.bookData.bookDetail.outline;
+      orderItem.inventory = this.bookData.book.inventory;
+      orderData.products.push(orderItem);
+      // 添加入订单对象
+      orderObj[this.shopData.id] = orderData;
+      // 包装结算对象信息
+      settlementObj.type = 'borrow';
+      settlementObj.data = orderObj;
+      // 总借阅费
+      settlementObj.allBorrowCost = item.borrowCost;
+      // 总包装费
+      settlementObj.allPackingCost = item.packingCost;
+      // 总配送费
+      settlementObj.allDeliverFee = this.shopData.deliverFee;
+      // 押金
+      settlementObj.allDeposit = item.deposit;
+      // 总金额
+      settlementObj.allAmount = parseFloat(parseFloat(item.amount + this.shopData.deliverFee).toFixed(2));
+      return settlementObj;
     }
   },
   computed: {

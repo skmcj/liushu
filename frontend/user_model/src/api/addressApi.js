@@ -47,3 +47,11 @@ export const deleteAddressByIdApi = function(id) {
 export const setDefaultAddressApi = function(id) {
   return request.put('/address/default', { id });
 }
+
+/**
+ * 获取登录用户默认地址
+ * @returns
+ */
+export const getDefaultAddressApi = function() {
+  return request.get('/address/default');
+}

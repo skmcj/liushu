@@ -72,6 +72,20 @@ public class AddressController {
     }
 
     /**
+     * 获取用户默认地址
+     * @return
+     */
+    @GetMapping("/default")
+    public Result<Address> getDefault(HttpServletRequest request) throws Exception {
+        User user = CommonUtil.getTokenMessByUser(request);
+        LambdaQueryWrapper<Address> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Address::getIsDefault, 1);
+        Address address = addressService.getOne(queryWrapper);
+        if(address == null) return Result.error("该用户未设默认地址");
+        return Result.success(address);
+    }
+
+    /**
      * 设置默认地址
      * @param address
      * @return

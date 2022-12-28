@@ -432,6 +432,9 @@ export default {
       } else {
         // 存储选中对象
         this.$store.dispatch('setSettlementObj', {
+          // 类型
+          type: 'cart',
+          // 商品数据
           data: checkedObj,
           // 总借阅费
           allBorrowCost: this.allBorrowCost,
