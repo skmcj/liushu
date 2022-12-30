@@ -25,17 +25,48 @@ public class AsyncConfig {
     @Value("${spring.task.pool.keep-alive}")
     private int keepAliveSeconds;
 
-    @Value("${spring.task.thread-name-prefix}")
-    private String namePrefix;
+    @Value("${spring.task.thread-name-prefix.scheduled}")
+    private String namePrefixScheduled;
 
-    @Bean
+    @Value("${spring.task.thread-name-prefix.timer-task}")
+    private String namePrefixTimerTask;
+
+    /**
+     * 定时任务线程池
+     * @return
+     */
+    @Bean("scheduledTaskPool")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);
         executor.setMaxPoolSize(maxPoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setKeepAliveSeconds(keepAliveSeconds);
-        executor.setThreadNamePrefix(namePrefix);
+        executor.setThreadNamePrefix(namePrefixScheduled);
+        /**
+         * 拒绝处理策略
+         * CallerRunsPolicy()：交由调用方线程运行，比如 main 线程。
+         * AbortPolicy()：直接抛出异常。
+         * DiscardPolicy()：直接丢弃。
+         * DiscardOldestPolicy()：丢弃队列中最老的任务。
+         */
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        executor.initialize();
+        return executor;
+    }
+
+    /**
+     * 订单延时处理线程池
+     * @return
+     */
+    @Bean("orderListenerPool")
+    public Executor orderListenerExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setKeepAliveSeconds(keepAliveSeconds);
+        executor.setThreadNamePrefix(namePrefixTimerTask);
         /**
          * 拒绝处理策略
          * CallerRunsPolicy()：交由调用方线程运行，比如 main 线程。

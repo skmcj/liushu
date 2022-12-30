@@ -24,7 +24,7 @@ public class ScheduledTask {
     /**
      * 每月 1 号 00:00:00 执行
      */
-    @Async
+    @Async("scheduledTaskPool")
     @Scheduled(cron = "0 0 0 1 * ?")
     public void taskMonthly() {
         log.info("每月任务执行 =>" + System.currentTimeMillis());
@@ -56,7 +56,7 @@ public class ScheduledTask {
     /**
      * 每 15 分钟 执行
      */
-    @Async
+    @Async("scheduledTaskPool")
     @Scheduled(fixedRate = 900000)
     public void taskMinute() {
         log.info("每15分钟执行 =>" + System.currentTimeMillis());

@@ -1,5 +1,6 @@
 package top.skmcj.liushu.entity;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
@@ -9,6 +10,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 订单表
@@ -105,6 +107,11 @@ public class Order implements Serializable {
     private BigDecimal discountAmount;
 
     /**
+     * 优惠卷ID列表
+     */
+    private String discountIds;
+
+    /**
      * 实付金额 = 订单总金额 - 优惠金额
      */
     private BigDecimal amount;
@@ -151,5 +158,13 @@ public class Order implements Serializable {
      */
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
+
+    /**
+     * 获取优惠卷ID列表
+     * @return
+     */
+    public List<Long> getDiscountList() {
+        return JSON.parseObject(discountIds, List.class);
+    }
 
 }

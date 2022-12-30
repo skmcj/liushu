@@ -1,5 +1,6 @@
 package top.skmcj.liushu.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -31,11 +32,13 @@ public class OrderItem implements Serializable {
     /**
      * 图书名称
      */
+    @TableField(exist = false)
     private String bookName;
 
     /**
      * 图书封面
      */
+    @TableField(exist = false)
     private String bookCover;
 
     /**

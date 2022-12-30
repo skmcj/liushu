@@ -3,9 +3,11 @@ package top.skmcj.liushu.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import top.skmcj.liushu.dao.mapper.OrderMapper;
 import top.skmcj.liushu.dto.OrderDto;
@@ -15,9 +17,11 @@ import top.skmcj.liushu.entity.OrderItem;
 import top.skmcj.liushu.service.OrderItemService;
 import top.skmcj.liushu.service.OrderService;
 import top.skmcj.liushu.vo.OrderPageVo;
+import top.skmcj.liushu.vo.OrderVo;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
@@ -67,5 +71,61 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.page(pageInfo, queryWrapper);
 
         return pageInfo;
+    }
+
+    /**
+     * 创建订单
+     * @param orderDto
+     * @return
+     */
+    @Override
+    public boolean generateOrder(OrderDto orderDto) {
+        // 生成预订单
+        //
+        /** 是否使用优惠卷
+         * 使用 - 判断优惠卷是否合法
+         */
+        // 核算总金额
+        // 生成数据库记录 - 订单数据
+        // 扣减相应库存
+        return false;
+    }
+
+    /**
+     * 支付订单
+     * 将订单的支付状态改为1
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean payOrder(Long orderId) {
+        return false;
+    }
+
+    /**
+     * 监听订单订单
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean ListenerOrder(Long orderId) {
+        return false;
+    }
+
+    /**
+     * 取消订单
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean cancelOrder(Long orderId) {
+        log.info("取消订单 ==> " + orderId);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        log.info("取消完成 ==> " + orderId);
+        return false;
     }
 }
