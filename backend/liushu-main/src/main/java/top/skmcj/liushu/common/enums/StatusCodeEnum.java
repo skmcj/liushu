@@ -138,7 +138,17 @@ public enum StatusCodeEnum {
     EMPLOYEE_SEARCH_OK(21067, "员工搜索成功"),
     EMPLOYEE_EXISTS(21068, "员工已存在"),
 
-    GOODSCATE_DEL_ERR(21071, "该分类下还有在售图书，不可删除")
+    GOODSCATE_DEL_ERR(21071, "该分类下还有在售图书，不可删除"),
+
+    ORDER_GEN_OK(21080, "订单创建成功"),
+    ORDER_GEN_ERR(21081, "订单创建失败"),
+    ORDER_GEN_ITEM_ERR(21082, "订单内商品存在不合法状态"),
+    ORDER_GEN_SHOP_ERR(21083, "商家未营业"),
+    ORDER_PAY_OK(21091, "订单支付成功"),
+    ORDER_PAY_ERR(21092, "订单支付失败"),
+    ORDER_PAY_NO_MONEY(21093, "用户余额不足"),
+    ORDER_PAY_NO_PASS(21094, "用户尚未设置支付密码，无法支付"),
+    ORDER_PAY_PASS_ERR(21095, "用户支付密码错误")
     ;
 
     // 状态码

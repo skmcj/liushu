@@ -119,6 +119,7 @@ public class FrontendStoreController {
     public Result<List<Book>> getBookRank(Long storeId, int size, HttpServletRequest request) {
         LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Book::getStoreId, storeId);
+        queryWrapper.eq(Book::getStatus, 1);
         queryWrapper.orderByDesc(Book::getTba);
         queryWrapper.orderByDesc(Book::getMba);
         queryWrapper.orderByDesc(Book::getUpdateTime);

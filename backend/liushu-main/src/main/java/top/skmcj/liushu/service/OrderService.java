@@ -13,7 +13,7 @@ public interface OrderService extends IService<Order> {
 
     Page getOrderPage(OrderPageVo pageVo, Long storeId);
 
-    boolean generateOrder(OrderDto orderDto);
+    OrderDto generateOrder(OrderDto orderDto);
 
     boolean payOrder(Long orderId);
 

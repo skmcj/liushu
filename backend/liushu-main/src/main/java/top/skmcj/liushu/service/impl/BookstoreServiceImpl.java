@@ -38,6 +38,8 @@ public class BookstoreServiceImpl extends ServiceImpl<BookstoreMapper, Bookstore
 
         for(int i = 0; i < sizeArr.length; i++) {
             LambdaQueryWrapper<Bookstore> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Bookstore::getStatus, 1);
+            queryWrapper.eq(Bookstore::getAuditStatus, 2);
             queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int)(total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
             List<Bookstore> list = this.list(queryWrapper);
             list.stream().forEach(item -> {

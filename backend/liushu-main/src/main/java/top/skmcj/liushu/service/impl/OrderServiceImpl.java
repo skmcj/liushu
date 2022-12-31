@@ -9,16 +9,20 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.skmcj.liushu.dao.mapper.OrderMapper;
 import top.skmcj.liushu.dto.OrderDto;
 import top.skmcj.liushu.entity.Book;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.entity.OrderItem;
+import top.skmcj.liushu.service.BookService;
 import top.skmcj.liushu.service.OrderItemService;
 import top.skmcj.liushu.service.OrderService;
+import top.skmcj.liushu.util.NumberUtil;
 import top.skmcj.liushu.vo.OrderPageVo;
 import top.skmcj.liushu.vo.OrderVo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +31,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private OrderItemService orderItemService;
+
+    @Autowired
+    private BookService bookService;
 
     /**
      * 根据id获取订单完整信息
@@ -79,16 +86,42 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return
      */
     @Override
-    public boolean generateOrder(OrderDto orderDto) {
+    @Transactional
+    public OrderDto generateOrder(OrderDto orderDto) {
         // 生成预订单
-        //
-        /** 是否使用优惠卷
-         * 使用 - 判断优惠卷是否合法
-         */
-        // 核算总金额
-        // 生成数据库记录 - 订单数据
+        // 生成总订单
+        Order order = new Order();
+        order.setNumber(NumberUtil.genOrderNumberStr());
+        order.setUserId(orderDto.getUserId());
+        order.setStoreId(orderDto.getStoreId());
+        order.setAddressId(orderDto.getAddressId());
+        order.setConsignee(orderDto.getConsignee());
+        order.setPhone(orderDto.getPhone());
+        order.setAddress(orderDto.getAddress());
+        order.setBorrowTime(orderDto.getBorrowTime());
+        order.setRenewDuration(orderDto.getRenewDuration());
+        order.setExpectedTime(orderDto.getExpectedTime());
+        order.setDeliveryFee(orderDto.getDeliveryFee());
+        order.setOrderAmount(orderDto.getOrderAmount());
+        order.setDiscountAmount(orderDto.getDiscountAmount());
+        order.setDiscountIds(orderDto.getDiscountIds());
+        order.setAmount(orderDto.getAmount());
+        order.setRemark(orderDto.getRemark());
+        this.save(order);
+        // 生成订单项
         // 扣减相应库存
-        return false;
+        List<OrderItem> orderItems = orderDto.getOrderItems();
+        orderItems.stream().forEach(item -> {
+            item.setOrderId(order.getId());
+            orderItemService.save(item);
+            Book book = bookService.getById(item.getBookId());
+            Book uBook = new Book();
+            uBook.setId(item.getBookId());
+            uBook.setInventory(book.getInventory() - item.getQuantity());
+            bookService.updateById(uBook);
+        });
+        OrderDto rOrder = this.packingOrderDto(order, orderItems);
+        return rOrder;
     }
 
     /**
@@ -99,7 +132,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public boolean payOrder(Long orderId) {
-        return false;
+        // 设置订单为对应状态
+        Order order = new Order();
+        order.setId(orderId);
+        // 交易状态
+        order.setTradeStatus(1);
+        // 支付状态
+        order.setPayStatus(1);
+        order.setPayTime(LocalDateTime.now());
+        boolean flag = this.updateById(order);
+        return flag;
     }
 
     /**
@@ -118,14 +160,65 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return
      */
     @Override
+    @Transactional
     public boolean cancelOrder(Long orderId) {
-        log.info("取消订单 ==> " + orderId);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        log.info("取消完成 ==> " + orderId);
-        return false;
+        // 订单未支付
+        Order order = new Order();
+        order.setId(orderId);
+        // 交易状态设为取消
+        order.setTradeStatus(2);
+        this.updateById(order);
+        LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(OrderItem::getOrderId, orderId);
+        List<OrderItem> orderItems = orderItemService.list(itemWrapper);
+        // 设置订单项的状态为取消
+        orderItems.stream().forEach(item -> {
+            // 返回库存
+            Book oldBook = bookService.getById(item.getBookId());
+            Book book = new Book();
+            book.setId(item.getBookId());
+            book.setInventory(oldBook.getInventory() + item.getQuantity());
+            bookService.updateById(book);
+        });
+        return true;
+    }
+
+    /**
+     * 整合包装订单数据
+     * @param order
+     * @param orderItems
+     * @return
+     */
+    private OrderDto packingOrderDto(Order order, List<OrderItem> orderItems) {
+        OrderDto orderDto = new OrderDto();
+        orderDto.setId(order.getId());
+        orderDto.setNumber(order.getNumber());
+        orderDto.setUserId(order.getUserId());
+        orderDto.setStoreId(order.getStoreId());
+        orderDto.setAddressId(order.getAddressId());
+        orderDto.setConsignee(order.getConsignee());
+        orderDto.setPhone(order.getPhone());
+        orderDto.setAddress(order.getAddress());
+        orderDto.setBorrowTime(order.getBorrowTime());
+        orderDto.setRenewDuration(order.getRenewDuration());
+        orderDto.setExpectedTime(order.getExpectedTime());
+        orderDto.setDeliveryFee(order.getDeliveryFee());
+        orderDto.setShippingMethod(order.getShippingMethod());
+        orderDto.setPayMethod(order.getPayMethod());
+        orderDto.setPayTime(order.getPayTime());
+        orderDto.setOrderAmount(order.getOrderAmount());
+        orderDto.setDiscountAmount(order.getDiscountAmount());
+        orderDto.setDiscountIds(order.getDiscountIds());
+        orderDto.setAmount(order.getAmount());
+        orderDto.setRemark(order.getRemark());
+        orderDto.setTradeStatus(order.getTradeStatus());
+        orderDto.setPayStatus(order.getPayStatus());
+        orderDto.setAmStatus(order.getAmStatus());
+        orderDto.setStatus(order.getStatus());
+        orderDto.setCreateTime(order.getCreateTime());
+        orderDto.setUpdateTime(order.getUpdateTime());
+        orderDto.setIsDeleted(order.getIsDeleted());
+        orderDto.setOrderItems(orderItems);
+        return orderDto;
     }
 }

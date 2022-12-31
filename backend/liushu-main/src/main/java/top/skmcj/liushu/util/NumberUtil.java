@@ -17,4 +17,12 @@ public class NumberUtil {
     public static long genOrderNumber() {
         return numberGenerator.nextId();
     }
+
+    /**
+     * 生成一个订单号
+     * @return
+     */
+    public static String genOrderNumberStr() {
+        return String.valueOf(numberGenerator.nextId());
+    }
 }

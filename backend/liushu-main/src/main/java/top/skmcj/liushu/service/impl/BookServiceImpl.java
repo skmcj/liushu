@@ -211,7 +211,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
      */
     @Override
     public List<BookCardDto> getBookByRandom(int size) {
-        long total = this.count();
+        LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
+        bookWrapper.eq(Book::getStatus, 1);
+        long total = this.count(bookWrapper);
         List<BookCardDto> bookCards = new ArrayList<>();
         List<Book> books = new ArrayList<>();
         SecureRandom random = new SecureRandom();
@@ -220,6 +222,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
         for (int i = 0; i < sizeArr.length; i++) {
             LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Book::getStatus, 1);
             queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int) (total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
             List<Book> list = this.list(queryWrapper);
             list.stream().forEach(item -> {
@@ -270,6 +273,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         List<BookCardDto> bookCards = new ArrayList<>();
         LambdaQueryWrapper<Book> countWrapper = new LambdaQueryWrapper<>();
         countWrapper.eq(Book::getBookCateId, cateId);
+        countWrapper.eq(Book::getStatus, 1);
         long total = this.count(countWrapper);
         List<Book> books = new ArrayList<>();
         SecureRandom random = new SecureRandom();
@@ -279,6 +283,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         for (int i = 0; i < sizeArr.length; i++) {
             LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Book::getBookCateId, cateId);
+            queryWrapper.eq(Book::getStatus, 1);
             queryWrapper.last("LIMIT " + String.valueOf(random.nextInt((int) (total - sizeArr[i] + 1))) + ", " + sizeArr[i]);
             List<Book> list = this.list(queryWrapper);
             list.stream().forEach(item -> {
@@ -340,6 +345,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     public List<Book> getBookRankByCate(Integer cateId, int size) {
         LambdaQueryWrapper<Book> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Book::getBookCateId, cateId);
+        queryWrapper.eq(Book::getStatus, 1);
         queryWrapper.orderByDesc(Book::getTba);
         queryWrapper.orderByDesc(Book::getMba);
         queryWrapper.orderByDesc(Book::getUpdateTime);
@@ -405,6 +411,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         Page<Book> bookPage = new Page<>(currentPage, pageSize);
         LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
         bookWrapper.eq(Book::getBookCateId, cateId);
+        bookWrapper.eq(Book::getStatus, 1);
         bookWrapper.orderByDesc(Book::getUpdateTime);
         this.page(bookPage, bookWrapper);
         List<Book> books = bookPage.getRecords();
@@ -457,6 +464,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         // 获取图书列表
         LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
         bookWrapper.eq(Book::getStoreId, storeId);
+        bookWrapper.eq(Book::getStatus, 1);
         bookWrapper.orderByDesc(Book::getTba);
         bookWrapper.orderByDesc(Book::getMba);
         bookWrapper.orderByDesc(Book::getUpdateTime);
@@ -516,6 +524,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
         bookWrapper.eq(Book::getStoreId, storeId);
         bookWrapper.eq(Book::getGoodsCateId, cateId);
+        bookWrapper.eq(Book::getStatus, 1);
         bookWrapper.orderByDesc(Book::getUpdateTime);
         this.page(bookPage, bookWrapper);
         // 获取商家信息
@@ -573,6 +582,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         LambdaQueryWrapper<Book> searchWrapper = new LambdaQueryWrapper<>();
         boolean hasText = StringUtils.isNotEmpty(text);
         searchWrapper.eq(Book::getStoreId, storeId);
+        searchWrapper.eq(Book::getStatus, 1);
         if(hasText) {
             searchWrapper.like(Book::getName, text);
             searchWrapper.or().like(Book::getAuthor, text);
