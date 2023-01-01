@@ -1,6 +1,7 @@
 package top.skmcj.liushu.controller.frontend;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +12,7 @@ import top.skmcj.liushu.common.task.order.OrderListenerTask;
 import top.skmcj.liushu.dto.OrderDto;
 import top.skmcj.liushu.entity.*;
 import top.skmcj.liushu.service.*;
-import top.skmcj.liushu.util.BigDecimalUtil;
-import top.skmcj.liushu.util.JwtUtil;
-import top.skmcj.liushu.util.NumberUtil;
-import top.skmcj.liushu.util.TimingWheelUtil;
+import top.skmcj.liushu.util.*;
 import top.skmcj.liushu.vo.OrderPayVo;
 import top.skmcj.liushu.vo.OrderVo;
 
@@ -218,5 +216,44 @@ public class FrontendOrderController {
         moneyInfo.setMoney(BigDecimalUtil.subtract(balance, amount));
         infoService.updateById(moneyInfo);
         return Result.success(StatusCodeEnum.ORDER_PAY_OK);
+    }
+
+    /**
+     * 分页获取用户所有订单
+     * @param currentPage
+     * @param pageSize
+     * @param request
+     * @return
+     */
+    @GetMapping("/all")
+    public Result<Page<OrderDto>> getAllOrder(int currentPage, int pageSize, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        User user = JwtUtil.verifyTokenOfUser(token);
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        Page<OrderDto> orderPage = orderService.getAllOrderOfPage(user.getId(), currentPage, pageSize, imgDoMain);
+        return Result.success(orderPage);
+    }
+
+    /**
+     * 根据订单状态分页获取用户订单
+     * @param status
+     *  1 - 待付款 payStatus: 0
+     *  2 - 待配送 status: 0、1
+     *  3 - 待归还 status: 2、3、6
+     *  4 - 待评价 status: 4、7
+     *  5 - 退款/售后 status: 8
+     * @param currentPage
+     * @param pageSize
+     * @param request
+     * @return
+     */
+    @GetMapping("/{status}")
+    public Result<Page<OrderDto>> getOrderByStatus(@PathVariable int status,
+                                                   int currentPage, int pageSize, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        User user = JwtUtil.verifyTokenOfUser(token);
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        Page<OrderDto> orderPage = orderService.getOrderByStatusOfPage(user.getId(), status, currentPage, pageSize, imgDoMain);
+        return Result.success(orderPage);
     }
 }

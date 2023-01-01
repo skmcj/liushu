@@ -20,4 +20,8 @@ public interface OrderService extends IService<Order> {
     boolean ListenerOrder(Long orderId);
 
     boolean cancelOrder(Long orderId);
+
+    Page<OrderDto> getAllOrderOfPage(Long userId, int currentPage, int pageSize, String imgDoMain);
+
+    Page<OrderDto> getOrderByStatusOfPage(Long userId, int status, int currentPage, int pageSize, String imgDoMain);
 }

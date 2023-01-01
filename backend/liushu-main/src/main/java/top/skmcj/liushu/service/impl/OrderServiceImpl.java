@@ -3,6 +3,7 @@ package top.skmcj.liushu.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sun.tools.corba.se.idl.constExpr.Or;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -24,6 +25,7 @@ import top.skmcj.liushu.vo.OrderVo;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -184,6 +186,99 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
+     * 前台分页获取用户订单
+     * @param userId
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    @Transactional
+    public Page<OrderDto> getAllOrderOfPage(Long userId, int currentPage, int pageSize, String imgDoMain) {
+        Page<OrderDto> orderDtoPage = new Page<>();
+        Page<Order> orderPage = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+        orderWrapper.eq(Order::getUserId, userId);
+        // 获取对应页码的用户订单数据
+        this.page(orderPage, orderWrapper);
+        List<Order> orders = orderPage.getRecords();
+        List<OrderDto> orderDtos = null;
+        if (orders != null) {
+            // 封装为 OrderDto
+            orderDtos = orders.stream().map(item -> {
+                LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
+                orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
+                // 获取订单项
+                List<OrderItem> orderItems = orderItemService.list(orderItemWrapper);
+                // 获取订单图书封面
+                orderItems.stream().forEach(orderItem -> {
+                    Book book = bookService.getById(orderItem.getBookId());
+                    orderItem.setBookName(book.getName());
+                    orderItem.setBookCover(imgDoMain + book.getCover());
+                });
+                // 封装
+                OrderDto orderDto = packingOrderDto(item, orderItems);
+
+                return orderDto;
+            }).collect(Collectors.toList());
+        }
+        orderDtoPage.setRecords(orderDtos);
+        orderDtoPage.setTotal(orderPage.getTotal());
+        orderDtoPage.setSize(orderPage.getSize());
+        orderDtoPage.setCurrent(orderPage.getCurrent());
+        return orderDtoPage;
+    }
+
+    /**
+     * 根据订单状态分页获取对应用户订单
+     * @param userId
+     * @param status
+     *  1 - 待付款 payStatus: 0
+     *  2 - 待配送 status: 0、1
+     *  3 - 待归还 status: 2、3、6
+     *  4 - 待评价 status: 4、7
+     *  5 - 退款/售后 status: 8
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    @Transactional
+    public Page<OrderDto> getOrderByStatusOfPage(Long userId, int status, int currentPage, int pageSize, String imgDoMain) {
+        Page<OrderDto> orderDtoPage = new Page<>();
+        Page<Order> orderPage = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Order> orderWrapper = getOrderWrapperByStatus(userId, status);
+        // 获取对应订单
+        this.page(orderPage, orderWrapper);
+        List<Order> orders = orderPage.getRecords();
+        List<OrderDto> orderDtos = null;
+        if (orders != null) {
+            // 封装为 OrderDto
+            orderDtos = orders.stream().map(item -> {
+                LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
+                orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
+                // 获取订单项
+                List<OrderItem> orderItems = orderItemService.list(orderItemWrapper);
+                // 获取订单图书封面
+                orderItems.stream().forEach(orderItem -> {
+                    Book book = bookService.getById(orderItem.getBookId());
+                    orderItem.setBookName(book.getName());
+                    orderItem.setBookCover(imgDoMain + book.getCover());
+                });
+                // 封装
+                OrderDto orderDto = packingOrderDto(item, orderItems);
+
+                return orderDto;
+            }).collect(Collectors.toList());
+        }
+        orderDtoPage.setRecords(orderDtos);
+        orderDtoPage.setTotal(orderPage.getTotal());
+        orderDtoPage.setSize(orderPage.getSize());
+        orderDtoPage.setCurrent(orderPage.getCurrent());
+        return orderDtoPage;
+    }
+
+    /**
      * 整合包装订单数据
      * @param order
      * @param orderItems
@@ -220,5 +315,53 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderDto.setIsDeleted(order.getIsDeleted());
         orderDto.setOrderItems(orderItems);
         return orderDto;
+    }
+
+    /**
+     * 根据状态返回对应条件Wrapper
+     * @param userId
+     * @param status
+     *  1 - 待付款 payStatus: 0
+     *  2 - 待配送 status: 0、1
+     *  3 - 待归还 status: 2、3、6
+     *  4 - 待评价 status: 4、7
+     *  5 - 退款/售后 status: 8
+     * @return
+     */
+    private LambdaQueryWrapper<Order> getOrderWrapperByStatus(Long userId, int status) {
+        LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+        if(status == 1) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 0);
+            orderWrapper.eq(Order::getPayStatus, 0);
+        } else if(status == 2) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 1);
+            orderWrapper.eq(Order::getPayStatus, 1);
+            orderWrapper.eq(Order::getStatus, 0);
+            orderWrapper.or().eq(Order::getStatus, 1);
+        } else if(status == 3) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 1);
+            orderWrapper.eq(Order::getPayStatus, 1);
+            orderWrapper.eq(Order::getStatus, 2);
+            orderWrapper.or().eq(Order::getStatus, 3);
+            orderWrapper.or().eq(Order::getStatus, 6);
+        } else if(status == 4) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 1);
+            orderWrapper.eq(Order::getPayStatus, 1);
+            orderWrapper.eq(Order::getStatus, 4);
+            orderWrapper.or().eq(Order::getStatus, 7);
+        } else if(status == 5) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 1);
+            orderWrapper.eq(Order::getPayStatus, 1);
+            orderWrapper.eq(Order::getStatus, 8);
+        } else {
+            // 默认搜索全部
+            orderWrapper.eq(Order::getUserId, userId);
+        }
+        return orderWrapper;
     }
 }
