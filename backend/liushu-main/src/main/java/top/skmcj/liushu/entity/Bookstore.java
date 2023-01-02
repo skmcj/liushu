@@ -72,7 +72,7 @@ public class Bookstore implements Serializable {
     /**
      * 配送费
      */
-    private BigDecimal deliverFee;
+    private BigDecimal deliveryFee;
 
     /**
      * 默认首次借阅时长

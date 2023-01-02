@@ -41,7 +41,7 @@ public class BusinessAuthVo implements Serializable {
     /**
      * 配送费
      */
-    private BigDecimal deliverFee;
+    private BigDecimal deliveryFee;
 
     /**
      * 营业执照

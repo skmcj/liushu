@@ -70,7 +70,7 @@ public class BookstoreServiceImpl extends ServiceImpl<BookstoreMapper, Bookstore
         targetStore.setAddress(store.getAddress());
         targetStore.setBusinessHours(store.getBusinessHours());
         targetStore.setDistribution(store.getDistribution());
-        targetStore.setDeliverFee(store.getDeliverFee());
+        targetStore.setDeliveryFee(store.getDeliveryFee());
         targetStore.setBorrowDay(store.getBorrowDay());
         targetStore.setRenewDay(store.getRenewDay());
         targetStore.setStoreService(store.getStoreService());

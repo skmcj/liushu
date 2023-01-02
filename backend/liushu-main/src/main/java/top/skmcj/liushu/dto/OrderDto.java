@@ -11,6 +11,12 @@ import java.util.List;
  */
 @Data
 public class OrderDto extends Order {
+
+    /**
+     * 商家名称
+     */
+    private String storeName;
+
     /**
      * 订单项列表
      */

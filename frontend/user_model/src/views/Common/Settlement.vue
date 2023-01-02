@@ -104,6 +104,7 @@
                   :options="options"
                   :props="{ expandTrigger: 'hover' }"
                   separator=" "
+                  placeholder="请选择期望配送时间"
                   @change="handleExpectTime"></el-cascader>
               </div>
               <div class="mess-box">
@@ -117,7 +118,7 @@
                 </div>
                 <div class="mess-item">
                   <span class="label">预估配送费：</span>
-                  <span class="text">{{ '￥ ' + $keepTwoNum(allDeliverFee) }}</span>
+                  <span class="text">{{ '￥ ' + $keepTwoNum(alldeliveryFee) }}</span>
                 </div>
                 <div class="mess-item">
                   <span class="label">押金：</span>
@@ -145,10 +146,17 @@
       destroy-on-close
       @close="handlePayPanelClose">
       <div class="order-to-pay">
-        <PaymentPanel :cart-obj="orderObj" :amount="allAmount" />
+        <PaymentPanel
+          :order-list="orderDtoList"
+          :amount="allAmount"
+          :money="money"
+          :pay-type="payType"
+          @overtime="handleOrderOvertime"
+          @payMethod="handlePayMethod"
+          @payComplete="handlePayComplete" />
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="payDialogVisible = false" round>确认 支付</el-button>
+        <el-button type="primary" :disabled="isOvertime" @click="handlePay" round>确认 支付</el-button>
       </span>
     </el-dialog>
   </div>
@@ -158,7 +166,9 @@
 import Wave from '@/components/Common/Wave';
 import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
 import commonUtil from '@/utils/common';
+import { deleteCartApi } from '@/api/cartApi';
 import { getDefaultAddressApi } from '@/api/addressApi';
+import { generateOrderApi, payOrderByLSApi } from '@/api/orderApi';
 
 export default {
   components: {
@@ -167,19 +177,25 @@ export default {
   },
   data() {
     return {
+      payPass: '',
+      payType: 'borrow',
+      isOvertime: false,
+      payMethod: 'balance',
+      money: 0,
       // 收银台
       payDialogVisible: false,
       address: {},
       expectTime: '',
       options: [],
       orderObj: {},
+      orderDtoList: [],
       businessHours: '8:30-20:30',
       // 总借阅费
       allBorrowCost: 0,
       // 总包装费
       allPackingCost: 0,
       // 总配送费
-      allDeliverFee: 0,
+      alldeliveryFee: 0,
       // 押金
       allDeposit: 0,
       // 总金额
@@ -187,17 +203,19 @@ export default {
     };
   },
   created() {
+    this.payType = this.$store.state.settlementObj.type ? this.$store.state.settlementObj.type : 'borrow';
     this.orderObj = this.$store.state.settlementObj.data;
     // 总借阅费
     this.allBorrowCost = this.$store.state.settlementObj.allBorrowCost;
     // 总包装费
     this.allPackingCost = this.$store.state.settlementObj.allPackingCost;
     // 总配送费
-    this.allDeliverFee = this.$store.state.settlementObj.allDeliverFee;
+    this.alldeliveryFee = this.$store.state.settlementObj.alldeliveryFee;
     // 押金
     this.allDeposit = this.$store.state.settlementObj.allDeposit;
     // 总金额
     this.allAmount = this.$store.state.settlementObj.allAmount;
+    this.money = this.$store.state.userInfo.money;
     this.options = this.packingOptions(this.businessHours);
     // $store如果地址为空，获取默认地址
     this.getAddress();
@@ -239,22 +257,127 @@ export default {
     /**
      * 去付款
      */
-    handleSettlement() {
-      // 判断类型，borrow | cart
-      // 发送请求，删除购物车中选中项
-      // 发送请求，生成订单
-      for (const key in this.orderObj) {
-        this.orderObj[key].createTime = new Date();
-        this.orderObj[key].payStatus = 0;
+    async handleSettlement() {
+      if (this.$isEmpty(this.address)) {
+        this.$showMsg('请选择配送地址');
+        return;
       }
-      console.log('order =>', this.orderObj);
-      this.payDialogVisible = true;
+      if (this.$isEmpty(this.expectTime)) {
+        this.$showMsg('请选择期望配送时间');
+        return;
+      }
+      // 获取待结算订单信息
+      let genOrderList = this.packingOrderList(this.orderObj);
+      // console.log('orderList ==>', genOrderList);
+      this.orderDtoList = await this.generateOrderOfList(genOrderList);
+      if (this.orderDtoList.length > 0) {
+        // 订单生成成功
+        this.updateAmount(this.orderDtoList);
+        this.payDialogVisible = true;
+        // 判断类型，borrow | cart
+        // 发送请求，删除购物车中选中项
+        if (this.payType === 'cart') {
+          let ids = this.getCartIds(this.orderObj, this.orderDtoList);
+          this.deleteCart(ids);
+        }
+      }
+    },
+    /**
+     * 账户支付密码
+     */
+    handlePayComplete(val) {
+      this.payPass = val;
+      // console.log('pass pay ==>', val);
+    },
+    /**
+     * 确认支付
+     */
+    handlePay() {
+      // console.log('确认支付');
+      // this.payDialogVisible = false;
+      if (this.payMethod === 'balance') {
+        if (this.$isEmpty(this.payPass)) {
+          this.$showMsg('请输入支付密码');
+          return;
+        }
+        // 账户余额支付
+        if (this.money > this.allAmount) {
+          // 进行支付
+          this.payOrderOfList(this.orderDtoList);
+        } else {
+          // 余额不足
+          this.$showMsg('账户余额不足，请充值后前往订单页支付', {
+            type: 'warning',
+            duration: 1200,
+            closeFunc: () => {
+              this.$router.replace('/mine');
+            }
+          });
+        }
+      }
+    },
+    /**
+     * 批量支付订单
+     */
+    async payOrderOfList(list) {
+      let payPass = this.$sha256(this.payPass.substring(0, 6));
+      for (const order of list) {
+        let res = await payOrderByLSApi(order.id, payPass);
+        if (!res.data.flag) {
+          this.$showMsg('订单支付失败，请稍后再试', {
+            type: 'error',
+            duration: 1200,
+            closeFunc: () => {
+              this.$router.replace('/mine');
+            }
+          });
+          return;
+        }
+      }
+      this.$showMsg('支付成功', {
+        type: 'success',
+        closeFunc: () => {
+          this.$router.replace('/mine/order').catch(err => {});
+        }
+      });
+    },
+    /**
+     * 支付方式
+     */
+    handlePayMethod(val) {
+      this.payMethod = val;
+    },
+    /**
+     * 批量生成订单
+     */
+    async generateOrderOfList(list) {
+      let orderList = [];
+      for (const item of list) {
+        let res = await generateOrderApi(item);
+        // console.log('gen order ==>', res);
+        if (res.data.flag) {
+          orderList.push(res.data.data);
+        } else {
+          this.$showMsg('订单生成失败，请稍后再试', {
+            type: 'error',
+            duration: 1200
+          });
+        }
+      }
+      return orderList;
     },
     /**
      * 期望时间
      */
     handleExpectTime(val) {
-      console.log('select time =>', val);
+      // console.log('select time =>', val);
+    },
+    /**
+     * 订单超时
+     */
+    handleOrderOvertime(val) {
+      // console.log('订单超时 ==> ', val);
+      this.isOvertime = true;
     },
     /**
      * 包装期望时间列表
@@ -276,10 +399,6 @@ export default {
       // 初始化options
       let options = [
         {
-          label: '立即配送',
-          value: commonUtil.formatDate(now, 'YYYY-mm-dd HH:MM')
-        },
-        {
           label: '今天',
           value: commonUtil.formatDate(now),
           children: []
@@ -295,22 +414,89 @@ export default {
           children: []
         }
       ];
-      for (let i = 1; i < options.length; i++) {
+      for (let i = 0; i < options.length; i++) {
         let h = 0;
         let m = 0;
         let t = sTime + 20;
         while (t < eTime) {
-          h = parseInt(t / 60);
-          m = t % 60;
+          h = commonUtil.formatUnits(parseInt(t / 60));
+          m = commonUtil.formatUnits(t % 60);
           options[i].children.push({
             label: h + ':' + m,
             value: h + ':' + m,
-            disabled: i === 1 && t < nTime
+            disabled: i === 0 && t < nTime
           });
           t += 20;
         }
       }
+      // 添加立即配送
+      if (!this.isExceedBusinessTime(now, etList)) {
+        // 当前时间未超过营业时间
+        options.unshift({
+          label: '立即配送',
+          value: commonUtil.formatDate(now, 'YYYY-mm-dd HH:MM')
+        });
+      }
       return options;
+    },
+    /**
+     * 包装订单数据
+     */
+    packingOrderList(orderObj) {
+      let userInfo = this.$store.state.userInfo;
+      let list = [];
+      for (const key in orderObj) {
+        let item = {};
+        item.userId = userInfo.id;
+        item.storeId = orderObj[key].storeId;
+        item.addressId = this.address.id;
+        item.consignee = this.address.consignee;
+        item.address = this.address.location + this.address.detail;
+        item.borrowTime = orderObj[key].products[0].borrowTime;
+        item.expectedTime = this.expectTime.join(' ') + ':00';
+        item.remark = orderObj[key].remark ? orderObj[key].remark : null;
+        item.phone = this.address.areaCode + ' ' + this.address.phone;
+        item.deliveryFee = orderObj[key].deliveryFee;
+        item.orderItems = [];
+        let orderAmount = 0;
+        let discountAmount = 0;
+        let amount = 0;
+        for (const product of orderObj[key].products) {
+          let orderItem = {};
+          if (product.amount) {
+            orderAmount += product.amount;
+          }
+          if (product.discountAmount) {
+            discountAmount += product.discountAmount;
+          }
+          orderItem.bookId = product.bookId;
+          orderItem.quantity = product.quantity;
+          orderItem.borrowCost = product.borrowCost;
+          orderItem.packingCost = product.packingCost;
+          orderItem.amount = product.amount;
+          orderItem.deposit = product.deposit;
+          item.orderItems.push(orderItem);
+        }
+        item.orderAmount = this.accToFixedTwo(orderAmount);
+        item.discountAmount = this.accToFixedTwo(discountAmount);
+        item.amount = this.accToFixedTwo(orderAmount - discountAmount);
+        list.push(item);
+      }
+      return list;
+    },
+    /**
+     * 是否超过营业时间
+     * @param {Date} date
+     * @param {Array} etList
+     */
+    isExceedBusinessTime(date, etList) {
+      let h = date.getHours();
+      let m = date.getMinutes();
+      if (h < etList[0]) return true;
+      if (h > etList[2]) return true;
+      if (h === etList[0] && m < etList[1]) return true;
+      if (h === etList[2] && m > etList[3]) return true;
+      return false;
     },
     /**
      * 支付面板关闭
@@ -319,6 +505,36 @@ export default {
       // 暂时跳转到首页
       // this.$router.replace('/');
       this.$router.replace('/mine/cart');
+    },
+    /**
+     * 删除购物车项
+     */
+    deleteCart(ids) {
+      deleteCartApi(ids).then(res => {
+        if (!res.data.flag) {
+          console.warn('已结算购物车信息清除失败');
+        }
+      });
+    },
+    accToFixedTwo(num) {
+      return parseFloat(parseFloat(num).toFixed(2));
+    },
+    getCartIds(orderObj, orderList) {
+      let ids = [];
+      for (const item of orderList) {
+        let storeId = item.storeId;
+        for (const cart of orderObj[storeId].products) {
+          if (cart.id) ids.push(cart.id);
+        }
+      }
+      return ids;
+    },
+    updateAmount(orderDtoList) {
+      let amount = 0;
+      for (const order of orderDtoList) {
+        amount += order.amount;
+      }
+      this.allAmount = this.accToFixedTwo(amount);
     }
   }
 };

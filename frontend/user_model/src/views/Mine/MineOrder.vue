@@ -43,8 +43,8 @@
           </div>
           <!-- 订单商品列表 -->
           <div class="orderr-goods-box">
-            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
-              <div class="order-goods-item" v-for="(goods, gi) in order.orderDetail" :key="'order-goods-item-' + gi">
+            <div class="order-goods-list">
+              <div class="order-goods-item" v-for="(goods, gi) in order.orderItems" :key="'order-goods-item-' + gi">
                 <div class="order-goods-content">
                   <div class="cover">
                     <img :src="goods.bookCover" alt="goods" />
@@ -63,6 +63,8 @@
             <span>{{ order.orderTip }}</span>
           </div>
         </div>
+        <!-- 订单类型 -->
+        <!-- 待付款 -->
         <div v-if="computeOrderStatus(order) === 'pay'" class="order-other">
           <!-- 订单类型 -->
           <!-- 待付款 -->
@@ -77,6 +79,7 @@
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
+        <!-- 待配送 -->
         <div v-if="computeOrderStatus(order) === 'send'" class="order-other">
           <!-- 待配送 -->
           <div class="order-type">
@@ -103,6 +106,7 @@
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
+        <!-- 待评价 -->
         <div v-if="computeOrderStatus(order) === 'comment'" class="order-other">
           <!-- 待评价 -->
           <div class="order-type">
@@ -115,6 +119,7 @@
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
+        <!-- 退款/售后 -->
         <div v-if="computeOrderStatus(order) === 'after'" class="order-other">
           <!-- 退款/售后 -->
           <div class="order-type">
@@ -124,6 +129,14 @@
           <!-- 订单操作 -->
           <div class="order-tools">
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <!-- 已取消订单 -->
+        <div v-if="computeOrderStatus(order) === 'cancel'" class="order-other">
+          <!-- 已取消订单 -->
+          <div class="order-type">
+            <i class="ic-cancel-order"></i>
+            <span>订单已取消</span>
           </div>
         </div>
       </div>
@@ -224,10 +237,11 @@
           </div>
           <!-- 订单商品列表 -->
           <div class="orderr-goods-box">
-            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
+            <!-- <div class="order-goods-list" @mousewheel.stop="handleXScroll"> -->
+            <div class="order-goods-list">
               <div
                 class="order-goods-item"
-                v-for="(goods, gi) in dialogOrder.orderDetail"
+                v-for="(goods, gi) in dialogOrder.orderItems"
                 :key="'order-goods-item-' + gi">
                 <div class="order-goods-content">
                   <div class="cover">
@@ -307,10 +321,10 @@
           </div>
           <!-- 订单商品列表 -->
           <div class="orderr-goods-box">
-            <div class="order-goods-list" @mousewheel.stop="handleXScroll">
+            <div class="order-goods-list">
               <div
                 class="order-goods-item"
-                v-for="(goods, gi) in dialogOrder.orderDetail"
+                v-for="(goods, gi) in dialogOrder.orderItems"
                 :key="'order-goods-item-' + gi">
                 <div class="order-goods-content">
                   <div class="cover">
@@ -368,10 +382,7 @@
         <div class="order-goods-box">
           <div class="order-goods-title-box">{{ dialogOrder.storeName }}</div>
           <div class="order-goods-list">
-            <div
-              class="order-goods-item"
-              v-for="(goods, gi) in dialogOrder.orderDetail"
-              :key="'order-goods-item-' + gi">
+            <div class="order-goods-item" v-for="(goods, gi) in dialogOrder.orderItems" :key="'order-goods-item-' + gi">
               <div class="order-goods-content">
                 <div class="cover">
                   <img :src="goods.bookCover" alt="goods" />
@@ -426,18 +437,22 @@
           <!-- 费用信息 -->
           <div class="order-detail-item-box">
             <div class="order-detail-item between">
+              <span class="label">押金</span>
+              <span class="text">{{ '￥ ' + computeOrderAmount(dialogOrder.orderItems, (type = 'deposit')) }}</span>
+            </div>
+            <div class="order-detail-item between">
               <span class="label">借阅费</span>
-              <span class="text">{{ '￥ ' + dialogOrder.allBorrowCost }}</span>
+              <span class="text">{{ '￥ ' + computeOrderAmount(dialogOrder.orderItems, (type = 'borrow')) }}</span>
             </div>
             <div class="order-detail-item between">
               <span class="label">包装费</span>
-              <span class="text">{{ '￥ ' + dialogOrder.allPackingCost }}</span>
+              <span class="text">{{ '￥ ' + computeOrderAmount(dialogOrder.orderItems, (type = 'packing')) }}</span>
             </div>
             <div class="order-detail-item between">
               <span class="label">配送费</span>
               <span class="text">{{ '￥ ' + dialogOrder.deliveryFee }}</span>
             </div>
-            <div class="order-detail-item between">
+            <div class="order-detail-item between block">
               <span class="label">优惠金额</span>
               <span class="text">{{ '￥ ' + dialogOrder.discountAmount }}</span>
             </div>
@@ -453,6 +468,8 @@
 </template>
 
 <script>
+import { getAllOrderOgPageApi, getOrderByStatusOfPageApi } from '@/api/orderApi';
+
 export default {
   data() {
     return {
@@ -469,7 +486,7 @@ export default {
       ],
       currentPage: 1,
       pageSize: 5,
-      total: 21,
+      total: 0,
       commentDgVisable: false,
       commentDgTitle: '',
       commentDgList: {},
@@ -526,105 +543,51 @@ export default {
     };
   },
   created() {
-    this.orderList = this.getOrderTest(5);
-    this.orderList[0].payStatus = 0;
-    this.orderList[2].status = 2;
-    this.orderList[3].status = 4;
-    this.orderList[4].status = 8;
-    this.orderList[4].orderTip = '当前订单已逾期';
+    this.initOrderList();
   },
   methods: {
-    getOrderTest(n) {
-      let list = [];
-      for (let i = 0; i < n; i++) {
-        let order = {
-          id: '111',
-          // 订单号
-          number: 'L-1234567894561230',
-          // 所属用户id
-          userId: '123',
-          // 所属书店id
-          storeId: '124',
-          // 订单地址id
-          addressId: '125',
-          storeName: '片刻书店',
-          // 收货人姓名
-          consignee: '蜡笔小新',
-          // 收货人联系方式
-          phone: '13489568956',
-          // 收货地址
-          address: '广东省韶关市韶关学院西区曼陀罗苑',
-          // 借阅时长(天)
-          borrowTime: 30,
-          // 可续借时长，默认为图书设定值
-          renewDuration: 30,
-          // 期望配送时间
-          expectedTime: '2022-11-12 23:22',
-          // 配送费
-          deliveryFee: 2,
-          // 借阅费
-          allBorrowCost: 0,
-          // 包装费
-          allPackingCost: 0,
-          // 配送方式，0-由商家配送；1-由平台配送
-          shippingMethod: 0,
-          // 支付方式，0-在线支付
-          payMethod: 0,
-          // 支付时间
-          payTime: '2022-11-17 23:25',
-          // 订单总金额
-          orderAmount: 2.0,
-          // 优惠金额，默认为0
-          discountAmount: 0,
-          // 实付金额 = 订单总金额 - 优惠金额
-          amount: 2.0,
-          // 订单备注
-          remark: 1,
-          // 交易状态，0-进行中；1-已完成；2-已取消
-          tradeStatus: 1,
-          // 支付状态，0-未支付，1-已支付
-          payStatus: 1,
-          // 售后状态，0-待售后；1-待退款；2-已退款；3-待退货；4-已退货
-          amStatus: 0,
-          // 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-待评价；5-已完成；6-逾期中；7-已逾期；8-售后中
-          status: 0,
-          // 创建时间
-          createTime: '2022-11-11 23:22',
-          // 更新时间
-          updateTime: '2022-11-11 23:22',
-          // 是否删除，0-默认；1-删除
-          isDelete: 0,
-          orderDetail: []
-        };
-        let goods = {
-          // 订单详情id
-          id: '222',
-          // 所属订单id
-          orderId: '111',
-          // 图书id
-          bookId: '224',
-          // 图书名称
-          bookName: '数学之美',
-          // 图书封面
-          bookCover: 'https://voidtech.cn/i/2022/11/15/115c6tb.jpg',
-          // 数量
-          quantity: Math.round(Math.random() * 3 + 1),
-          // 订单项状态，0-已提交订单；1-已取消订单
-          itemStatus: 0,
-          // 借阅费
-          borrowCost: 0,
-          // 包装费
-          packingCost: 2,
-          // 总金额
-          amount: 2
-        };
-        let num = Math.round(Math.random() * 9 + 1);
-        for (let j = 0; j < num; j++) {
-          order.orderDetail.push(goods);
-        }
-        list.push(order);
+    initOrderList() {
+      if (this.navCheck === 'all') {
+        this.getOrderPage();
+      } else if (this.navCheck === 'pay') {
+        this.getOrderPageByStatus(1);
+      } else if (this.navCheck === 'send') {
+        this.getOrderPageByStatus(2);
+      } else if (this.navCheck === 'back') {
+        this.getOrderPageByStatus(3);
+      } else if (this.navCheck === 'comment') {
+        this.getOrderPageByStatus(4);
+      } else if (this.navCheck === 'after') {
+        this.getOrderPageByStatus(5);
+      } else {
+        this.getOrderPage();
       }
-      return list;
+    },
+    /**
+     * 分页获取订单
+     */
+    getOrderPage() {
+      getAllOrderOgPageApi(this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.orderList = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
+        }
+      });
+    },
+    /**
+     * 根据状态分页获取订单
+     */
+    getOrderPageByStatus(status) {
+      getOrderByStatusOfPageApi(status, this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.orderList = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
+        }
+      });
     },
     getDialogTip(text) {
       let tip = '';
@@ -642,6 +605,7 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val;
       // 获取图书
+      this.initOrderList();
     },
     /**
      * 计算当前订单的状态 待付款 | 待配送 | 待归还 | 待评价
@@ -651,7 +615,10 @@ export default {
      * tradeStatus 交易状态，0-进行中；1-已完成；2-已取消
      */
     computeOrderStatus(item) {
-      if (item.payStatus === 0) {
+      if (item.tradeStatus === 2) {
+        return 'cancel';
+      }
+      if (item.tradeStatus === 0 && item.payStatus === 0) {
         return 'pay';
       }
       if (item.status === 0 || item.status === 1) {
@@ -666,6 +633,30 @@ export default {
       if (item.status === 8) {
         return 'after';
       }
+    },
+    /**
+     * 计算订单项费用和
+     * @param {Array} orderItems
+     * @param {String} type
+     * @returns {Number}
+     */
+    computeOrderAmount(orderItems, type = 'borrow') {
+      if (!orderItems) return 0;
+      let amount = 0;
+      if (type === 'borrow') {
+        orderItems.forEach(item => {
+          amount += item.borrowCost;
+        });
+      } else if (type === 'packing') {
+        orderItems.forEach(item => {
+          amount += item.packingCost;
+        });
+      } else if (type === 'deposit') {
+        orderItems.forEach(item => {
+          amount += item.deposit;
+        });
+      }
+      return parseFloat(parseFloat(amount).toFixed(2));
     },
     /**
      * 横向滚动
@@ -696,6 +687,7 @@ export default {
     handleNav(item) {
       this.navCheck = item.value;
       // 获取指定订单
+      this.initOrderList();
     },
     handleDetail(item) {
       this.dialogOrder = item;
@@ -748,22 +740,22 @@ export default {
      */
     handleComment(item) {
       this.commentDgList = [];
-      for (let i = 0; i < item.orderDetail.length; i++) {
+      for (let i = 0; i < item.orderItems.length; i++) {
         let comment = {
           // 订单id
           orderId: item.id,
           // 订单详情id
-          orderItemId: item.orderDetail[i].id,
+          orderItemId: item.orderItems[i].id,
           // 用户id
           userId: item.userId,
           // 图书id
-          bookId: item.orderDetail[i].bookId,
+          bookId: item.orderItems[i].bookId,
           // 书店id
           storeId: item.storeId,
           // 图书名称
-          bookName: item.orderDetail[i].bookName,
+          bookName: item.orderItems[i].bookName,
           // 图书封面
-          bookCover: item.orderDetail[i].bookCover,
+          bookCover: item.orderItems[i].bookCover,
           // 用户昵称
           nickname: this.nickname,
           // 评论内容
@@ -1466,6 +1458,9 @@ export default {
         align-items: center;
         &.between {
           justify-content: space-between;
+        }
+        &.block {
+          padding-bottom: 48px;
         }
         .label {
           min-width: 72px;

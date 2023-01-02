@@ -4,7 +4,7 @@
     <!-- 订单列表 -->
     <div class="pay-order-box">
       <div class="pay-order-list">
-        <div class="pay-order-item" v-for="(order, key) in payOrderObj" :key="'pay-order-' + key">
+        <div class="pay-order-item" v-for="(order, key) in payOrderList" :key="'pay-order-' + key">
           <!-- 左边订单信息 -->
           <div class="left">
             <!-- 订单号 -->
@@ -14,7 +14,7 @@
             </div>
             <!-- 商品列表 -->
             <div class="order-goods-list">
-              <div class="order-goods-item" v-for="(item, index) in order.products" :key="'goods-' + key + index">
+              <div class="order-goods-item" v-for="(item, index) in order.orderItems" :key="'goods-' + key + index">
                 <div class="goods-mess">
                   <div class="cover">
                     <img :src="item.bookCover" alt="cover" />
@@ -36,7 +36,7 @@
         </div>
       </div>
       <div class="pay-order-mess">
-        <span class="left">{{ '合并 | 共计 ' + Object.getOwnPropertyNames(payOrderObj).length + ' 单' }}</span>
+        <span class="left">{{ '合并 | 共计 ' + orderCount + ' 单' }}</span>
         <span class="right">{{ '￥ ' + $keepTwoNum(amount) }}</span>
       </div>
     </div>
@@ -98,10 +98,14 @@
       </div>
     </div>
     <!-- 底部信息 -->
-    <div class="pay-tip-box">
-      <div class="pay-time-tip">
+    <div class="pay-tip-box" v-if="firstOrder.payStatus === 0">
+      <div
+        class="pay-time-tip"
+        :class="{
+          'is-error': isOvertime
+        }">
         <i class="ic-info"></i>
-        <span class="label">{{ '订单已创建，请在 ' + this.timeTip + ' 内完成支付' }}</span>
+        <span class="label">{{ timeTip }}</span>
       </div>
     </div>
   </div>
@@ -115,52 +119,62 @@ export default {
     PayInput
   },
   props: {
-    cartObj: {
-      type: Object,
+    orderList: {
+      type: Array,
       default: () => {
-        return {};
+        return [];
       }
     },
-    amount: Number
+    amount: Number,
+    money: Number,
+    payType: String
   },
   data() {
     return {
-      money: 0,
+      isOvertime: false,
+      firstOrder: {},
       payMethod: 'balance',
       payPass: '',
-      payOrderObj: {},
+      payOrderList: {},
       // 计时器
       timer: null,
       // 设置计时，单位：s => 15分钟
       counter: 900,
       counters: 900000,
-      timeTip: ''
+      timeTip: '',
+      orderCount: 0
     };
   },
   created() {
-    this.payOrderObj = this.cartObj;
-    this.computeAmount(this.payOrderObj);
+    this.payOrderList = this.orderList;
+    this.orderCount = this.payOrderList.length;
+    // this.computeAmount(this.payOrderList);
   },
   mounted() {
-    this.computeTimeCount(this.payOrderObj);
+    this.computeTimeCount(this.payOrderList);
   },
   methods: {
     computeTimeCount(obj) {
-      const order = this.getFirstAttr(obj);
-      if (order.payStatus === 0) {
+      this.firstOrder = this.payOrderList[0];
+      // this.firstOrder.createTime = new Date();
+      // this.firstOrder.payStatus = 0;
+      if (this.firstOrder.payStatus === 0) {
         // 未支付
-        let createTime = order.createTime;
+        let createTime = new Date(this.firstOrder.createTime);
         let now = new Date();
         let diff = now - createTime;
         if (diff < this.counters) {
           // 未超时(15分钟)
           // 需计时
           this.counter = parseInt((this.counters - diff) / 1000);
+          this.timeTip = `订单已创建，请在 ${parseInt(this.counter / 60)}:${this.counter % 60} 内完成支付`;
           this.timer = setInterval(() => {
             // 替换文本，秒实时改变
-            this.timeTip = `${parseInt(this.counter / 60)}:${this.counter % 60}`;
+            this.timeTip = `订单已创建，请在 ${parseInt(this.counter / 60)}:${this.counter % 60} 内完成支付`;
             this.counter--;
             if (this.counter < 0) {
+              this.timeTip = '订单超时未支付，已取消';
+              this.handleOrderOvertime();
               // 当计时小于零时，取消该计时器
               clearInterval(this.timer);
               this.resetTimer();
@@ -173,7 +187,8 @@ export default {
      * 重置计时相关参数
      */
     resetTimer() {
-      this.timeTip = '';
+      this.isOvertime = false;
+      this.timeTip = `订单已创建，请在 ${parseInt(this.counter / 60)}:${this.counter % 60} 内完成支付`;
       if (this.timer) {
         // 存在计时器对象，则清除
         clearInterval(this.timer);
@@ -192,7 +207,7 @@ export default {
         orderObj[key].products.forEach(item => {
           orderObj[key].amount += item.amount;
         });
-        orderObj[key].amount += orderObj[key].deliverFee;
+        orderObj[key].amount += orderObj[key].deliveryFee;
       }
     },
     /**
@@ -208,6 +223,7 @@ export default {
           this.handleWechatPay();
           break;
       }
+      this.$emit('payMethod', text);
     },
     /**
      * 支付宝支付
@@ -226,12 +242,27 @@ export default {
      */
     handlePayComplete(val) {
       console.log('pay complete =>', val);
+      this.$emit('payComplete', val);
+    },
+    /**
+     * 订单超时
+     */
+    handleOrderOvertime() {
+      this.$emit('overtime', true);
     },
     /**
      * 获取对象第一个属性
      */
     getFirstAttr(obj) {
       return obj[Object.keys(obj)[0]];
+    },
+    /**
+     * 计算对象长度
+     */
+    computeObjCount(obj) {
+      let list = Object.getOwnPropertyNames(obj);
+      if (list.indexOf('_ob_')) return list.length - 1;
+      return list.length;
     }
   },
   beforeDestroy() {
@@ -528,6 +559,9 @@ export default {
       display: flex;
       align-items: center;
       color: #fac03d;
+      &.is-error {
+        color: #ee827c;
+      }
       i {
         font-size: 18px;
         margin-right: 6px;

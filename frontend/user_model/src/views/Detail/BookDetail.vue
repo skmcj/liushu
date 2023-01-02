@@ -216,7 +216,7 @@
         :borrow-cost="bookData.bookCost.borrowCost"
         :packing-cost="bookData.bookCost.packingCost"
         :deposit="bookData.bookCost.deposit"
-        :deliver-fee="shopData.deliverFee"
+        :delivery-fee="shopData.deliveryFee"
         :borrow-day="shopData.borrowDay"
         @addCart="handleAddCart"
         @borrowBuy="handleBorrowBuy" />
@@ -440,6 +440,7 @@ export default {
       // 打开结算面板
       // 存储选中对象
       let orderData = this.packingOrder(orderItem);
+      orderData.type = 'borrow';
       // console.log('order ==>', orderData);
       this.$store.dispatch('setSettlementObj', orderData);
       this.$router.push('/settlement');
@@ -454,7 +455,7 @@ export default {
       cart.userId = userInfo.id;
       cart.bookId = this.bookData.book.id;
       cart.storeId = this.shopData.id;
-      console.log('加购物车', cart);
+      // console.log('加购物车', cart);
       addCartItemApi(cart).then(res => {
         if (res.data.flag) {
           this.$showMsg('加入购物车成功', { type: 'success' });
@@ -552,7 +553,7 @@ export default {
       let orderData = {
         storeId: this.shopData.id,
         storeName: this.shopData.storeName,
-        deliverFee: this.shopData.deliverFee,
+        deliveryFee: this.shopData.deliveryFee,
         products: []
       };
       let orderItem = item;
@@ -578,11 +579,11 @@ export default {
       // 总包装费
       settlementObj.allPackingCost = item.packingCost;
       // 总配送费
-      settlementObj.allDeliverFee = this.shopData.deliverFee;
+      settlementObj.alldeliveryFee = this.shopData.deliveryFee;
       // 押金
       settlementObj.allDeposit = item.deposit;
       // 总金额
-      settlementObj.allAmount = parseFloat(parseFloat(item.amount + this.shopData.deliverFee).toFixed(2));
+      settlementObj.allAmount = parseFloat(parseFloat(item.amount + this.shopData.deliveryFee).toFixed(2));
       return settlementObj;
     }
   },

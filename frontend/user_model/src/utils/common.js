@@ -30,6 +30,20 @@ const formatDate = function(date, fmt = 'YYYY-mm-dd') {
   return fmt;
 }
 
+/**
+ * 将数字转化为指定位数的数字，高位默认补0
+ * @param {Number} num 数字
+ * @param {Number} unit 位数
+ * @param {String} char 补位字符，默认为0
+ * @returns {String}
+ */
+const formatUnits = function(num, unit = 2, char = '0') {
+  let numStr = num.toString();
+  if(numStr.length > unit) return numStr;
+  return numStr.padStart(unit, char);
+}
+
 export default {
-  formatDate
+  formatDate,
+  formatUnits
 }

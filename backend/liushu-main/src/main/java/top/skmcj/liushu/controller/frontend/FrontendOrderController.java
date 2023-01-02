@@ -117,7 +117,7 @@ public class FrontendOrderController {
         if (bookFlag) return Result.error(StatusCodeEnum.ORDER_GEN_ITEM_ERR);
 
         // 加上配送费
-        amount = BigDecimalUtil.add(amount, store.getDeliverFee());
+        amount = BigDecimalUtil.add(amount, store.getDeliveryFee());
 
         // 是否有使用优惠卷
         BigDecimal discountAmount = new BigDecimal(0);
@@ -141,7 +141,7 @@ public class FrontendOrderController {
         orderDto.setBorrowTime(orderVo.getBorrowTime());
         orderDto.setRenewDuration(store.getRenewDay());
         orderDto.setExpectedTime(orderVo.getExpectedTime());
-        orderDto.setDeliveryFee(store.getDeliverFee());
+        orderDto.setDeliveryFee(store.getDeliveryFee());
         orderDto.setOrderAmount(amount);
         orderDto.setDiscountAmount(discountAmount);
         orderDto.setDiscountIds(orderVo.getDiscountIds());
@@ -149,6 +149,15 @@ public class FrontendOrderController {
         orderDto.setRemark(orderVo.getRemark());
         // 创建订单
         OrderDto rOrder = orderService.generateOrder(orderDto);
+        rOrder.setStoreName(store.getStoreName());
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        List<OrderItem> rOrderItems = rOrder.getOrderItems();
+        // 添加图书信息
+        rOrderItems.stream().forEach(item -> {
+            Book book = bookService.getById(item.getBookId());
+            item.setBookName(book.getName());
+            item.setBookCover(imgDoMain + book.getCover());
+        });
         // 监听订单
         TimingWheelUtil.addTimeoutTask(new OrderListenerTask(rOrder.getId()), rOrder.getId());
         return Result.success(rOrder);

@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import top.skmcj.liushu.dao.mapper.OrderMapper;
 import top.skmcj.liushu.dto.OrderDto;
 import top.skmcj.liushu.entity.Book;
+import top.skmcj.liushu.entity.Bookstore;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.entity.OrderItem;
 import top.skmcj.liushu.service.BookService;
+import top.skmcj.liushu.service.BookstoreService;
 import top.skmcj.liushu.service.OrderItemService;
 import top.skmcj.liushu.service.OrderService;
 import top.skmcj.liushu.util.NumberUtil;
@@ -36,6 +38,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private BookstoreService storeService;
 
     /**
      * 根据id获取订单完整信息
@@ -122,7 +127,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             uBook.setInventory(book.getInventory() - item.getQuantity());
             bookService.updateById(uBook);
         });
-        OrderDto rOrder = this.packingOrderDto(order, orderItems);
+        OrderDto rOrder = this.getOrderById(order.getId());
         return rOrder;
     }
 
@@ -199,6 +204,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Page<Order> orderPage = new Page<>(currentPage, pageSize);
         LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
         orderWrapper.eq(Order::getUserId, userId);
+        orderWrapper.orderByDesc(Order::getUpdateTime);
         // 获取对应页码的用户订单数据
         this.page(orderPage, orderWrapper);
         List<Order> orders = orderPage.getRecords();
@@ -206,6 +212,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (orders != null) {
             // 封装为 OrderDto
             orderDtos = orders.stream().map(item -> {
+                Bookstore bookstore = storeService.getById(item.getStoreId());
                 LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
                 orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
                 // 获取订单项
@@ -219,6 +226,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
 
+                orderDto.setStoreName(bookstore.getStoreName());
                 return orderDto;
             }).collect(Collectors.toList());
         }
@@ -248,6 +256,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Page<OrderDto> orderDtoPage = new Page<>();
         Page<Order> orderPage = new Page<>(currentPage, pageSize);
         LambdaQueryWrapper<Order> orderWrapper = getOrderWrapperByStatus(userId, status);
+        orderWrapper.orderByDesc(Order::getUpdateTime);
         // 获取对应订单
         this.page(orderPage, orderWrapper);
         List<Order> orders = orderPage.getRecords();
@@ -255,6 +264,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (orders != null) {
             // 封装为 OrderDto
             orderDtos = orders.stream().map(item -> {
+                Bookstore bookstore = storeService.getById(item.getStoreId());
                 LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
                 orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
                 // 获取订单项
@@ -268,6 +278,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
 
+                orderDto.setStoreName(bookstore.getStoreName());
                 return orderDto;
             }).collect(Collectors.toList());
         }

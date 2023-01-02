@@ -85,7 +85,7 @@
           <div class="text">{{ rBorrowCost + ' 元' }}</div>
           <div class="text">{{ rDeposit + ' 元' }}</div>
           <div class="text">{{ rPackingCost + ' 元' }}</div>
-          <div class="text">{{ rDeliverFee + ' 元' }}</div>
+          <div class="text">{{ rdeliveryFee + ' 元' }}</div>
         </div>
       </div>
     </div>
@@ -134,7 +134,7 @@ export default {
     borrowCost: Number,
     packingCost: Number,
     deposit: Number,
-    deliverFee: Number,
+    deliveryFee: Number,
     // 首次可借阅天数
     borrowDay: Number,
     inventory: {
@@ -150,7 +150,7 @@ export default {
       // 包装费
       rPackingCost: 0,
       // 配送费
-      rDeliverFee: 0,
+      rdeliveryFee: 0,
       // 押金
       rDeposit: 0,
       // 借阅时长
@@ -169,7 +169,7 @@ export default {
       // 包装费
       this.rPackingCost = this.packingCost;
       // 配送费
-      this.rDeliverFee = this.deliverFee;
+      this.rdeliveryFee = this.deliveryFee;
       // 押金
       this.rDeposit = this.deposit;
     },

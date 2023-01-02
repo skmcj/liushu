@@ -97,7 +97,7 @@
             </div>
             <div class="mess-item">
               <span class="label">预估配送费：</span>
-              <span class="text">{{ '￥ ' + $keepTwoNum(allDeliverFee) }}</span>
+              <span class="text">{{ '￥ ' + $keepTwoNum(alldeliveryFee) }}</span>
             </div>
             <div class="mess-item">
               <span class="label">押金：</span>
@@ -140,7 +140,7 @@ export default {
       // 总包装费
       allPackingCost: 0,
       // 总配送费
-      allDeliverFee: 0,
+      alldeliveryFee: 0,
       // 押金
       allDeposit: 0,
       // 总金额
@@ -184,7 +184,7 @@ export default {
       // 总包装费
       this.allPackingCost = 0;
       // 总配送费
-      this.allDeliverFee = 0;
+      this.alldeliveryFee = 0;
       // 押金
       this.allDeposit = 0;
       // 总金额
@@ -206,7 +206,7 @@ export default {
           let shopItem = {
             storeId: list[i].storeId,
             storeName: list[i].storeName,
-            deliverFee: 2,
+            deliveryFee: 2,
             // 店铺全选状态
             checkAll: false,
             // 店铺选中
@@ -341,7 +341,7 @@ export default {
      */
     changeItemCost(item, flag = true) {
       let q = item.quantity;
-      let addDeliverFee = 0;
+      let adddeliveryFee = 0;
       if (flag) {
         // 加
         // 总借阅费
@@ -351,15 +351,15 @@ export default {
         // 总配送费
         if (!this.orderSet[item.storeId]) {
           this.orderSet[item.storeId] = 1;
-          addDeliverFee = this.cartObj[item.storeId].deliverFee;
+          adddeliveryFee = this.cartObj[item.storeId].deliveryFee;
         } else {
           this.orderSet[item.storeId] += 1;
         }
-        this.allDeliverFee += addDeliverFee;
+        this.alldeliveryFee += adddeliveryFee;
         // 押金
         this.allDeposit += item.deposit * q;
         // 总金额
-        this.allAmount += item.amount + addDeliverFee;
+        this.allAmount += item.amount + adddeliveryFee;
       } else {
         // 减
         // 总借阅费
@@ -368,16 +368,16 @@ export default {
         this.allPackingCost -= item.packingCost * q;
         // 总配送费
         if (this.orderSet[item.storeId] === 1) {
-          addDeliverFee = this.cartObj[item.storeId].deliverFee;
+          adddeliveryFee = this.cartObj[item.storeId].deliveryFee;
           this.orderSet[item.storeId] -= 1;
         } else {
           this.orderSet[item.storeId] -= 1;
         }
-        this.allDeliverFee -= addDeliverFee;
+        this.alldeliveryFee -= adddeliveryFee;
         // 押金
         this.allDeposit -= item.deposit * q;
         // 总金额
-        this.allAmount -= item.amount + addDeliverFee;
+        this.allAmount -= item.amount + adddeliveryFee;
       }
     },
     /**
@@ -441,7 +441,7 @@ export default {
           // 总包装费
           allPackingCost: this.allPackingCost,
           // 总配送费
-          allDeliverFee: this.allDeliverFee,
+          alldeliveryFee: this.alldeliveryFee,
           // 押金
           allDeposit: this.allDeposit,
           // 总金额
@@ -469,7 +469,7 @@ export default {
               let shopItem = {
                 storeId: item.storeId,
                 storeName: item.storeName,
-                deliverFee: 2,
+                deliveryFee: 2,
                 products: []
               };
               shopItem.products.push(item);

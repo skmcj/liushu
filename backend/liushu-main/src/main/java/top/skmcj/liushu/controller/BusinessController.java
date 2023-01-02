@@ -227,7 +227,7 @@ public class BusinessController {
         bookstore.setCover(authVo.getCover());
         bookstore.setAddress(authVo.getAddress());
         bookstore.setBusinessHours(authVo.getBusinessHours());
-        bookstore.setDeliverFee(authVo.getDeliverFee());
+        bookstore.setDeliveryFee(authVo.getDeliveryFee());
         bookstore.setAuditStatus(1);
         storeService.updateById(bookstore);
         // 详细信息
@@ -687,7 +687,7 @@ public class BusinessController {
             flag = true;
         }else if(store.getDistribution() == null) {
             flag = true;
-        }else if(store.getDeliverFee() == null) {
+        }else if(store.getDeliveryFee() == null) {
             flag = true;
         }else if(store.getBorrowDay() == null) {
             flag = true;
