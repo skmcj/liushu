@@ -41,13 +41,13 @@ export const updateCartMessApi = function(carts) {
 
 /**
  * 批量删除购物车项
- * @param {*} ids
+ * @param {Array} ids
  * @returns
  */
 export const deleteCartApi = function(ids) {
   return request.delete('/cart', {
     params: {
-      ids
+      ids: ids.join(',')
     }
   });
 }

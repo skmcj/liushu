@@ -17,7 +17,7 @@
       </div>
     </div>
     <!-- 订单列表 -->
-    <div class="order-list">
+    <div class="order-list" v-if="!$isEmpty(orderList)">
       <!-- 订单项 -->
       <div
         class="order-item"
@@ -74,7 +74,7 @@
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn pay" @click.stop="handlePay(order)">待付款</div>
+            <div class="order-btn pay" @click.stop="handleClickPay(order)">去付款</div>
             <div class="order-btn cancel" @click.stop="handleCancel(order)">取消订单</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
@@ -141,6 +141,8 @@
         </div>
       </div>
     </div>
+    <!-- 无订单 -->
+    <SvgPage class="no-order" v-if="$isEmpty(orderList)" name="no-order" text="暂无相关订单" :img-width="480" />
     <div class="page-tool">
       <el-pagination
         layout="total, prev, pager, next"
@@ -152,6 +154,29 @@
         hide-on-single-page>
       </el-pagination>
     </div>
+    <!-- 付款dialog -->
+    <el-dialog
+      title="收银台"
+      :visible.sync="payDialogVisible"
+      class="pay-dialog"
+      :close-on-click-modal="false"
+      :modal-append-to-body="false"
+      destroy-on-close
+      @close="handlePayPanelClose">
+      <div class="order-to-pay">
+        <PaymentPanel
+          :order-list="orderDtoList"
+          :amount="allAmount"
+          :money="userInfo.money"
+          :pay-type="payType"
+          @overtime="handleOrderOvertime"
+          @payMethod="handlePayMethod"
+          @payComplete="handlePayComplete" />
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" :disabled="isOvertime" @click="handlePay" round>确认 支付</el-button>
+      </span>
+    </el-dialog>
     <!-- 评价dialog -->
     <el-dialog
       class="comment-dialog"
@@ -346,7 +371,7 @@
           </div>
           <div class="other-mess-item">
             <span class="label">剩余时长：</span>
-            <span class="text">{{ computeLeaveDay(dialogOrder.createTime, dialogOrder.borrowTime) }}</span>
+            <span class="text">{{ computeLeaveDay(dialogOrder.expectedTime, dialogOrder.borrowTime) }}</span>
           </div>
         </div>
         <!-- 提示 -->
@@ -468,12 +493,19 @@
 </template>
 
 <script>
-import { getAllOrderOgPageApi, getOrderByStatusOfPageApi } from '@/api/orderApi';
+import Vue from 'vue';
+import SvgPage from '@/components/Common/SvgPage';
+import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
+import { getAllOrderOgPageApi, getOrderByStatusOfPageApi, payOrderByLSApi } from '@/api/orderApi';
 
 export default {
+  components: {
+    PaymentPanel,
+    SvgPage
+  },
   data() {
     return {
-      nickname: '蜡笔小新',
+      userInfo: {},
       orderList: [],
       navCheck: 'all',
       navList: [
@@ -539,11 +571,26 @@ export default {
         }
       },
       // 详情
-      detailDgVisable: false
+      detailDgVisable: false,
+      // 付款
+      payDialogVisible: false,
+      orderDtoList: [],
+      allAmount: 0,
+      payMethod: 'balance',
+      payType: 'borrow',
+      payPass: '',
+      isOvertime: false,
+      // 计时
+      // 计时器
+      timer: null,
+      // 设置计时，单位：s => 15分钟
+      counter: 900,
+      timeTip: ''
     };
   },
   created() {
     this.initOrderList();
+    this.userInfo = this.$store.state.userInfo;
   },
   methods: {
     initOrderList() {
@@ -571,6 +618,7 @@ export default {
         if (res.data.flag) {
           this.orderList = res.data.data.records;
           this.total = res.data.data.total;
+          this.computeOrderPayTimeCount(this.orderList);
         } else {
           this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
         }
@@ -584,6 +632,7 @@ export default {
         if (res.data.flag) {
           this.orderList = res.data.data.records;
           this.total = res.data.data.total;
+          this.computeOrderPayTimeCount(this.orderList);
         } else {
           this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
         }
@@ -696,7 +745,91 @@ export default {
     /**
      * 去付款
      */
-    handlePay(item) {},
+    handleClickPay(item) {
+      this.orderDtoList = [item];
+      this.allAmount = item.amount;
+      this.payDialogVisible = true;
+    },
+    /**
+     * 账户支付密码
+     */
+    handlePayComplete(val) {
+      this.payPass = val;
+      // console.log('pass pay ==>', val);
+    },
+    /**
+     * 订单超时
+     */
+    handleOrderOvertime(val) {
+      // console.log('订单超时 ==> ', val);
+      this.isOvertime = true;
+    },
+    /**
+     * 确认支付
+     */
+    handlePay() {
+      // console.log('确认支付');
+      // this.payDialogVisible = false;
+      if (this.payMethod === 'balance') {
+        if (this.$isEmpty(this.payPass)) {
+          this.$showMsg('请输入支付密码');
+          return;
+        }
+        // 账户余额支付
+        if (this.money > this.allAmount) {
+          // 进行支付
+          this.payOrderOfList(this.orderDtoList);
+        } else {
+          // 余额不足
+          this.$showMsg('账户余额不足，请充值后前往订单页支付', {
+            type: 'warning',
+            duration: 1200,
+            closeFunc: () => {
+              this.$router.replace('/mine');
+            }
+          });
+        }
+      }
+    },
+    /**
+     * 批量支付订单
+     */
+    async payOrderOfList(list) {
+      let payPass = this.$sha256(this.payPass.substring(0, 6));
+      for (const order of list) {
+        let res = await payOrderByLSApi(order.id, payPass);
+        if (!res.data.flag) {
+          this.$showMsg('订单支付失败，请稍后再试', {
+            type: 'error',
+            duration: 1200,
+            closeFunc: () => {
+              this.$router.replace('/mine');
+            }
+          });
+          return;
+        }
+      }
+      this.$showMsg('支付成功', {
+        type: 'success',
+        closeFunc: () => {
+          this.$router.replace('/mine/order').catch(err => {});
+        }
+      });
+    },
+    /**
+     * 支付方式
+     */
+    handlePayMethod(val) {
+      this.payMethod = val;
+    },
+    /**
+     * 支付面板关闭
+     */
+    handlePayPanelClose() {
+      // 暂时跳转到首页
+      // this.$router.replace('/');
+      this.payDialogVisible = false;
+    },
     /**
      * 取消订单
      */
@@ -757,7 +890,7 @@ export default {
           // 图书封面
           bookCover: item.orderItems[i].bookCover,
           // 用户昵称
-          nickname: this.nickname,
+          nickname: this.userInfo.nickname,
           // 评论内容
           content: '',
           // 评分
@@ -772,7 +905,7 @@ export default {
     },
     // 评价匿名处理
     commentSwitchChange(item) {
-      item.nickname = item.isAnonymous === 0 ? this.nickname : '';
+      item.nickname = item.isAnonymous === 0 ? this.userInfo.nickname : '';
     },
     /**
      * 提交评价
@@ -789,6 +922,80 @@ export default {
       let start = new Date(startDate);
       let num = start.getDate() + time - now.getDate();
       return num >= 0 ? num + '天' : '逾期 ' + num * -1 + ' 天';
+    },
+    /**
+     * 计时订单是否未支付，需计时
+     */
+    computeOrderPayTimeCount(orderList) {
+      for (const order of orderList) {
+        if (order.tradeStatus === 0 && order.payStatus === 0) {
+          this.computeOrderTimeCount(order);
+        }
+      }
+    },
+    /**
+     * 计时待付款订单剩余时间
+     */
+    computeOrderTimeCount(order) {
+      // 订单待付款
+      let now = new Date();
+      let createTime = new Date(order.createTime);
+      // 差值
+      let dValue = parseInt((now - createTime) / 1000);
+      if (dValue < this.counter) {
+        // 显示倒计时 Vue.set() 对新增加的属性设置监听
+        // 剩余时长
+        Vue.set(order, 'counter', this.counter - dValue);
+        Vue.set(order, 'orderTip', `订单已创建，请在 ${parseInt(order.counter / 60)}:${order.counter % 60} 内完成支付`);
+        // order.counter = this.counter - dValue;
+        // order.orderTip = `订单已创建，请在 ${parseInt(order.counter / 60)}:${order.counter % 60} 内完成支付`;
+        Vue.set(
+          order,
+          'timer',
+          setInterval(() => {
+            // 替换文本，秒实时改变
+            order.orderTip = `订单已创建，请在 ${parseInt(order.counter / 60)}:${order.counter % 60} 内完成支付`;
+            order.counter--;
+            if (order.counter < 0) {
+              order.orderTip = '订单已超时，正在取消···';
+              order.isOvertime = true;
+              // 当计时小于零时，取消该计时器
+              clearInterval(order.timer);
+              setTimeout(() => {
+                order.orderTip = undefined;
+                this.initOrderList();
+              }, 3000);
+              this.resetTimer();
+            }
+          }, 1000)
+        );
+        // order.timer = setInterval(() => {
+        //   // 替换文本，秒实时改变
+        //   order.orderTip = `订单已创建，请在 ${parseInt(order.counter / 60)}:${order.counter % 60} 内完成支付`;
+        //   order.counter--;
+        //   if (order.counter < 0) {
+        //     order.orderTip = undefined;
+        //     order.isOvertime = true;
+        //     // 当计时小于零时，取消该计时器
+        //     clearInterval(order.timer);
+        //     this.resetTimer();
+        //   }
+        // }, 1000);
+      }
+    },
+    /**
+     * 重置计时相关参数
+     */
+    resetTimer(order) {
+      // order.timeTip = `订单已创建，请在 ${parseInt(order.counter / 60)}:${order.counter % 60} 内完成支付`;
+      if (order.timer) {
+        // 存在计时器对象，则清除
+        clearInterval(order.timer);
+        // 重置秒数，防止下次混乱
+        order.counter = 900;
+        // 计时器对象重置为空
+        order.timer = null;
+      }
     }
   }
 };
@@ -1116,6 +1323,9 @@ export default {
       margin-top: 12px;
     }
   }
+}
+.no-order {
+  margin: 36px 0;
 }
 .page-tool {
   margin-top: 24px;
@@ -1495,6 +1705,11 @@ export default {
         }
       }
     }
+  }
+}
+.pay-dialog {
+  :deep(.el-dialog) {
+    width: 64%;
   }
 }
 </style>

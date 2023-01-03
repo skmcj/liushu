@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.service.OrderService;
+import top.skmcj.liushu.util.ListenerTaskUtil;
 
 /**
  * 预订单监听任务
@@ -19,9 +20,6 @@ public class OrderListenerTask implements TimerTask {
      * 订单ID
      */
     private Long orderId;
-
-    @Autowired
-    private OrderService orderService;
 
     public OrderListenerTask(Long orderId) {
         this.orderId = orderId;
@@ -43,7 +41,7 @@ public class OrderListenerTask implements TimerTask {
     @Override
     public void run(Timeout timeout) throws Exception {
         log.info("[timer task] 订单 ID-{} 超时未支付，正在取消···", orderId);
-        orderService.cancelOrder(orderId);
+        ListenerTaskUtil.cancelOrder(orderId);
         // 取消订单
         log.info("[timer task] 订单 ID-{} 超时未支付，取消成功", orderId);
     }

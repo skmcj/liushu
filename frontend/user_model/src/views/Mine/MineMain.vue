@@ -173,6 +173,7 @@
 
 <script>
 import SvgPage from '@/components/Common/SvgPage';
+import { getUserInfoApi } from '@/api/userApi';
 
 export default {
   components: {
@@ -187,7 +188,7 @@ export default {
         money: 0,
         coupon: null
       },
-      walletVisible: true,
+      walletVisible: false,
       // 消息卡选项的选择项 sys | per
       messActive: 'sys',
       // 弹窗控制参数
@@ -198,12 +199,25 @@ export default {
   },
   created() {
     this.moneyRecords = this.getRecordsTest(15);
+    this.updateUserInfo();
   },
   mounted() {
     this.width = this.$el.offsetWidth;
-    this.getUserInfo();
+    // this.getUserInfo();
   },
   methods: {
+    /**
+     * 更新用户信息
+     */
+    updateUserInfo() {
+      getUserInfoApi(this.$store.state.userInfo.id).then(res => {
+        if (res.data.flag) {
+          // 获取成功
+          this.$store.dispatch('setUserInfo', res.data.data);
+          this.userInfo = this.$store.state.userInfo;
+        }
+      });
+    },
     /**
      * 获取用户信息
      */
