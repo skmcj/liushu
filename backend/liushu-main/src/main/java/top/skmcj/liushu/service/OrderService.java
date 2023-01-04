@@ -7,6 +7,8 @@ import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.vo.OrderPageVo;
 import top.skmcj.liushu.vo.OrderVo;
 
+import java.time.LocalDateTime;
+
 public interface OrderService extends IService<Order> {
 
     OrderDto getOrderById(Long id);
@@ -24,4 +26,14 @@ public interface OrderService extends IService<Order> {
     Page<OrderDto> getAllOrderOfPage(Long userId, int currentPage, int pageSize, String imgDoMain);
 
     Page<OrderDto> getOrderByStatusOfPage(Long userId, int status, int currentPage, int pageSize, String imgDoMain);
+
+    boolean updateOrderStatus(Long orderId, Integer status);
+
+    boolean updateOrderAmStatus(Long orderId, Integer amStatus);
+
+    boolean repayOfOrder(Long orderId, LocalDateTime returnTime);
+
+    void inspectOverdueOrderOfStore(Long storeId);
+
+    void inspectOverdueOrderOfUser(Long userId);
 }

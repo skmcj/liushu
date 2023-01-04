@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import top.skmcj.liushu.service.BookstoreService;
 import top.skmcj.liushu.service.OrderItemService;
 import top.skmcj.liushu.service.OrderService;
 import top.skmcj.liushu.util.NumberUtil;
+import top.skmcj.liushu.util.TimeUtil;
 import top.skmcj.liushu.vo.OrderPageVo;
 import top.skmcj.liushu.vo.OrderVo;
 
@@ -41,6 +43,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private BookstoreService storeService;
+
+    /**
+     * 逾期缓存期限
+     */
+    @Value("${liushu.order.overdue-time}")
+    private int overdueTime;
 
     /**
      * 根据id获取订单完整信息
@@ -290,6 +298,109 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
+     * 订单状态修改
+     * @param orderId
+     * @param status
+     * 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-已上门(待评价)；5-已完成；6-逾期中；7-已逾期；8-售后中
+     * @return
+     */
+    @Override
+    public boolean updateOrderStatus(Long orderId, Integer status) {
+        Order order = new Order();
+        order.setId(orderId);
+        order.setStatus(status);
+        if(status.equals(1)) {
+            // 已送达，设置送达时间
+            order.setDeliveryTime(LocalDateTime.now());
+        }
+        if(status.equals(4)) {
+            // 已上门回收，设置实际回收时间
+            order.setRecycleTime(LocalDateTime.now());
+        }
+        boolean flag = this.updateById(order);
+        return flag;
+    }
+
+    /**
+     * 更新订单售后状态
+     * @param orderId
+     * @param amStatus
+     * @return
+     */
+    @Override
+    public boolean updateOrderAmStatus(Long orderId, Integer amStatus) {
+        Order order = new Order();
+        order.setId(orderId);
+        order.setAmStatus(amStatus);
+        boolean flag = this.updateById(order);
+        return flag;
+    }
+
+    /**
+     * 预约归还图书
+     * @param orderId
+     * @param returnTime
+     * @return
+     */
+    @Override
+    public boolean repayOfOrder(Long orderId, LocalDateTime returnTime) {
+        Order order = new Order();
+        order.setId(orderId);
+        order.setReturnTime(returnTime);
+        order.setStatus(3);
+        boolean flag = this.updateById(order);
+        return flag;
+    }
+
+    /**
+     * 检查商家逾期订单
+     * @param storeId
+     */
+    @Override
+    @Transactional
+    public void inspectOverdueOrderOfStore(Long storeId) {
+        // 1-待收货；2-待归还
+        // 获取商家所有已配送、待归还订单
+        LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+        orderWrapper.eq(Order::getStoreId, storeId);
+        orderWrapper.eq(Order::getStatus, 1);
+        orderWrapper.or().eq(Order::getStatus, 2);
+        List<Order> orders = this.list(orderWrapper);
+        // 检查这些订单是否逾期，已逾期则修改
+        orders.stream().forEach(item -> {
+            boolean isLate = isLateOrder(item, overdueTime);
+            if(isLate) {
+                // 已逾期，将状态设置为 6-逾期中
+                this.updateOrderStatus(item.getId(), 6);
+            }
+        });
+    }
+
+    /**
+     * 检查用户逾期订单
+     * @param userId
+     */
+    @Override
+    @Transactional
+    public void inspectOverdueOrderOfUser(Long userId) {
+        // 1-待收货；2-待归还
+        // 获取用户所有已配送、待归还订单
+        LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+        orderWrapper.eq(Order::getUserId, userId);
+        orderWrapper.eq(Order::getStatus, 1);
+        orderWrapper.or().eq(Order::getStatus, 2);
+        List<Order> orders = this.list(orderWrapper);
+        // 检查这些订单是否逾期，已逾期则修改
+        orders.stream().forEach(item -> {
+            boolean isLate = isLateOrder(item, overdueTime);
+            if(isLate) {
+                // 已逾期，将状态设置为 6-逾期中
+                this.updateOrderStatus(item.getId(), 6);
+            }
+        });
+    }
+
+    /**
      * 整合包装订单数据
      * @param order
      * @param orderItems
@@ -374,5 +485,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderWrapper.eq(Order::getUserId, userId);
         }
         return orderWrapper;
+    }
+
+    /**
+     * 判断订单是否逾期指定期限
+     * @param order 订单数据
+     * @param time 逾期期限
+     * @return
+     */
+    private boolean isLateOrder(Order order, int time) {
+        // 送达时间
+        LocalDateTime deliveryTime = order.getDeliveryTime();
+        // 逾期时间
+        LocalDateTime overdueTime = deliveryTime.plusDays(time + order.getBorrowTime());
+        // 当前时间是否超过逾期时间
+        boolean flag = TimeUtil.gt(LocalDateTime.now(), overdueTime);
+        return flag;
     }
 }

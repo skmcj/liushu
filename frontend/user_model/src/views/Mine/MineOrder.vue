@@ -88,11 +88,13 @@
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn urge" @click.stop="handleUrge(order)">我要催单</div>
+            <div class="order-btn urge" v-if="order.status === 1" @click.stop="handleAfterSales(order)">申请售后</div>
+            <div class="order-btn urge" v-if="order.status === 0" @click.stop="handleUrge(order)">我要催单</div>
             <div class="order-btn" @click.stop="handleConfirm(order)">确认收货</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
+        <!-- 待归还 -->
         <div v-if="computeOrderStatus(order) === 'back'" class="order-other">
           <!-- 待归还 -->
           <div class="order-type">
@@ -128,6 +130,7 @@
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
+            <div class="order-btn urge" @click.stop="handleRefund(order)">申请退款</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -842,6 +845,14 @@ export default {
      * 催单
      */
     handleUrge(item) {},
+    /**
+     * 申请售后
+     */
+    handleAfterSales(item) {},
+    /**
+     * 申请退款
+     */
+    handleRefund(item) {},
     /**
      * 确认收货
      */

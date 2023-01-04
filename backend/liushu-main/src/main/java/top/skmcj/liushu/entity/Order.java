@@ -77,6 +77,21 @@ public class Order implements Serializable {
     private LocalDateTime expectedTime;
 
     /**
+     * 实际送达时间
+     */
+    private LocalDateTime deliveryTime;
+
+    /**
+     * 预约归还时间
+     */
+    private LocalDateTime returnTime;
+
+    /**
+     * 实际上门回收时间
+     */
+    private LocalDateTime recycleTime;
+
+    /**
      * 配送费
      */
     private BigDecimal deliveryFee;
@@ -140,6 +155,11 @@ public class Order implements Serializable {
      * 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-待评价；5-已完成；6-逾期中；7-已逾期；8-售后中
      */
     private Integer status;
+
+    /**
+     * 评论状态，0-未评论；1-已评论
+     */
+    private Integer isComment;
 
     /**
      * 创建时间

@@ -214,11 +214,11 @@ public class FrontendOrderController {
             // 用户余额不足以支付
             return Result.error(StatusCodeEnum.ORDER_PAY_NO_MONEY);
         }
-        boolean payFlag = orderService.payOrder(orderPayVo.getOrderId());
-        if (!payFlag) return Result.error(StatusCodeEnum.ORDER_PAY_ERR);
         // 校验支付密码
         if (payPass == null) return Result.error(StatusCodeEnum.ORDER_PAY_NO_PASS);
         if (!payPass.equals(orderPayVo.getPayPass())) return Result.error(StatusCodeEnum.ORDER_PAY_PASS_ERR);
+        boolean payFlag = orderService.payOrder(orderPayVo.getOrderId());
+        if (!payFlag) return Result.error(StatusCodeEnum.ORDER_PAY_ERR);
         // 扣除相应余额
         UserInfo moneyInfo = new UserInfo();
         moneyInfo.setId(userInfo.getId());
@@ -264,5 +264,85 @@ public class FrontendOrderController {
         String imgDoMain = CommonUtil.getImgDoMain(request);
         Page<OrderDto> orderPage = orderService.getOrderByStatusOfPage(user.getId(), status, currentPage, pageSize, imgDoMain);
         return Result.success(orderPage);
+    }
+
+    /**
+     * 确认收货
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/confirm")
+    public Result<String> confirmReceipt(@RequestBody Order order) {
+        boolean flag = orderService.updateOrderStatus(order.getId(), 2);
+        if(!flag) return Result.error("确认收货失败");
+        return Result.success("确认收货完成");
+    }
+
+    /**
+     * 确认完成
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/complete")
+    public Result<String> confirmComplete(@RequestBody Order order) {
+        // 订单完成，商家获得收入
+        return Result.success("订单确认完成成功");
+    }
+
+    /**
+     * 续借
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/renew")
+    public Result<String> renewOfOrder(@RequestBody Order order) {
+        return Result.success("续借成功");
+    }
+
+    /**
+     * 预约归还
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/repay")
+    public Result<String> repayOfOrder(@RequestBody Order order) {
+        boolean flag = orderService.repayOfOrder(order.getId(), order.getReturnTime());
+        if(!flag) return Result.error("预约失败");
+        return Result.success("预约成功");
+    }
+
+    /**
+     * 评价
+     * @param order
+     * @return
+     */
+    @PutMapping("/comment")
+    public Result<String> commentOfOrder(@RequestBody Order order) {
+        return Result.success("评价成功");
+    }
+
+    /**
+     * 申请售后
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/aAS")
+    public Result<String> applyAfterSalesOfOrder(@RequestBody Order order) {
+        boolean flag = orderService.updateOrderStatus(order.getId(), 8);
+        if(!flag) return Result.error("售后申请失败");
+        return Result.success("售后申请成功");
+    }
+
+    /**
+     * 申请退款
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/refund")
+    public Result<String> applyRefundOfOrder(@RequestBody Order order) {
+        // 设置订单的售后状态为 1
+        boolean flag = orderService.updateOrderAmStatus(order.getId(), 1);
+        if(!flag) return Result.error("退款申请失败");
+        return Result.success("退款申请成功");
     }
 }
