@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
+import top.skmcj.liushu.common.task.service.OrderHandleTask;
 import top.skmcj.liushu.dto.BookstoreDto;
 import top.skmcj.liushu.dto.EmployeeDto;
 import top.skmcj.liushu.entity.*;
@@ -52,6 +53,9 @@ public class BusinessController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private OrderHandleTask orderHandleTask;
 
     @Autowired
     private MailServerUtil mailServerUtil;
@@ -188,6 +192,10 @@ public class BusinessController {
                     employeeDTO.setCompetence(dEmployee.getCompetence());
                     employeeDTO.setStatus(dEmployee.getStatus());
                     employeeDTO.setToken(token);
+
+                    // 检查商家订单逾期情况
+                    orderHandleTask.inspectOverdueOrderOfStore(dEmployee.getStoreId());
+
                     return Result.success(employeeDTO, StatusCodeEnum.BUSINESS_LOGIN_OK);
                 }
                 if(bookstore.getAuditStatus() == 3) {

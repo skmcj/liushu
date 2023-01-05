@@ -17,6 +17,7 @@ import top.skmcj.liushu.vo.OrderPayVo;
 import top.skmcj.liushu.vo.OrderVo;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -286,6 +287,7 @@ public class FrontendOrderController {
     @PutMapping("/status/complete")
     public Result<String> confirmComplete(@RequestBody Order order) {
         // 订单完成，商家获得收入
+        // 退回押金
         return Result.success("订单确认完成成功");
     }
 
@@ -295,7 +297,60 @@ public class FrontendOrderController {
      * @return
      */
     @PutMapping("/status/renew")
-    public Result<String> renewOfOrder(@RequestBody Order order) {
+    public Result<OrderDto> renewOfOrder(@RequestBody Order order, HttpServletRequest request) {
+        // 数据库订单数据
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("找不到对应订单");
+        // 订单状态非 2-待归还 ，不可续借
+        if(!mOrder.getStatus().equals(2)) return Result.error("当前订单状态不可续借");
+        // 续借时长超过本单剩余可续借时长
+        if(order.getBorrowTime().compareTo(mOrder.getRenewDuration()) > 0) {
+            return Result.error("续借失败，订单剩余可续借时长不足");
+        }
+        OrderDto renewOrder = orderService.getRenewOrder(order);
+        List<OrderItem> orderItems = renewOrder.getOrderItems();
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        orderItems.stream().forEach(item -> {
+            item.setBookCover(imgDoMain + item.getBookCover());
+        });
+        // 整合续借相关 OrderDto ，存入 session ，key 为 orderId
+        HttpSession session = request.getSession();
+        session.setAttribute(order.getId().toString(), renewOrder);
+        // 返回整合的 OrderDto，等待支付
+        return Result.success(renewOrder);
+    }
+
+    /**
+     * 续借订单支付(零钱支付)
+     * @param orderPayVo
+     * @return
+     */
+    @PutMapping("/renew/pay")
+    public Result<String> renewOfOrderToPayOfLS(@RequestBody OrderPayVo orderPayVo, HttpServletRequest request) {
+        Order order = orderService.getById(orderPayVo.getOrderId());
+        if(order == null) return Result.error("查无相关订单");
+        // 根据 orderId 从 session 中取出订单数据
+        HttpSession session = request.getSession();
+        OrderDto renewOrder = (OrderDto) session.getAttribute(orderPayVo.getOrderId().toString());
+        if(renewOrder == null) return Result.error("查无相关续借订单");
+        System.out.println("续借订单金额 ==> " + renewOrder.getAmount());
+        System.out.println("续借订单项 ==> " + renewOrder.getOrderItems());
+
+        // 进行支付，从用户零钱减去相应金额
+        LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
+        infoWrapper.eq(UserInfo::getUserId, order.getUserId());
+        UserInfo info = infoService.getOne(infoWrapper);
+        if(BigDecimalUtil.lt(info.getMoney(), renewOrder.getAmount())) {
+            // 余额不足
+            return Result.error("用户余额不足");
+        }
+        UserInfo sInfo = new UserInfo();
+        sInfo.setId(info.getId());
+        sInfo.setMoney(BigDecimalUtil.subtract(info.getMoney(), renewOrder.getAmount()));
+        boolean infoFlag = infoService.updateById(sInfo);
+        if(!infoFlag) return Result.error("支付失败，请稍后再试");
+        // 更新订单数据
+        orderService.payRenewOfOrder(renewOrder);
         return Result.success("续借成功");
     }
 
@@ -318,7 +373,7 @@ public class FrontendOrderController {
      */
     @PutMapping("/comment")
     public Result<String> commentOfOrder(@RequestBody Order order) {
-        return Result.success("评价成功");
+        return Result.success("评论成功");
     }
 
     /**

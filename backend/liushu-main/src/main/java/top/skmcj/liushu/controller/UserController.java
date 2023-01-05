@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
+import top.skmcj.liushu.common.task.service.OrderHandleTask;
 import top.skmcj.liushu.dto.UserDto;
 import top.skmcj.liushu.entity.User;
 import top.skmcj.liushu.entity.UserInfo;
@@ -31,6 +32,9 @@ public class UserController {
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private OrderHandleTask orderHandleTask;
 
     @Autowired
     private MailServerUtil mailServerUtil;
@@ -90,6 +94,10 @@ public class UserController {
             userDto.setMoney(userInfo.getMoney());
             userDto.setSignature(userInfo.getSignature());
             userDto.setSex(userInfo.getSex());
+
+            // 检查逾期订单
+            orderHandleTask.inspectOverdueOrderOfUser(loginUser.getId());
+
             return Result.success(userDto, StatusCodeEnum.USER_LOGIN_OK);
         } else {
             // 密码错误

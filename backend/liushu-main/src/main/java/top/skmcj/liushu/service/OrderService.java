@@ -33,7 +33,15 @@ public interface OrderService extends IService<Order> {
 
     boolean repayOfOrder(Long orderId, LocalDateTime returnTime);
 
-    void inspectOverdueOrderOfStore(Long storeId);
+    int inspectOverdueOrderOfStore(Long storeId);
 
-    void inspectOverdueOrderOfUser(Long userId);
+    int inspectOverdueOrderOfUser(Long userId);
+
+    int inspectOverdueOrder();
+
+    OrderDto getRenewOrder(Order order);
+
+    void payRenewOfOrder(OrderDto orderDto);
+
+    boolean refundOfOrder(Long orderId);
 }

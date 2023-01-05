@@ -14,20 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.skmcj.liushu.dao.mapper.OrderMapper;
 import top.skmcj.liushu.dto.OrderDto;
-import top.skmcj.liushu.entity.Book;
-import top.skmcj.liushu.entity.Bookstore;
-import top.skmcj.liushu.entity.Order;
-import top.skmcj.liushu.entity.OrderItem;
-import top.skmcj.liushu.service.BookService;
-import top.skmcj.liushu.service.BookstoreService;
-import top.skmcj.liushu.service.OrderItemService;
-import top.skmcj.liushu.service.OrderService;
+import top.skmcj.liushu.entity.*;
+import top.skmcj.liushu.service.*;
+import top.skmcj.liushu.util.BigDecimalUtil;
 import top.skmcj.liushu.util.NumberUtil;
 import top.skmcj.liushu.util.TimeUtil;
 import top.skmcj.liushu.vo.OrderPageVo;
 import top.skmcj.liushu.vo.OrderVo;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +37,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private BookCostService costService;
 
     @Autowired
     private BookstoreService storeService;
@@ -358,7 +358,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     @Transactional
-    public void inspectOverdueOrderOfStore(Long storeId) {
+    public int inspectOverdueOrderOfStore(Long storeId) {
+        // 逾期订单数量
+        final int[] count = {0};
         // 1-待收货；2-待归还
         // 获取商家所有已配送、待归还订单
         LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
@@ -372,8 +374,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if(isLate) {
                 // 已逾期，将状态设置为 6-逾期中
                 this.updateOrderStatus(item.getId(), 6);
+                count[0] += 1;
             }
         });
+        return count[0];
     }
 
     /**
@@ -382,7 +386,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     @Transactional
-    public void inspectOverdueOrderOfUser(Long userId) {
+    public int inspectOverdueOrderOfUser(Long userId) {
+        final int[] count = {0};
         // 1-待收货；2-待归还
         // 获取用户所有已配送、待归还订单
         LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
@@ -396,8 +401,153 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if(isLate) {
                 // 已逾期，将状态设置为 6-逾期中
                 this.updateOrderStatus(item.getId(), 6);
+                count[0] += 1;
             }
         });
+        return count[0];
+    }
+
+    /**
+     * 检查平台逾期订单
+     * @return
+     */
+    @Override
+    public int inspectOverdueOrder() {
+        final int[] count = {0};
+        // 1-待收货；2-待归还
+        // 获取用户所有已配送、待归还订单
+        LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+        orderWrapper.eq(Order::getStatus, 1);
+        orderWrapper.or().eq(Order::getStatus, 2);
+        List<Order> orders = this.list(orderWrapper);
+        // 检查这些订单是否逾期，已逾期则修改
+        orders.stream().forEach(item -> {
+            boolean isLate = isLateOrder(item, overdueTime);
+            if(isLate) {
+                // 已逾期，将状态设置为 6-逾期中
+                this.updateOrderStatus(item.getId(), 6);
+                count[0] += 1;
+            }
+        });
+        return count[0];
+    }
+
+    /**
+     * 获取续借订单数据
+     * @param order
+     * @return
+     */
+    @Override
+    @Transactional
+    public OrderDto getRenewOrder(Order order) {
+        OrderDto orderDto = new OrderDto();
+        // 获取订单数据
+        Order mOrder = this.getById(order.getId());
+        orderDto.setId(mOrder.getId());
+        orderDto.setNumber(mOrder.getNumber());
+        orderDto.setBorrowTime(order.getBorrowTime());
+        // 获取订单项
+        LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(OrderItem::getOrderId, order.getId());
+        List<OrderItem> goodsItems = orderItemService.list(itemWrapper);
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal amount = new BigDecimal(0);
+        for (OrderItem item : goodsItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(item.getId());
+            orderItem.setOrderId(item.getOrderId());
+            orderItem.setBookId(item.getBookId());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setBorrowCost(item.getBorrowCost());
+            orderItem.setPackingCost(item.getPackingCost());
+            orderItem.setAmount(item.getAmount());
+            orderItem.setDeposit(item.getDeposit());
+            // 计算每一项的借阅费
+            // 如果超过图书免费借阅时长，则计费
+            Book book = bookService.getById(item.getBookId());
+            LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+            costWrapper.eq(BookCost::getBookId, item.getBookId());
+            BookCost cost = costService.getOne(costWrapper);
+            // 剩余免费借阅时长
+            int leftFreeDay = cost.getFreeDay() - mOrder.getBorrowTime();
+            // leftFreeDay 小于 0 ，表示无免费借阅时长
+            orderItem.setBookName(book.getName());
+            orderItem.setBookCover(book.getCover());
+            if(leftFreeDay <= 0) {
+                // 直接计算
+                // 订单项单一金额增量
+                BigDecimal singleInc = BigDecimalUtil.multiply(cost.getBorrowCost(), order.getBorrowTime());
+                // 订单项金额增量
+                BigDecimal inc = BigDecimalUtil.multiply(singleInc, item.getQuantity());
+                BigDecimal itemBorrowCost = BigDecimalUtil.add(item.getBorrowCost(), inc);
+                BigDecimal itemAmount = BigDecimalUtil.add(item.getAmount(), inc);
+                amount = BigDecimalUtil.add(amount, inc);
+                orderItem.setBorrowCost(itemBorrowCost);
+                orderItem.setAmount(itemAmount);
+            } else {
+                // 有剩余免费时长
+                if(order.getBorrowTime() > leftFreeDay) {
+                    // 计算借阅费
+                    int payDay = order.getBorrowTime() - leftFreeDay;
+                    BigDecimal singleInc = BigDecimalUtil.multiply(cost.getBorrowCost(), order.getBorrowTime());
+                    BigDecimal inc = BigDecimalUtil.multiply(singleInc, item.getQuantity());
+                    BigDecimal itemBorrowCost = BigDecimalUtil.add(item.getBorrowCost(), inc);
+                    BigDecimal itemAmount = BigDecimalUtil.add(item.getAmount(), inc);
+                    amount = BigDecimalUtil.add(amount, inc);
+                    orderItem.setBorrowCost(itemBorrowCost);
+                    orderItem.setAmount(itemAmount);
+                }
+            }
+            orderItems.add(orderItem);
+        }
+        // 续借暂不可用优惠卷，虽然也没有设计优惠卷
+        orderDto.setOrderAmount(amount);
+        orderDto.setAmount(amount);
+        orderDto.setOrderItems(orderItems);
+        return orderDto;
+    }
+
+    /**
+     * 支付续借订单
+     * @param orderDto
+     * @return
+     */
+    @Override
+    @Transactional
+    public void payRenewOfOrder(OrderDto orderDto) {
+        Order order = this.getById(orderDto.getId());
+        // 整合(数据库Order)与(续借Order)为新的 Order 数据，修改数据库
+        // 设置 Order 的 借阅时间 及 金额
+        Order sOrder = new Order();
+        sOrder.setId(order.getId());
+        // 新的借阅时长 = 订单首次借阅时长 + 续借时长
+        sOrder.setBorrowTime(order.getBorrowTime() + orderDto.getBorrowTime());
+        // 新的订单金额 = 订单原金额 + 续借金额
+        sOrder.setOrderAmount(BigDecimalUtil.add(order.getOrderAmount(), orderDto.getOrderAmount()));
+        sOrder.setAmount(BigDecimalUtil.add(order.getAmount(), orderDto.getAmount()));
+        // 修改可续借时长
+        sOrder.setRenewDuration(order.getRenewDuration() - orderDto.getBorrowTime());
+        this.updateById(sOrder);
+        // 数据：借阅时长、订单金额
+        // 设置订单项数据
+        List<OrderItem> goodsItems = orderDto.getOrderItems();
+        goodsItems.stream().forEach(item -> {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(item.getId());
+            orderItem.setBorrowCost(item.getBorrowCost());
+            orderItem.setAmount(item.getAmount());
+            orderItemService.updateById(orderItem);
+        });
+    }
+
+    /**
+     * 订单退款
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean refundOfOrder(Long orderId) {
+        return false;
     }
 
     /**
@@ -496,6 +646,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private boolean isLateOrder(Order order, int time) {
         // 送达时间
         LocalDateTime deliveryTime = order.getDeliveryTime();
+        if(deliveryTime == null) {
+            // 尚未配送
+            return false;
+        }
         // 逾期时间
         LocalDateTime overdueTime = deliveryTime.plusDays(time + order.getBorrowTime());
         // 当前时间是否超过逾期时间
