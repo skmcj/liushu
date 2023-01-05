@@ -347,6 +347,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = new Order();
         order.setId(orderId);
         order.setReturnTime(returnTime);
+        // 3-待上门
         order.setStatus(3);
         boolean flag = this.updateById(order);
         return flag;

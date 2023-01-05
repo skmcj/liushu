@@ -361,6 +361,8 @@ public class FrontendOrderController {
      */
     @PutMapping("/status/repay")
     public Result<String> repayOfOrder(@RequestBody Order order) {
+        Order mOrder = orderService.getById(order.getId());
+        if(!mOrder.getStatus().equals(2)) return Result.error("当前订单状态异常，预约失败");
         boolean flag = orderService.repayOfOrder(order.getId(), order.getReturnTime());
         if(!flag) return Result.error("预约失败");
         return Result.success("预约成功");
