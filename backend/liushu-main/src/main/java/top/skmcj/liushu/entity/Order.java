@@ -72,6 +72,11 @@ public class Order implements Serializable {
     private Integer renewDuration;
 
     /**
+     * 逾期时长
+     */
+    private Integer overdueTime;
+
+    /**
      * 期望配送时间
      */
     private LocalDateTime expectedTime;
@@ -110,6 +115,11 @@ public class Order implements Serializable {
      * 支付时间
      */
     private LocalDateTime payTime;
+
+    /**
+     * 逾期费用
+     */
+    private BigDecimal overdueCost;
 
     /**
      * 订单总金额

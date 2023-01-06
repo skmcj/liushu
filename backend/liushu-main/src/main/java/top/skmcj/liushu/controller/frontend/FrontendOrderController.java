@@ -3,6 +3,7 @@ package top.skmcj.liushu.controller.frontend;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import top.skmcj.liushu.bo.OrderBo;
@@ -43,6 +44,12 @@ public class FrontendOrderController {
 
     @Autowired
     private UserInfoService infoService;
+
+    /**
+     * 逾期缓存期限
+     */
+    @Value("${liushu.order.overdue-time}")
+    private int overdueTime;
 
     /**
      * 生成订单
@@ -325,6 +332,7 @@ public class FrontendOrderController {
      * @param orderPayVo
      * @return
      */
+    @Transactional
     @PutMapping("/renew/pay")
     public Result<String> renewOfOrderToPayOfLS(@RequestBody OrderPayVo orderPayVo, HttpServletRequest request) {
         Order order = orderService.getById(orderPayVo.getOrderId());
@@ -333,9 +341,6 @@ public class FrontendOrderController {
         HttpSession session = request.getSession();
         OrderDto renewOrder = (OrderDto) session.getAttribute(orderPayVo.getOrderId().toString());
         if(renewOrder == null) return Result.error("查无相关续借订单");
-        System.out.println("续借订单金额 ==> " + renewOrder.getAmount());
-        System.out.println("续借订单项 ==> " + renewOrder.getOrderItems());
-
         // 进行支付，从用户零钱减去相应金额
         LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
         infoWrapper.eq(UserInfo::getUserId, order.getUserId());
@@ -344,6 +349,10 @@ public class FrontendOrderController {
             // 余额不足
             return Result.error("用户余额不足");
         }
+        if(!info.getPayPass().equals(orderPayVo.getPayPass())) {
+            // 支付密码错误
+            return Result.error("平台支付密码错误");
+        }
         UserInfo sInfo = new UserInfo();
         sInfo.setId(info.getId());
         sInfo.setMoney(BigDecimalUtil.subtract(info.getMoney(), renewOrder.getAmount()));
@@ -351,6 +360,8 @@ public class FrontendOrderController {
         if(!infoFlag) return Result.error("支付失败，请稍后再试");
         // 更新订单数据
         orderService.payRenewOfOrder(renewOrder);
+        // 删除 session 数据
+        session.removeAttribute(orderPayVo.getOrderId().toString());
         return Result.success("续借成功");
     }
 
@@ -365,6 +376,70 @@ public class FrontendOrderController {
         if(!mOrder.getStatus().equals(2)) return Result.error("当前订单状态异常，预约失败");
         boolean flag = orderService.repayOfOrder(order.getId(), order.getReturnTime());
         if(!flag) return Result.error("预约失败");
+        return Result.success("预约成功");
+    }
+
+    /**
+     * 逾期中订单预约归还
+     * @param order
+     * @return
+     */
+    @PutMapping("/status/overdue/repay")
+    public Result<OrderDto> repayOfOverdueOrder(@RequestBody Order order, HttpServletRequest request) {
+        // 订单信息
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        if(!mOrder.getStatus().equals(6)) return Result.error("订单状态异常，尚不可预约归还");
+        // 计算逾期日期及费用，生成逾期订单
+        OrderDto overdueOrder = orderService.repayOverdueOfOrder(order);
+        // 逾期时长超过限制
+        if(overdueOrder.getOverdueTime() > overdueTime) return Result.error("订单逾期超过限制，已抵押，无法归还");
+        List<OrderItem> orderItems = overdueOrder.getOrderItems();
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        orderItems.stream().forEach(item -> {
+            item.setBookCover(imgDoMain + item.getBookCover());
+        });
+        // 存入session
+        HttpSession session = request.getSession();
+        session.setAttribute(order.getId().toString(), overdueOrder);
+        // 返回逾期订单
+        return Result.success(overdueOrder);
+    }
+
+    /**
+     * 逾期中订单支付 - 零钱支付
+     * @param orderPayVo
+     * @return
+     */
+    @Transactional
+    @PutMapping("/repay/pay")
+    public Result<String> repayOfOverdueOrderToPayOfLS(@RequestBody OrderPayVo orderPayVo, HttpServletRequest request) {
+        Order mOrder = orderService.getById(orderPayVo.getOrderId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 获取逾期订单
+        HttpSession session = request.getSession();
+        OrderDto overdueOrder = (OrderDto) session.getAttribute(orderPayVo.getOrderId().toString());
+        if(overdueOrder == null) return Result.error("查无相关逾期预还订单");
+        // 进行支付，从用户零钱减去相应金额
+        LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
+        infoWrapper.eq(UserInfo::getUserId, mOrder.getUserId());
+        UserInfo info = infoService.getOne(infoWrapper);
+        if(BigDecimalUtil.lt(info.getMoney(), overdueOrder.getAmount())) {
+            // 余额不足
+            return Result.error("用户余额不足");
+        }
+        if(!info.getPayPass().equals(orderPayVo.getPayPass())) {
+            // 支付密码不对
+            return Result.error("支付密码不对");
+        }
+        UserInfo sInfo = new UserInfo();
+        sInfo.setId(info.getId());
+        sInfo.setMoney(BigDecimalUtil.subtract(info.getMoney(), overdueOrder.getAmount()));
+        boolean infoFlag = infoService.updateById(sInfo);
+        if(!infoFlag) return Result.error("支付失败");
+        // 更新数据
+        orderService.payOverdueOfOrder(overdueOrder);
+        session.removeAttribute(orderPayVo.getOrderId().toString());
         return Result.success("预约成功");
     }
 

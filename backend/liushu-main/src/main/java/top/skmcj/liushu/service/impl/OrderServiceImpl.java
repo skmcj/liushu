@@ -354,7 +354,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
-     * 检查商家逾期订单
+     * 检查商家 6-逾期中 订单
      * @param storeId
      */
     @Override
@@ -371,7 +371,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> orders = this.list(orderWrapper);
         // 检查这些订单是否逾期，已逾期则修改
         orders.stream().forEach(item -> {
-            boolean isLate = isLateOrder(item, overdueTime);
+            boolean isLate = isLateOrder(item);
             if(isLate) {
                 // 已逾期，将状态设置为 6-逾期中
                 this.updateOrderStatus(item.getId(), 6);
@@ -382,7 +382,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
-     * 检查用户逾期订单
+     * 检查用户 6-逾期中 订单
      * @param userId
      */
     @Override
@@ -398,7 +398,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> orders = this.list(orderWrapper);
         // 检查这些订单是否逾期，已逾期则修改
         orders.stream().forEach(item -> {
-            boolean isLate = isLateOrder(item, overdueTime);
+            boolean isLate = isLateOrder(item);
             if(isLate) {
                 // 已逾期，将状态设置为 6-逾期中
                 this.updateOrderStatus(item.getId(), 6);
@@ -409,7 +409,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
-     * 检查平台逾期订单
+     * 检查平台 6-逾期中 订单
      * @return
      */
     @Override
@@ -423,7 +423,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> orders = this.list(orderWrapper);
         // 检查这些订单是否逾期，已逾期则修改
         orders.stream().forEach(item -> {
-            boolean isLate = isLateOrder(item, overdueTime);
+            boolean isLate = isLateOrder(item);
             if(isLate) {
                 // 已逾期，将状态设置为 6-逾期中
                 this.updateOrderStatus(item.getId(), 6);
@@ -447,6 +447,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderDto.setId(mOrder.getId());
         orderDto.setNumber(mOrder.getNumber());
         orderDto.setBorrowTime(order.getBorrowTime());
+        // 获取商家信息
+        Bookstore store = storeService.getById(mOrder.getStoreId());
+        orderDto.setStoreId(store.getId());
+        orderDto.setStoreName(store.getStoreName());
         // 获取订单项
         LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
         itemWrapper.eq(OrderItem::getOrderId, order.getId());
@@ -536,6 +540,110 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             OrderItem orderItem = new OrderItem();
             orderItem.setId(item.getId());
             orderItem.setBorrowCost(item.getBorrowCost());
+            orderItem.setAmount(item.getAmount());
+            orderItemService.updateById(orderItem);
+        });
+    }
+
+    /**
+     * 生成逾期中订单数据
+     * @param order
+     * @return
+     */
+    @Override
+    @Transactional
+    public OrderDto repayOverdueOfOrder(Order order) {
+        OrderDto orderDto = new OrderDto();
+        // 订单数据
+        Order mOrder = this.getById(order.getId());
+        orderDto.setId(mOrder.getId());
+        orderDto.setNumber(mOrder.getNumber());
+        orderDto.setDeliveryTime(mOrder.getDeliveryTime());
+        orderDto.setBorrowTime(mOrder.getBorrowTime());
+        orderDto.setReturnTime(order.getReturnTime());
+        // 获取商家信息
+        Bookstore store = storeService.getById(mOrder.getStoreId());
+        orderDto.setStoreId(store.getId());
+        orderDto.setStoreName(store.getStoreName());
+        // 计算逾期时长
+        // 送达时间
+        LocalDateTime deliveryTime = mOrder.getDeliveryTime();
+        // 到期时间
+        LocalDateTime dueTime = deliveryTime.plusDays(mOrder.getBorrowTime());
+        // 逾期时长
+        long dueDuration = TimeUtil.compareToDay(dueTime, order.getReturnTime());
+        orderDto.setOverdueTime((int) dueDuration);
+        // 逾期超过界限
+        if(dueDuration > overdueTime) return orderDto;
+        // 计算逾期费用
+        // 获取订单项
+        LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(OrderItem::getOrderId, order.getId());
+        List<OrderItem> goodsItems = orderItemService.list(itemWrapper);
+        List<OrderItem> orderItems = new ArrayList<>();
+        // 逾期费用
+        BigDecimal amount = new BigDecimal(0);
+        for (OrderItem item : goodsItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(item.getId());
+            orderItem.setOrderId(item.getOrderId());
+            orderItem.setBookId(item.getBookId());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setBorrowCost(item.getBorrowCost());
+            orderItem.setPackingCost(item.getPackingCost());
+            orderItem.setDeposit(item.getDeposit());
+            // 设置图书信息
+            Book book = bookService.getById(item.getBookId());
+            orderItem.setBookName(book.getName());
+            orderItem.setBookCover(book.getCover());
+            // 计算逾期耗费
+            LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+            costWrapper.eq(BookCost::getBookId, item.getBookId());
+            BookCost cost = costService.getOne(costWrapper);
+            // 订单项单一金额增量
+            BigDecimal singleInc = BigDecimalUtil.multiply(cost.getBorrowCost(), orderDto.getOverdueTime());
+            // 订单项金额增量
+            BigDecimal inc = BigDecimalUtil.multiply(singleInc, item.getQuantity());
+            orderItem.setOverdueCost(inc);
+            orderItem.setAmount(BigDecimalUtil.add(item.getAmount(), inc));
+            amount = BigDecimalUtil.add(amount, inc);
+            // 加入
+            orderItems.add(orderItem);
+        }
+        orderDto.setOrderItems(orderItems);
+        orderDto.setOrderAmount(amount);
+        orderDto.setAmount(amount);
+        orderDto.setOverdueCost(amount);
+        return orderDto;
+    }
+
+    /**
+     * 支付逾期中订单
+     * @param orderDto
+     */
+    @Override
+    @Transactional
+    public void payOverdueOfOrder(OrderDto orderDto) {
+        Order order = this.getById(orderDto.getId());
+        // 更新Order
+        Order sOrder = new Order();
+        sOrder.setId(orderDto.getId());
+        // 新的订单金额 = 订单原金额 + 逾期金额
+        sOrder.setOrderAmount(BigDecimalUtil.add(order.getOrderAmount(), orderDto.getOverdueCost()));
+        sOrder.setAmount(BigDecimalUtil.add(order.getAmount(), orderDto.getOverdueCost()));
+        // 逾期费用
+        sOrder.setOverdueCost(orderDto.getOverdueCost());
+        // 逾期时间
+        sOrder.setOverdueTime(orderDto.getOverdueTime());
+        sOrder.setReturnTime(orderDto.getReturnTime());
+        sOrder.setStatus(3);
+        this.updateById(sOrder);
+        // 更新订单项
+        List<OrderItem> orderItems = orderDto.getOrderItems();
+        orderItems.stream().forEach(item -> {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(item.getId());
+            orderItem.setOverdueCost(item.getOverdueCost());
             orderItem.setAmount(item.getAmount());
             orderItemService.updateById(orderItem);
         });
@@ -641,10 +749,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     /**
      * 判断订单是否逾期指定期限
      * @param order 订单数据
-     * @param time 逾期期限
      * @return
      */
-    private boolean isLateOrder(Order order, int time) {
+    private boolean isLateOrder(Order order) {
         // 送达时间
         LocalDateTime deliveryTime = order.getDeliveryTime();
         if(deliveryTime == null) {
@@ -652,7 +759,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return false;
         }
         // 逾期时间
-        LocalDateTime overdueTime = deliveryTime.plusDays(time + order.getBorrowTime());
+        LocalDateTime overdueTime = deliveryTime.plusDays(order.getBorrowTime());
         // 当前时间是否超过逾期时间
         boolean flag = TimeUtil.gt(LocalDateTime.now(), overdueTime);
         return flag;

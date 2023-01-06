@@ -62,6 +62,11 @@ public class OrderItem implements Serializable {
     private BigDecimal packingCost;
 
     /**
+     * 逾期费用
+     */
+    private BigDecimal overdueCost;
+
+    /**
      * 总金额
      */
     private BigDecimal amount;
