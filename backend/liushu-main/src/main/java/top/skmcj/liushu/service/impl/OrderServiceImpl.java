@@ -47,8 +47,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     /**
      * 逾期缓存期限
      */
-    @Value("${liushu.order.overdue-time}")
-    private int overdueTime;
+    @Value("${liushu.order.overdue-period}")
+    private int overduePeriod;
 
     /**
      * 根据id获取订单完整信息
@@ -574,7 +574,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         long dueDuration = TimeUtil.compareToDay(dueTime, order.getReturnTime());
         orderDto.setOverdueTime((int) dueDuration);
         // 逾期超过界限
-        if(dueDuration > overdueTime) return orderDto;
+        if(dueDuration > overduePeriod) return orderDto;
         // 计算逾期费用
         // 获取订单项
         LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
@@ -647,6 +647,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItem.setAmount(item.getAmount());
             orderItemService.updateById(orderItem);
         });
+    }
+
+    /**
+     * 标记已逾期订单
+     * @param orderId
+     */
+    @Override
+    @Transactional
+    public void makeOverdueOfOrder(Long orderId) {
+        // 获取订单数据
+        Order mOrder = this.getById(orderId);
+        // 标记逾期
+        Order order = new Order();
+        order.setId(orderId);
+        // 7-已逾期
+        order.setStatus(7);
+        this.updateById(order);
+        // 商家获取订单收入
+        Bookstore bookstore = storeService.getById(mOrder.getStoreId());
+        Bookstore store = new Bookstore();
+        store.setId(mOrder.getStoreId());
+        // 计算商家收入
+        BigDecimal newIncome = BigDecimalUtil.add(bookstore.getIncome(), mOrder.getAmount());
+        store.setIncome(newIncome);
+        storeService.updateById(store);
     }
 
     /**

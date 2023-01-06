@@ -48,8 +48,8 @@ public class FrontendOrderController {
     /**
      * 逾期缓存期限
      */
-    @Value("${liushu.order.overdue-time}")
-    private int overdueTime;
+    @Value("${liushu.order.overdue-period}")
+    private int overduePeriod;
 
     /**
      * 生成订单
@@ -393,7 +393,7 @@ public class FrontendOrderController {
         // 计算逾期日期及费用，生成逾期订单
         OrderDto overdueOrder = orderService.repayOverdueOfOrder(order);
         // 逾期时长超过限制
-        if(overdueOrder.getOverdueTime() > overdueTime) return Result.error("订单逾期超过限制，已抵押，无法归还");
+        if(overdueOrder.getOverdueTime() > overduePeriod) return Result.error("订单逾期超过限制，已抵押，无法归还");
         List<OrderItem> orderItems = overdueOrder.getOrderItems();
         String imgDoMain = CommonUtil.getImgDoMain(request);
         orderItems.stream().forEach(item -> {

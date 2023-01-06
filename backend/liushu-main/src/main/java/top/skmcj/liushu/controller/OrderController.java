@@ -28,8 +28,8 @@ public class OrderController {
     /**
      * 逾期缓存期限
      */
-    @Value("${liushu.order.overdue-time}")
-    private int overdueTime;
+    @Value("${liushu.order.overdue-period}")
+    private int overduePeriod;
 
     /**
      * 分页获取订单
@@ -164,14 +164,20 @@ public class OrderController {
         // 订单逾期超过缓存期限未归还，商家可标记为逾期
         // 获取订单对象
         Order mOrder = orderService.getById(order.getId());
-        // 判断
-
-        // 期望配送时间与当前时间差值
-        long dValue = TimeUtil.compareToDay(mOrder.getDeliveryTime(), LocalDateTime.now());
-        if(dValue < 7) {
-            // 商家无法确认收货，需等待 7 天后或用户自己确认收货
-            return Result.error("订单配送完成未超过 7 天，无法确认收货");
-        }
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单不处于逾期中，无法标记
+        if(!mOrder.getStatus().equals(6)) return Result.error("订单状态异常，无法标记逾期");
+        // 计算逾期时间
+        LocalDateTime deliveryTime = mOrder.getDeliveryTime();
+        // 逾期日期
+        LocalDateTime overdueDate = deliveryTime.plusDays(mOrder.getBorrowTime());
+        // 已逾期时长
+        long dueDuration = TimeUtil.compareToDay(overdueDate, LocalDateTime.now());
+        // 未超过逾期期限
+        if(dueDuration <= overduePeriod) return Result.error("订单尚未超过逾期期限，不可标记逾期");
+        // 超过逾期期限
+        // 标记逾期，商家获得订单收入
+        orderService.makeOverdueOfOrder(order.getId());
         return Result.success("逾期订单标记成功");
     }
 

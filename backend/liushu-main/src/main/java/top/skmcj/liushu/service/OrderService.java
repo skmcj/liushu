@@ -47,5 +47,7 @@ public interface OrderService extends IService<Order> {
 
     void payOverdueOfOrder(OrderDto orderDto);
 
+    void makeOverdueOfOrder(Long orderId);
+
     boolean refundOfOrder(Long orderId);
 }
