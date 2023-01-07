@@ -44,6 +44,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private BookstoreService storeService;
 
+    @Autowired
+    private UserInfoService infoService;
+
+    @Autowired
+    private LsAccountService lsAccountService;
+
     /**
      * 逾期缓存期限
      */
@@ -665,13 +671,43 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(7);
         this.updateById(order);
         // 商家获取订单收入
-        Bookstore bookstore = storeService.getById(mOrder.getStoreId());
-        Bookstore store = new Bookstore();
-        store.setId(mOrder.getStoreId());
-        // 计算商家收入
-        BigDecimal newIncome = BigDecimalUtil.add(bookstore.getIncome(), mOrder.getAmount());
-        store.setIncome(newIncome);
-        storeService.updateById(store);
+        storeService.addIncome(mOrder.getStoreId(), mOrder.getAmount());
+        // 平台获取服务费
+        lsAccountService.handleOrderIncomeOfLS(mOrder.getAmount(), mOrder.getAmount());
+    }
+
+    /**
+     * 订单确认完成
+     * @param orderId
+     */
+    @Override
+    @Transactional
+    public void completeOrder(Long orderId) {
+        // 获取订单数据
+        Order mOrder = this.getById(orderId);
+        // 设置订单状态为 5-已完成
+        Order sOrder = new Order();
+        sOrder.setId(mOrder.getId());
+        sOrder.setStatus(5);
+        this.updateById(sOrder);
+        // 订单完成，计算商家获得收入
+        // 订单押金
+        BigDecimal deposit = new BigDecimal(0);
+        LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(OrderItem::getOrderId, mOrder.getId());
+        List<OrderItem> orderItems = orderItemService.list(itemWrapper);
+        for(OrderItem item : orderItems) {
+            // 累加订单项押金
+            deposit = BigDecimalUtil.add(deposit, item.getDeposit());
+        }
+        // 商家收入
+        BigDecimal income = BigDecimalUtil.subtract(mOrder.getAmount(), deposit);
+        // 更新商家收入
+        storeService.addIncome(mOrder.getStoreId(), income);
+        // 退回押金
+        infoService.addMoney(mOrder.getUserId(), deposit);
+        // 更新平台收入
+        lsAccountService.handleOrderIncomeOfLS(mOrder.getAmount(), income);
     }
 
     /**
@@ -680,8 +716,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return
      */
     @Override
-    public boolean refundOfOrder(Long orderId) {
-        return false;
+    @Transactional
+    public void refundOfOrder(Long orderId) {
+        // 获取订单数据
+        Order mOrder = this.getById(orderId);
+        // 退款 - 将订单 amStatus 设为 2-已退款
+        Order order = new Order();
+        order.setId(orderId);
+        order.setAmStatus(2);
+        this.updateById(order);
+        // 将订单金额返还给用户余额
+        LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
+        infoWrapper.eq(UserInfo::getUserId, mOrder.getUserId());
+        UserInfo info = infoService.getOne(infoWrapper);
+        UserInfo sInfo = new UserInfo();
+        sInfo.setId(info.getId());
+        sInfo.setMoney(BigDecimalUtil.add(info.getMoney(), mOrder.getAmount()));
+        infoService.updateById(sInfo);
     }
 
     /**

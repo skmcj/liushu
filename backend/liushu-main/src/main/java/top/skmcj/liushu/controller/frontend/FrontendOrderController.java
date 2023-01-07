@@ -45,6 +45,9 @@ public class FrontendOrderController {
     @Autowired
     private UserInfoService infoService;
 
+    @Autowired
+    private LsAccountService lsAccountService;
+
     /**
      * 逾期缓存期限
      */
@@ -232,6 +235,8 @@ public class FrontendOrderController {
         moneyInfo.setId(userInfo.getId());
         moneyInfo.setMoney(BigDecimalUtil.subtract(balance, amount));
         infoService.updateById(moneyInfo);
+        // 平台流动资金做出相应调整，加入订单实付金额
+        lsAccountService.addFundOfLS(amount);
         return Result.success(StatusCodeEnum.ORDER_PAY_OK);
     }
 
@@ -293,8 +298,13 @@ public class FrontendOrderController {
      */
     @PutMapping("/status/complete")
     public Result<String> confirmComplete(@RequestBody Order order) {
-        // 订单完成，商家获得收入
-        // 退回押金
+        // 获取订单
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单不是 4-已上门，不可确认完成
+        if(!mOrder.getStatus().equals(4)) return Result.error("订单状态异常，不可确认完成");
+        // 订单完成
+        orderService.completeOrder(order.getId());
         return Result.success("订单确认完成成功");
     }
 
@@ -358,6 +368,8 @@ public class FrontendOrderController {
         sInfo.setMoney(BigDecimalUtil.subtract(info.getMoney(), renewOrder.getAmount()));
         boolean infoFlag = infoService.updateById(sInfo);
         if(!infoFlag) return Result.error("支付失败，请稍后再试");
+        // 更新流书网账户流动资金
+        lsAccountService.addFundOfLS(renewOrder.getAmount());
         // 更新订单数据
         orderService.payRenewOfOrder(renewOrder);
         // 删除 session 数据
@@ -437,6 +449,8 @@ public class FrontendOrderController {
         sInfo.setMoney(BigDecimalUtil.subtract(info.getMoney(), overdueOrder.getAmount()));
         boolean infoFlag = infoService.updateById(sInfo);
         if(!infoFlag) return Result.error("支付失败");
+        // 更新流书网账户流动资金
+        lsAccountService.addFundOfLS(overdueOrder.getAmount());
         // 更新数据
         orderService.payOverdueOfOrder(overdueOrder);
         session.removeAttribute(orderPayVo.getOrderId().toString());

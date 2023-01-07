@@ -25,6 +25,9 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Value("${liushu.order.confirm-buff-day}")
+    private int confirmBuffDay;
+
     /**
      * 逾期缓存期限
      */
@@ -100,7 +103,7 @@ public class OrderController {
         Order mOrder = orderService.getById(order.getId());
         // 期望配送时间与当前时间差值
         long dValue = TimeUtil.compareToDay(mOrder.getDeliveryTime(), LocalDateTime.now());
-        if(dValue < 7) {
+        if(dValue <= confirmBuffDay) {
             // 配送完成，未超过 7 天
             // 商家无法确认收货，需等待 7 天后或用户自己确认收货
             return Result.error("订单配送完成未超过 7 天，无法确认收货");
@@ -119,14 +122,18 @@ public class OrderController {
     public Result<String> confirmComplete(@RequestBody Order order) {
         // 获取订单对象
         Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单不是 4-已上门，不可确认完成
+        if(!mOrder.getStatus().equals(4)) return Result.error("订单状态异常，不可确认完成");
         // 预约归还时间与当前时间差值
-        long dValue = TimeUtil.compareToDay(mOrder.getReturnTime(), LocalDateTime.now());
-        if(dValue < 7) {
+        long dValue = TimeUtil.compareToDay(mOrder.getRecycleTime(), LocalDateTime.now());
+        if(dValue <= confirmBuffDay) {
             // 上门完成，未超过 7 天
-            // 商家无法确认收货，需等待 7 天后或用户自己确认完成
+            // 商家无法确认完成，需等待 7 天后或用户自己确认完成
             return Result.error("图书回收完成未超过 7 天，无法确认完成");
         }
-        // 订单完成，商家获得收入
+        // 订单完成
+        orderService.completeOrder(order.getId());
         return Result.success("订单确认完成成功");
     }
 
@@ -149,6 +156,11 @@ public class OrderController {
      */
     @PutMapping("/status/refund")
     public Result<String> refundOfOrder(@RequestBody Order order) {
+        // 获取订单数据
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单未售后，不可退款
+        if(!mOrder.getStatus().equals(8)) return Result.error("订单状态异常，不可退款");
         // 退款 - 将订单 amStatus 设为 2
         // 将订单金额返还给用户余额
         return Result.success("订单退款成功");

@@ -3,6 +3,7 @@ package top.skmcj.liushu.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import top.skmcj.liushu.dao.mapper.BookstoreMapper;
 import top.skmcj.liushu.dto.BookstoreDto;
@@ -12,7 +13,9 @@ import top.skmcj.liushu.entity.BookstoreDetail;
 import top.skmcj.liushu.service.BookDetailService;
 import top.skmcj.liushu.service.BookstoreDetailService;
 import top.skmcj.liushu.service.BookstoreService;
+import top.skmcj.liushu.util.BigDecimalUtil;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,12 @@ public class BookstoreServiceImpl extends ServiceImpl<BookstoreMapper, Bookstore
 
     @Autowired
     private BookstoreDetailService detailService;
+
+    /**
+     * 流书网订单服务费百分比
+     */
+    @Value("${liushu.account.service-fee}")
+    private BigDecimal serviceFee;
 
     /**
      * 随机获取商家
@@ -91,5 +100,25 @@ public class BookstoreServiceImpl extends ServiceImpl<BookstoreMapper, Bookstore
         targetDetail.setEnvImgs(detailStore.getEnvImgs());
         bookstoreDto.setBookstoreDetail(targetDetail);
         return bookstoreDto;
+    }
+
+    /**
+     * 商家获取收入
+     * @param storeId
+     * @param income
+     * @return
+     */
+    @Override
+    public boolean addIncome(Long storeId, BigDecimal income) {
+        Bookstore store = this.getById(storeId);
+        Bookstore bookstore = new Bookstore();
+        bookstore.setId(store.getId());
+        // 平台抽取服务费
+        BigDecimal serviceCost = BigDecimalUtil.multiply(income, serviceFee);
+        // 真实收入
+        BigDecimal rIncome = BigDecimalUtil.subtract(income, serviceCost);
+        bookstore.setIncome(BigDecimalUtil.add(store.getIncome(), rIncome));
+        boolean flag = this.updateById(bookstore);
+        return flag;
     }
 }
