@@ -20,6 +20,7 @@ import top.skmcj.liushu.vo.OrderVo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,11 +49,20 @@ public class FrontendOrderController {
     @Autowired
     private LsAccountService lsAccountService;
 
+    @Autowired
+    private AfterSalesService asService;
+
     /**
      * 逾期缓存期限
      */
     @Value("${liushu.order.overdue-period}")
     private int overduePeriod;
+
+    /**
+     * 售后订单退货预约上门时间缓冲期限
+     */
+    @Value("${liushu.order.aso-day}")
+    private int asoDay;
 
     /**
      * 生成订单
@@ -469,26 +479,78 @@ public class FrontendOrderController {
 
     /**
      * 申请售后
-     * @param order
+     * @param afterSales
      * @return
      */
     @PutMapping("/status/aAS")
-    public Result<String> applyAfterSalesOfOrder(@RequestBody Order order) {
-        boolean flag = orderService.updateOrderStatus(order.getId(), 8);
+    public Result<String> applyAfterSalesOfOrder(@RequestBody AfterSales afterSales) {
+        Order mOrder = orderService.getById(afterSales.getOrderId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单未支付，不可申请售后
+        if(!mOrder.getPayStatus().equals(1)) return Result.error("订单尚未支付，无法申请售后");
+        // 可售后状态：0-待配送；1-待收货；2-待归还；3-待上门；4-已上门(待评价)；5-已完成；
+        if(mOrder.getStatus() > 5) return Result.error("订单状态异常，无法申请售后");
+        // 订单已完成，无法申请退货退款
+        if(mOrder.getStatus().equals(5) && afterSales.getType().equals(1)) return Result.error("订单已完成，不可申请退货退款");
+        boolean flag = orderService.applyAfterSalesService(afterSales);
         if(!flag) return Result.error("售后申请失败");
         return Result.success("售后申请成功");
     }
 
     /**
-     * 申请退款
+     * 返回售后前状态
      * @param order
      * @return
      */
-    @PutMapping("/status/refund")
-    public Result<String> applyRefundOfOrder(@RequestBody Order order) {
-        // 设置订单的售后状态为 1
-        boolean flag = orderService.updateOrderAmStatus(order.getId(), 1);
-        if(!flag) return Result.error("退款申请失败");
-        return Result.success("退款申请成功");
+    @PutMapping("/after/status/revert")
+    public Result<String> returnAfterSalesStatus(@RequestBody Order order) {
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        if(!mOrder.getAmStatus().equals(3)) return Result.error("订单状态异常，无法返回售后前状态");
+        if(mOrder.getAmStatus() < 2) return Result.error("订单售后处理暂未结束，无法返回售后前状态");
+        // 获取售后单据
+        LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
+        asWrapper.eq(AfterSales::getOrderId, mOrder.getId());
+        AfterSales afterSales = asService.getOne(asWrapper);
+        if(afterSales == null) return Result.error("查无相关售后单据");
+        if(!afterSales.getStatus().equals(5)) return Result.error("订单售后处理正常，无需返回售后前状态");
+        Order sOrder = new Order();
+        sOrder.setId(mOrder.getId());
+        sOrder.setStatus(afterSales.getOrderStatus());
+        boolean flag = orderService.updateById(sOrder);
+        if(!flag) return Result.error("返回售后前状态失败");
+        // 删除售后单据
+        asService.removeById(afterSales.getId());
+        return Result.success("返回售后前状态成功");
     }
+
+    /**
+     * 售后预约退货(预约上门收书)
+     * @param afterSales
+     * @return
+     */
+    @PutMapping("/after/status/repay")
+    public Result<String> repayOfASOrder(@RequestBody AfterSales afterSales) {
+        AfterSales sales = asService.getById(afterSales.getId());
+        if(sales == null) return Result.error("查无售后单据");
+        if(sales.getStatus().equals(7)) return Result.error("售后已关闭，无法预约");
+        // 售后类型非 1-退货退款
+        if(!sales.getType().equals(1)) return Result.error("售后类型非退货退款，无需预约退货");
+        if(sales.getStatus().equals(2)) return Result.error("请勿重复预约");
+
+        long day = TimeUtil.compareToDay(sales.getAgreeTime(), afterSales.getReturnTime());
+        // returnMode: 0-7天期限；2-双倍期限；3-无期限
+        if(sales.getReturnMode().equals(0) && day > asoDay) return Result.error("已超过可预约期限，请联系商家进行处理");
+        else if(sales.getReturnMode().equals(1) && day > 2 * asoDay) return Result.error("已超过可预约期限，请联系商家进行处理");
+        AfterSales afs = new AfterSales();
+        afs.setId(sales.getId());
+        // 2-待上门
+        afs.setStatus(2);
+        afs.setReturnTime(afterSales.getReturnTime());
+        boolean flag = asService.updateById(afs);
+        if(!flag) return Result.error("预约失败");
+        return Result.success("预约成功");
+    }
+
+
 }

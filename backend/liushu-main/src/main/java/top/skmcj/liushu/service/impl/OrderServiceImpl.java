@@ -50,11 +50,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private LsAccountService lsAccountService;
 
+    @Autowired
+    private AfterSalesService asService;
+
     /**
      * 逾期缓存期限
      */
     @Value("${liushu.order.overdue-period}")
     private int overduePeriod;
+
+    /**
+     * 流书网订单服务费百分比
+     */
+    @Value("${liushu.account.service-fee}")
+    private BigDecimal serviceFee;
 
     /**
      * 根据id获取订单完整信息
@@ -240,6 +249,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
 
+                // 订单申请了售后
+                if(item.getStatus().equals(8)) {
+                    // 获取售后信息
+                    LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
+                    asWrapper.eq(AfterSales::getOrderId, item.getId());
+                    AfterSales sales = asService.getOne(asWrapper);
+                    orderDto.setAfterSales(sales);
+                }
+
                 orderDto.setStoreName(bookstore.getStoreName());
                 return orderDto;
             }).collect(Collectors.toList());
@@ -291,6 +309,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 });
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
+                // 订单申请了售后
+                if(item.getStatus().equals(8)) {
+                    // 获取售后信息
+                    LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
+                    asWrapper.eq(AfterSales::getOrderId, item.getId());
+                    AfterSales sales = asService.getOne(asWrapper);
+                    orderDto.setAfterSales(sales);
+                }
 
                 orderDto.setStoreName(bookstore.getStoreName());
                 return orderDto;
@@ -711,28 +737,95 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
+     * 申请售后
+     * @param afterSales
+     */
+    @Override
+    @Transactional
+    public boolean applyAfterSalesService(AfterSales afterSales) {
+        // 获取订单数据
+        Order mOrder = this.getById(afterSales.getOrderId());
+        Order order = new Order();
+        order.setId(afterSales.getOrderId());
+        order.setStatus(8);
+        boolean uoFlag = this.updateById(order);
+        BigDecimal refund = new BigDecimal(0);
+        if(mOrder.getStatus().equals(5)) {
+            // 订单已完成后申请售后，只需退还商家收入
+            BigDecimal deposit = new BigDecimal(0);
+            LambdaQueryWrapper<OrderItem> itemWrapper = new LambdaQueryWrapper<>();
+            itemWrapper.eq(OrderItem::getOrderId, mOrder.getId());
+            List<OrderItem> orderItems = orderItemService.list(itemWrapper);
+            for(OrderItem item : orderItems) {
+                // 累加订单项押金
+                deposit = BigDecimalUtil.add(deposit, item.getDeposit());
+            }
+            // 商家收入
+            BigDecimal income = BigDecimalUtil.subtract(mOrder.getAmount(), deposit);
+            // 实际退款为商家所得，平台所得 2% 服务费不退还
+            refund = BigDecimalUtil.multiply(income, BigDecimalUtil.subtract(new BigDecimal(1), serviceFee));
+        } else {
+            // 返回订单实付金额
+            refund = mOrder.getAmount();
+        }
+        // 生成售后单据
+        AfterSales afs = new AfterSales();
+        afs.setOrderId(afterSales.getOrderId());
+        afs.setOrderStatus(mOrder.getStatus());
+        afs.setType(afterSales.getType());
+        afs.setRefundAmount(refund);
+        afs.setReason(afterSales.getReason());
+        afs.setProof(afterSales.getProof());
+        boolean sFlag = asService.save(afs);
+        return uoFlag && sFlag;
+    }
+
+    /**
      * 订单退款
      * @param orderId
-     * @return
      */
     @Override
     @Transactional
     public void refundOfOrder(Long orderId) {
         // 获取订单数据
         Order mOrder = this.getById(orderId);
-        // 退款 - 将订单 amStatus 设为 2-已退款
-        Order order = new Order();
-        order.setId(orderId);
-        order.setAmStatus(2);
-        this.updateById(order);
+        // 获取订单售后单据
+        LambdaQueryWrapper<AfterSales> salesWrapper = new LambdaQueryWrapper<>();
+        salesWrapper.eq(AfterSales::getOrderId, orderId);
+        AfterSales sales = asService.getOne(salesWrapper);
+        if(sales.getOrderStatus().equals(5)) {
+            // 订单已完成后申请售后，只需退还商家收入
+            // 计算商家退后收入
+            Bookstore store = storeService.getById(mOrder.getStoreId());
+            BigDecimal newIncome = BigDecimalUtil.subtract(store.getIncome(), sales.getRefundAmount());
+            // 扣除商家收入
+            Bookstore bookstore = new Bookstore();
+            bookstore.setId(mOrder.getStoreId());
+            bookstore.setIncome(newIncome);
+            storeService.updateById(bookstore);
+        } else {
+            // 返回订单实付金额
+            // 平台扣除
+            lsAccountService.reduceFundOfLS(sales.getRefundAmount());
+        }
         // 将订单金额返还给用户余额
         LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
         infoWrapper.eq(UserInfo::getUserId, mOrder.getUserId());
         UserInfo info = infoService.getOne(infoWrapper);
         UserInfo sInfo = new UserInfo();
         sInfo.setId(info.getId());
-        sInfo.setMoney(BigDecimalUtil.add(info.getMoney(), mOrder.getAmount()));
+        sInfo.setMoney(BigDecimalUtil.add(info.getMoney(), sales.getRefundAmount()));
         infoService.updateById(sInfo);
+        // 关闭售后
+        AfterSales afs = new AfterSales();
+        afs.setId(sales.getId());
+        afs.setStatus(7);
+        asService.updateById(afs);
+        // 退款 - 将订单 amStatus 设为 2-已结束
+        Order order = new Order();
+        order.setId(orderId);
+        order.setAmStatus(2);
+        this.updateById(order);
     }
 
     /**

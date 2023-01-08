@@ -1,6 +1,7 @@
 package top.skmcj.liushu.dto;
 
 import lombok.Data;
+import top.skmcj.liushu.entity.AfterSales;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.entity.OrderItem;
 
@@ -21,4 +22,9 @@ public class OrderDto extends Order {
      * 订单项列表
      */
     private List<OrderItem> orderItems;
+
+    /**
+     * 售后单据
+     */
+    private AfterSales afterSales;
 }

@@ -3,6 +3,7 @@ package top.skmcj.liushu.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.skmcj.liushu.dto.OrderDto;
+import top.skmcj.liushu.entity.AfterSales;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.vo.OrderPageVo;
 import top.skmcj.liushu.vo.OrderVo;
@@ -50,6 +51,8 @@ public interface OrderService extends IService<Order> {
     void makeOverdueOfOrder(Long orderId);
 
     void completeOrder(Long orderId);
+
+    boolean applyAfterSalesService(AfterSales afterSales);
 
     void refundOfOrder(Long orderId);
 }
