@@ -76,4 +76,16 @@ public class OrderItem implements Serializable {
      */
     private BigDecimal deposit;
 
+    /**
+     * 商品每日借阅费
+     */
+    @TableField(exist = false)
+    private BigDecimal borrowFee;
+
+    /**
+     * 免借阅费天数
+     */
+    @TableField(exist = false)
+    private Integer freeDay;
+
 }

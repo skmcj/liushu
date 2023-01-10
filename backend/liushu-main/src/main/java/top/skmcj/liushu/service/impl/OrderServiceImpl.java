@@ -80,6 +80,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq(OrderItem::getOrderId, id);
         List<OrderItem> list = orderItemService.list(queryWrapper);
         BeanUtils.copyProperties(order, orderDto);
+        list.stream().forEach(item -> {
+            Book book = bookService.getById(item.getBookId());
+            item.setBookName(book.getName());
+            item.setBookCover(book.getCover());
+        });
+        if(order.getStatus().equals(2) || order.getStatus().equals(6)) {
+            // 订单可续借或归还
+            // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
+            list.stream().forEach(orderItem -> {
+                LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+                costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
+                BookCost cost = costService.getOne(costWrapper);
+                orderItem.setBorrowFee(cost.getBorrowCost());
+                orderItem.setFreeDay(cost.getFreeDay());
+            });
+        }
+        // 订单申请了售后
+        if(order.getStatus().equals(8)) {
+            // 获取售后信息
+            LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
+            asWrapper.eq(AfterSales::getOrderId, order.getId());
+            AfterSales sales = asService.getOne(asWrapper);
+            orderDto.setAfterSales(sales);
+        }
+        Bookstore store = storeService.getById(order.getStoreId());
+        orderDto.setStoreName(store.getStoreName());
         orderDto.setOrderItems(list);
         return orderDto;
     }
@@ -246,6 +272,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     orderItem.setBookName(book.getName());
                     orderItem.setBookCover(imgDoMain + book.getCover());
                 });
+                if(item.getStatus().equals(2) || item.getStatus().equals(6)) {
+                    // 订单可续借或归还
+                    // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
+                    orderItems.stream().forEach(orderItem -> {
+                        LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+                        costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
+                        BookCost cost = costService.getOne(costWrapper);
+                        orderItem.setBorrowFee(cost.getBorrowCost());
+                        orderItem.setFreeDay(cost.getFreeDay());
+                    });
+                }
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
 
@@ -276,8 +313,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *  1 - 待付款 payStatus: 0
      *  2 - 待配送 status: 0、1
      *  3 - 待归还 status: 2、3、6
-     *  4 - 待评价 status: 4、7
-     *  5 - 退款/售后 status: 8
+     *  4 - 待评价 status: 4
+     *  5 - 已完成 status: 5、7
+     *  6 - 退款/售后 status: 8
      * @param currentPage
      * @param pageSize
      * @return
@@ -307,6 +345,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     orderItem.setBookName(book.getName());
                     orderItem.setBookCover(imgDoMain + book.getCover());
                 });
+                if(item.getStatus().equals(2) || item.getStatus().equals(6)) {
+                    // 订单可续借或归还
+                    // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
+                    orderItems.stream().forEach(orderItem -> {
+                        LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+                        costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
+                        BookCost cost = costService.getOne(costWrapper);
+                        orderItem.setBorrowFee(cost.getBorrowCost());
+                        orderItem.setFreeDay(cost.getFreeDay());
+                    });
+                }
                 // 封装
                 OrderDto orderDto = packingOrderDto(item, orderItems);
                 // 订单申请了售后
@@ -863,6 +912,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderDto.setCreateTime(order.getCreateTime());
         orderDto.setUpdateTime(order.getUpdateTime());
         orderDto.setIsDeleted(order.getIsDeleted());
+
+        orderDto.setOverdueTime(order.getOverdueTime());
+        orderDto.setDeliveryTime(order.getDeliveryTime());
+        orderDto.setReturnTime(order.getReturnTime());
+        orderDto.setRecycleTime(order.getRecycleTime());
+        orderDto.setOverdueCost(order.getOverdueCost());
+        orderDto.setIsComment(order.getIsComment());
+
         orderDto.setOrderItems(orderItems);
         return orderDto;
     }
@@ -874,7 +931,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *  1 - 待付款 payStatus: 0
      *  2 - 待配送 status: 0、1
      *  3 - 待归还 status: 2、3、6
-     *  4 - 待评价 status: 4、7
+     *  4 - 待评价 status: 4
+     *  5 - 已完成 status: 5、7
      *  5 - 退款/售后 status: 8
      * @return
      */
@@ -902,8 +960,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderWrapper.eq(Order::getTradeStatus, 1);
             orderWrapper.eq(Order::getPayStatus, 1);
             orderWrapper.eq(Order::getStatus, 4);
-            orderWrapper.or().eq(Order::getStatus, 7);
         } else if(status == 5) {
+            orderWrapper.eq(Order::getUserId, userId);
+            orderWrapper.eq(Order::getTradeStatus, 1);
+            orderWrapper.eq(Order::getPayStatus, 1);
+            orderWrapper.eq(Order::getStatus, 5);
+            orderWrapper.or().eq(Order::getStatus, 7);
+        } else if(status == 6) {
             orderWrapper.eq(Order::getUserId, userId);
             orderWrapper.eq(Order::getTradeStatus, 1);
             orderWrapper.eq(Order::getPayStatus, 1);

@@ -290,6 +290,24 @@ public class FrontendOrderController {
     }
 
     /**
+     * 根据ID获取订单
+     * @param id
+     * @param request
+     * @return
+     */
+    @GetMapping("/id/{id}")
+    public Result<OrderDto> getOrderById(@PathVariable Long id, HttpServletRequest request) {
+        OrderDto orderDto = orderService.getOrderById(id);
+        List<OrderItem> orderItems = orderDto.getOrderItems();
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        orderItems.stream().forEach(item -> {
+            item.setBookCover(imgDoMain + item.getBookCover());
+        });
+        return Result.success(orderDto);
+    }
+
+
+    /**
      * 确认收货
      * @param order
      * @return
@@ -396,6 +414,11 @@ public class FrontendOrderController {
     public Result<String> repayOfOrder(@RequestBody Order order) {
         Order mOrder = orderService.getById(order.getId());
         if(!mOrder.getStatus().equals(2)) return Result.error("当前订单状态异常，预约失败");
+        if(TimeUtil.lt(order.getReturnTime(), LocalDateTime.now())) return Result.error("预约时间不可以是过去的时间");
+        // 判断预约时间是否逾期
+        LocalDateTime deliveryTime = mOrder.getDeliveryTime();
+        LocalDateTime expirationTime = deliveryTime.plusDays(mOrder.getBorrowTime());
+        if(TimeUtil.gt(order.getReturnTime(), expirationTime)) return Result.error("预约时间不可超过订单借阅到期时间");
         boolean flag = orderService.repayOfOrder(order.getId(), order.getReturnTime());
         if(!flag) return Result.error("预约失败");
         return Result.success("预约成功");

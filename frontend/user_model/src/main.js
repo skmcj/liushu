@@ -23,6 +23,8 @@ Vue.config.productionTip = false;
 Vue.prototype.$bannerUrl = banner;
 Vue.prototype.$noCoverUrl = noCover;
 Vue.prototype.$noAvatarUrl = noAvatar;
+// 订单逾期缓存期限
+Vue.prototype.$overduePeriod = 15;
 /** 封装一些工具到Vue上 */
 // 将md5绑定到vue上
 Vue.prototype.$md5 = md5;

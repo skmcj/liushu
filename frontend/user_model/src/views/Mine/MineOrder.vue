@@ -59,7 +59,8 @@
           </div>
           <!-- 订单提示 -->
           <div class="order-tip-box" v-if="order.orderTip">
-            <i class="ic-info"></i>
+            <i class="ic-info" v-if="order.status !== 3"></i>
+            <i class="ic-time-tip" v-if="order.status === 3"></i>
             <span>{{ order.orderTip }}</span>
           </div>
         </div>
@@ -74,8 +75,8 @@
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn pay" @click.stop="handleClickPay(order)">去付款</div>
-            <div class="order-btn cancel" @click.stop="handleCancel(order)">取消订单</div>
+            <div class="order-btn pay" @click.stop="handleClickPay(order, oi)">去付款</div>
+            <div class="order-btn cancel" @click.stop="handleCancel(order, oi)">取消订单</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -88,49 +89,103 @@
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn urge" v-if="order.status === 1" @click.stop="handleAfterSales(order)">申请售后</div>
             <div class="order-btn urge" v-if="order.status === 0" @click.stop="handleUrge(order)">我要催单</div>
-            <div class="order-btn" @click.stop="handleConfirm(order)">确认收货</div>
+            <div class="order-btn" v-if="order.status === 1" @click.stop="handleConfirm(order, oi)">确认收货</div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
         <!-- 待归还 -->
         <div v-if="computeOrderStatus(order) === 'back'" class="order-other">
           <!-- 待归还 -->
-          <div class="order-type">
+          <div class="order-type" v-if="order.status == 2">
             <i class="ic-return-books"></i>
             <span>待归还</span>
           </div>
+          <!-- 待上门 -->
+          <div class="order-type" v-if="order.status == 3">
+            <i class="ic-repay"></i>
+            <span>待上门</span>
+          </div>
+          <!-- 逾期中 -->
+          <div class="order-type" v-if="order.status === 6">
+            <i class="ic-due"></i>
+            <span>逾期中</span>
+          </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn renew" @click.stop="handleRenew(order)">我要续借</div>
-            <div class="order-btn repay" @click.stop="handleRepay(order)">预约归还</div>
+            <div class="order-btn renew" v-if="order.status === 2" @click.stop="handleRenew(order, oi)">我要续借</div>
+            <div
+              class="order-btn repay"
+              :class="{
+                disabled: order.status === 3
+              }"
+              @click.stop="handleRepay(order, oi)">
+              {{ order.status === 3 ? '已预约' : '预约归还' }}
+            </div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
         <!-- 待评价 -->
         <div v-if="computeOrderStatus(order) === 'comment'" class="order-other">
           <!-- 待评价 -->
-          <div class="order-type">
+          <div class="order-type" v-if="order.status === 4">
             <i class="ic-evaluate"></i>
             <span>待评价</span>
           </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn comment" @click.stop="handleComment(order)">去评价</div>
+            <div class="order-btn comment" v-if="!order.isComment" @click.stop="handleComment(order, oi)">去评价</div>
+            <div class="order-btn comment" v-if="order.isComment" @click.stop="handleComment(order, oi)">查看评价</div>
+            <div class="order-btn complete" @click.stop="handleComplete(order, oi)">确认完成</div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
+            <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
+          </div>
+        </div>
+        <!-- 已完成 -->
+        <div v-if="computeOrderStatus(order) === 'complete'" class="order-other">
+          <!-- 已完成 -->
+          <div class="order-type" v-if="order.status === 5">
+            <i class="ic-complete"></i>
+            <span>已完成</span>
+          </div>
+          <!-- 已逾期 -->
+          <div class="order-type" v-if="order.status === 7">
+            <i class="ic-overdue"></i>
+            <span>已逾期</span>
+          </div>
+          <!-- 订单操作 -->
+          <div class="order-tools">
+            <div class="order-btn comment" v-if="!order.isComment" @click.stop="handleComment(order, oi)">去评价</div>
+            <div class="order-btn comment" v-if="order.isComment" @click.stop="handleComment(order, oi)">查看评价</div>
+            <div class="order-btn asales" v-if="order.status !== 7" @click.stop="handleAfterSales(order, oi)">
+              申请售后
+            </div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
         <!-- 退款/售后 -->
         <div v-if="computeOrderStatus(order) === 'after'" class="order-other">
           <!-- 退款/售后 -->
-          <div class="order-type">
+          <div class="order-type" v-if="order.amStatus !== 3">
             <i class="ic-after-sales"></i>
             <span>退款/售后</span>
           </div>
+          <!-- 退款/售后 -->
+          <div class="order-type" v-if="order.amStatus === 3">
+            <i class="ic-as-fail"></i>
+            <span>售后申请失败</span>
+          </div>
           <!-- 订单操作 -->
           <div class="order-tools">
-            <div class="order-btn urge" @click.stop="handleRefund(order)">申请退款</div>
+            <div
+              class="order-btn urge"
+              v-if="order.afterSales && order.afterSales.status === 1"
+              @click.stop="handleRepayOfAS(order)">
+              预约退货
+            </div>
+            <div class="order-btn asales" @click.stop="handleOpenAS(order)">售后单据</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -168,7 +223,7 @@
       @close="handlePayPanelClose">
       <div class="order-to-pay">
         <PaymentPanel
-          :order-list="orderDtoList"
+          :order-list="payDialogOrder"
           :amount="allAmount"
           :money="userInfo.money"
           :pay-type="payType"
@@ -178,6 +233,29 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" :disabled="isOvertime" @click="handlePay" round>确认 支付</el-button>
+      </span>
+    </el-dialog>
+    <!-- 归还付款dialog -->
+    <el-dialog
+      title="收银台"
+      :visible.sync="payOfRepayVisible"
+      class="pay-dialog"
+      :close-on-click-modal="false"
+      :modal-append-to-body="false"
+      destroy-on-close
+      @close="handlePayOfRepayClose">
+      <div class="order-to-pay">
+        <PaymentPanel
+          :order-list="payOfRepayOrder"
+          :amount="allAmount"
+          :money="userInfo.money"
+          :pay-type="payType"
+          :timing="false"
+          @payMethod="handlePayMethod"
+          @payComplete="handlePayComplete" />
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="handlePayOfRepayComplete" round>确认 支付</el-button>
       </span>
     </el-dialog>
     <!-- 评价dialog -->
@@ -291,7 +369,7 @@
           </div>
           <div class="other-mess-item">
             <span class="label">剩余时长：</span>
-            <span class="text">{{ computeLeaveDay(dialogOrder.createTime, dialogOrder.borrowTime) }}</span>
+            <span class="text">{{ computeLeaveDay(dialogOrder.deliveryTime, dialogOrder.borrowTime) }}</span>
           </div>
         </div>
         <!-- 提示 -->
@@ -320,7 +398,7 @@
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="gotoPay">去付款</el-button>
+        <el-button type="primary" @click="gotoPayOfRenew">去付款</el-button>
       </span>
     </el-dialog>
     <!-- 归还dialog -->
@@ -374,7 +452,7 @@
           </div>
           <div class="other-mess-item">
             <span class="label">剩余时长：</span>
-            <span class="text">{{ computeLeaveDay(dialogOrder.expectedTime, dialogOrder.borrowTime) }}</span>
+            <span class="text">{{ computeLeaveDay(dialogOrder.deliveryTime, dialogOrder.borrowTime) }}</span>
           </div>
         </div>
         <!-- 提示 -->
@@ -402,6 +480,18 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitRepayMess">预约 归还</el-button>
+      </span>
+    </el-dialog>
+    <!-- 售后dialog -->
+    <el-dialog
+      class="after-dialog"
+      :title="'预约归还'"
+      :visible.sync="afterDgVisable"
+      :modal-append-to-body="false"
+      :close-on-click-modal="false">
+      <div class="dialog-main-box"></div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAfterSales">提交 申请</el-button>
       </span>
     </el-dialog>
     <!-- 详情dialog -->
@@ -480,6 +570,10 @@
               <span class="label">配送费</span>
               <span class="text">{{ '￥ ' + dialogOrder.deliveryFee }}</span>
             </div>
+            <div class="order-detail-item between" v-if="dialogOrder.overdueCost">
+              <span class="label">{{ `逾期费(逾期${dialogOrder.overdueTime}天)` }}</span>
+              <span class="text">{{ '￥ ' + dialogOrder.overdueCost }}</span>
+            </div>
             <div class="order-detail-item between block">
               <span class="label">优惠金额</span>
               <span class="text">{{ '￥ ' + dialogOrder.discountAmount }}</span>
@@ -499,7 +593,24 @@
 import Vue from 'vue';
 import SvgPage from '@/components/Common/SvgPage';
 import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
-import { getAllOrderOgPageApi, getOrderByStatusOfPageApi, payOrderByLSApi } from '@/api/orderApi';
+import commonUtil from '@/utils/common';
+import {
+  getAllOrderOgPageApi,
+  getOrderByStatusOfPageApi,
+  getOrderByIdApi,
+  payOrderByLSApi,
+  cancelOrderApi,
+  confirmReceiptApi,
+  confirmCompleteApi,
+  renewOrderApi,
+  renewOrderToPayOfLSApi,
+  repayOrderApi,
+  repayOverdueOrderApi,
+  repayOverdueOrderToPayOfLSApi,
+  applyOrderToASApi,
+  revertOrderStatusOfASApi,
+  repayOrderOfASApi
+} from '@/api/orderApi';
 
 export default {
   components: {
@@ -517,6 +628,7 @@ export default {
         { label: '待配送', value: 'send', ct: { status: [0, 1] } },
         { label: '待归还', value: 'back', ct: { status: [2, 3, 6] } },
         { label: '待评价', value: 'comment', ct: { status: 4 } },
+        { label: '已完成', value: 'complete', ct: { status: 5 } },
         { label: '退款/售后', value: 'after', ct: { status: 8 } }
       ],
       currentPage: 1,
@@ -528,10 +640,13 @@ export default {
       renewVisable: false,
       repayDgVisable: false,
       dialogOrder: {},
+      dialogOrderIndex: 0,
       // 可续借时长
       renewValue: 0,
-      maxRenewValue: 60,
+      maxRenewValue: 30,
       renewCost: 0,
+      payOfRepayVisible: false,
+      payOfRepayOrder: {},
       // 还书时间
       repayDate: '',
       pickerOptions: {
@@ -569,26 +684,26 @@ export default {
           }
         ],
         // 禁用日期
-        disabledDate(time) {
-          return time.getTime() < Date.now();
+        disabledDate(date) {
+          return this.computeDisabledRepayDate(date);
         }
       },
       // 详情
       detailDgVisable: false,
       // 付款
       payDialogVisible: false,
-      orderDtoList: [],
+      payDialogIndex: 0,
+      payDialogOrder: [],
       allAmount: 0,
       payMethod: 'balance',
       payType: 'borrow',
       payPass: '',
       isOvertime: false,
+      // 售后申请
+      afterDgVisable: false,
       // 计时
-      // 计时器
-      timer: null,
       // 设置计时，单位：s => 15分钟
-      counter: 900,
-      timeTip: ''
+      counter: 900
     };
   },
   created() {
@@ -607,8 +722,10 @@ export default {
         this.getOrderPageByStatus(3);
       } else if (this.navCheck === 'comment') {
         this.getOrderPageByStatus(4);
-      } else if (this.navCheck === 'after') {
+      } else if (this.navCheck === 'complete') {
         this.getOrderPageByStatus(5);
+      } else if (this.navCheck === 'after') {
+        this.getOrderPageByStatus(6);
       } else {
         this.getOrderPage();
       }
@@ -621,7 +738,7 @@ export default {
         if (res.data.flag) {
           this.orderList = res.data.data.records;
           this.total = res.data.data.total;
-          this.computeOrderPayTimeCount(this.orderList);
+          this.handleOrderOfPreMounted(this.orderList);
         } else {
           this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
         }
@@ -635,7 +752,7 @@ export default {
         if (res.data.flag) {
           this.orderList = res.data.data.records;
           this.total = res.data.data.total;
-          this.computeOrderPayTimeCount(this.orderList);
+          this.handleOrderOfPreMounted(this.orderList);
         } else {
           this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
         }
@@ -679,8 +796,11 @@ export default {
       if (item.status === 2 || item.status === 3 || item.status === 6) {
         return 'back';
       }
-      if (item.status === 4 || item.status === 7) {
+      if (item.status === 4) {
         return 'comment';
+      }
+      if (item.status === 5 || item.status === 7) {
+        return 'complete';
       }
       if (item.status === 8) {
         return 'after';
@@ -748,9 +868,10 @@ export default {
     /**
      * 去付款
      */
-    handleClickPay(item) {
-      this.orderDtoList = [item];
-      this.allAmount = item.amount;
+    handleClickPay(order, index) {
+      this.payDialogOrder = [order];
+      this.payDialogIndex = index;
+      this.allAmount = order.amount;
       this.payDialogVisible = true;
     },
     /**
@@ -779,9 +900,27 @@ export default {
           return;
         }
         // 账户余额支付
-        if (this.money > this.allAmount) {
+        if (this.userInfo.money > this.allAmount) {
           // 进行支付
-          this.payOrderOfList(this.orderDtoList);
+          payOrderByLSApi(this.orderList[this.payDialogIndex].id, this.$sha256(this.payPass))
+            .then(res => {
+              if (res.data.flag) {
+                return getOrderByIdApi(this.orderList[this.payDialogIndex].id);
+              }
+            })
+            .then(res => {
+              if (res.data.flag) {
+                this.orderList[this.payDialogIndex] = res.data.data;
+                this.$forceUpdate();
+                this.$showMsg('支付成功', { type: 'success' });
+              }
+            })
+            .catch(err => {
+              this.$showMsg('支付失败', { type: 'error' });
+            })
+            .finally(() => {
+              this.payDialogVisible = false;
+            });
         } else {
           // 余额不足
           this.$showMsg('账户余额不足，请充值后前往订单页支付', {
@@ -793,31 +932,6 @@ export default {
           });
         }
       }
-    },
-    /**
-     * 批量支付订单
-     */
-    async payOrderOfList(list) {
-      let payPass = this.$sha256(this.payPass.substring(0, 6));
-      for (const order of list) {
-        let res = await payOrderByLSApi(order.id, payPass);
-        if (!res.data.flag) {
-          this.$showMsg('订单支付失败，请稍后再试', {
-            type: 'error',
-            duration: 1200,
-            closeFunc: () => {
-              this.$router.replace('/mine');
-            }
-          });
-          return;
-        }
-      }
-      this.$showMsg('支付成功', {
-        type: 'success',
-        closeFunc: () => {
-          this.$router.replace('/mine/order').catch(err => {});
-        }
-      });
     },
     /**
      * 支付方式
@@ -836,7 +950,26 @@ export default {
     /**
      * 取消订单
      */
-    handleCancel(item) {},
+    handleCancel(order, index) {
+      cancelOrderApi(order.id)
+        .then(res => {
+          if (res.data.flag) {
+            // 取消成功，更新数据
+            this.$showMsg('取消成功', { type: 'success' });
+            return getOrderByIdApi(order.id);
+            // item = {}
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            this.orderList[index] = res.data.data;
+            this.$forceUpdate();
+          }
+        })
+        .catch(err => {
+          this.$showMsg('取消失败，请稍后重试', { type: 'error' });
+        });
+    },
     /**
      * 联系商家
      */
@@ -844,40 +977,216 @@ export default {
     /**
      * 催单
      */
-    handleUrge(item) {},
+    handleUrge(item) {
+      // 暂时不实现实际功能
+      // 主要可以通过邮件通知商家或即时通信自定义消息通知
+      // 以上实现方式适用项目，并且能够实现，但单纯不想实现
+      this.$showMsg('已催促商家尽快配送，请耐心等候');
+    },
     /**
      * 申请售后
      */
-    handleAfterSales(item) {},
+    handleAfterSales(order, index) {},
     /**
-     * 申请退款
+     * 提交售后申请
      */
-    handleRefund(item) {},
+    submitAfterSales() {},
+    /**
+     * 查看售后单据
+     */
+    handleOpenAS(order) {},
+    /**
+     * 预约退货
+     */
+    handleRepayOfAS(item) {},
     /**
      * 确认收货
      */
-    handleConfirm(item) {},
+    handleConfirm(order, index) {
+      confirmReceiptApi(order.id)
+        .then(res => {
+          if (res.data.flag) {
+            // 确认收货成功
+            // 获取订单最新信息
+            return getOrderByIdApi(order.id);
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            this.orderList[index] = res.data.data;
+            this.$forceUpdate();
+            this.$showMsg('收货确认成功', { type: 'success' });
+          }
+        })
+        .catch(err => {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+        });
+    },
+    /**
+     * 确认完成
+     */
+    handleComplete(order, index) {
+      confirmCompleteApi(order.id)
+        .then(res => {
+          if (res.data.flag) {
+            return getOrderByIdApi(order.id);
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            this.orderList[index] = res.data.data;
+            this.$forceUpdate();
+            this.$showMsg('确认完成成功', { type: 'success' });
+          }
+        })
+        .catch(err => {
+          this.$showMsg('确认完成失败', { type: 'error' });
+        });
+    },
     /**
      * 续借
      */
-    handleRenew(item) {
-      this.dialogOrder = item;
+    handleRenew(order, index) {
+      this.dialogOrder = order;
+      this.dialogOrderIndex = index;
+      this.maxRenewValue = order.renewDuration;
       this.renewVisable = true;
     },
-    // 去付款
-    gotoPay() {
-      this.renewVisable = false;
+    // 续借订单去付款
+    gotoPayOfRenew() {
+      // console.log('续借订单 ==> ', this.dialogOrder.id, this.renewValue);
+      renewOrderApi(this.dialogOrder.id, this.renewValue)
+        .then(res => {
+          if (res.data.flag) {
+            this.renewVisable = false;
+            this.payOfRepayVisible = true;
+            this.payOfRepayOrder = [res.data.data];
+            this.allAmount = res.data.data.amount;
+            // console.log('renew order ==>', res.data.data);
+          }
+        })
+        .catch(err => {
+          this.renewVisable = false;
+          this.$showMsg('续借失败, 请稍后再试', { type: 'error' });
+        });
+    },
+    // 续借订单关闭
+    handlePayOfRepayClose() {
+      // this.$showMsg('续借失败', { type: 'warning' });
+    },
+    // 续借订单支付完成
+    handlePayOfRepayComplete() {
+      if (this.payMethod === 'balance') {
+        if (this.$isEmpty(this.payPass)) {
+          this.$showMsg('请输入支付密码');
+          return;
+        }
+        // 账户余额支付
+        if (this.userInfo.money > this.allAmount) {
+          // 进行支付
+          if (this.dialogOrder.status === 6) {
+            // 逾期中订单预约归还支付
+            repayOverdueOrderToPayOfLSApi(this.dialogOrder.id, this.$sha256(this.payPass))
+              .then(res => {
+                if (res.data.flag) {
+                  this.payOfRepayVisible = false;
+                  this.$showMsg('预约成功', { type: 'success' });
+                  return getOrderByIdApi(this.dialogOrder.id);
+                }
+              })
+              .then(res => {
+                if (res.data.flag) {
+                  this.orderList[this.dialogOrderIndex] = res.data.data;
+                  this.$forceUpdate();
+                }
+              });
+          } else {
+            renewOrderToPayOfLSApi(this.dialogOrder.id, this.$sha256(this.payPass))
+              .then(res => {
+                if (res.data.flag) {
+                  this.payOfRepayVisible = false;
+                  this.$showMsg('续借成功', { type: 'success' });
+                  return getOrderByIdApi(this.dialogOrder.id);
+                }
+              })
+              .then(res => {
+                if (res.data.flag) {
+                  this.orderList[this.dialogOrderIndex] = res.data.data;
+                  this.$forceUpdate();
+                }
+              });
+          }
+        } else {
+          // 余额不足
+          this.$showMsg('账户余额不足，请前往充值', {
+            type: 'warning',
+            duration: 1200
+          });
+        }
+      }
     },
     /**
      * 归还
      */
-    handleRepay(item) {
-      this.dialogOrder = item;
+    handleRepay(order, index) {
+      // 订单已预约，待上门
+      if (order.status === 3) return;
+      this.dialogOrder = order;
+      this.dialogOrderIndex = index;
       this.repayDgVisable = true;
     },
     // 预约归还
     submitRepayMess() {
-      this.repayDgVisable = false;
+      // console.log('预约归还 ==> ', this.dialogOrder.id, this.repayDate + ':00');
+      if (this.dialogOrder.status === 6) {
+        // 逾期中订单预约归还
+        repayOverdueOrderApi(this.dialogOrder.id, this.repayDate + ':00')
+          .then(res => {
+            this.payOfRepayVisible = true;
+            this.payOfRepayOrder = [res.data.data];
+            this.allAmount = res.data.data.amount;
+          })
+          .catch(err => {
+            this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+          })
+          .finally(() => {
+            this.repayDgVisable = false;
+            this.repayDate = '';
+          });
+      } else {
+        // 正常预约归还
+        repayOrderApi(this.dialogOrder.id, this.repayDate + ':00')
+          .then(res => {
+            if (res.data.flag) {
+              return getOrderByIdApi(this.dialogOrder.id);
+            }
+          })
+          .then(res => {
+            if (res.data.flag) {
+              this.computeOrderOfRepayTip(res.data.data);
+              this.orderList[this.dialogOrderIndex] = res.data.data;
+              this.$forceUpdate();
+              this.$showMsg('预约成功', { type: 'success' });
+            }
+          })
+          .catch(err => {
+            this.$showMsg('网络繁忙，请稍后重试', { type: 'warning' });
+          })
+          .finally(() => {
+            this.repayDgVisable = false;
+            this.repayDate = '';
+          });
+      }
+    },
+    /**
+     * 计算禁用的归还日期
+     */
+    computeDisabledRepayDate(date) {
+      if (this.$isEmpty(this.dialogOrder)) return date.getTime() < Date.now();
+      let now = new Date();
+      let dueDate = new Date(this.dialogOrder.deliveryTime);
+      dueDate.setDate(dueDate.getDate() + this.dialogOrder.borrowTime);
+      return date < now || date > dueDate;
     },
     /**
      * 评价
@@ -931,17 +1240,57 @@ export default {
     computeLeaveDay(startDate, time) {
       let now = new Date();
       let start = new Date(startDate);
-      let num = start.getDate() + time - now.getDate();
-      return num >= 0 ? num + '天' : '逾期 ' + num * -1 + ' 天';
+      start.setDate(start.getDate() + time);
+      let num = commonUtil.getDaysBetween(now, start);
+      return num >= 0 ? num + ' 天' : '已逾期 ' + num * -1 + ' 天';
     },
     /**
-     * 计时订单是否未支付，需计时
+     * 设置订单提示
      */
-    computeOrderPayTimeCount(orderList) {
+    handleOrderOfPreMounted(orderList) {
       for (const order of orderList) {
+        // 对未支付订单进行计时
         if (order.tradeStatus === 0 && order.payStatus === 0) {
           this.computeOrderTimeCount(order);
+          continue;
         }
+        // 逾期中
+        if (order.status === 6) {
+          this.computeOrderOfDueTip(order);
+          continue;
+        }
+        // 订单已预约
+        if (order.status === 3) {
+          this.computeOrderOfRepayTip(order);
+          continue;
+        }
+      }
+    },
+    /**
+     * 计算已预约上门订单的提示
+     */
+    computeOrderOfRepayTip(order) {
+      let now = new Date();
+      let returnTime = new Date(order.returnTime);
+      let dValue = commonUtil.getDaysBetween(now, returnTime);
+      if (dValue > 0) {
+        order.orderTip = `预约上门时间：${order.returnTime} (预计${dValue}天后)`;
+      } else if (dValue === 0) {
+        order.orderTip = `预约上门时间：${order.returnTime} (今天)`;
+      } else {
+        order.orderTip = `预约上门时间：${order.returnTime} (已超过${dValue * -1}天)`;
+      }
+    },
+    /**
+     * 计算逾期中订单的提示
+     */
+    computeOrderOfDueTip(order) {
+      let now = new Date();
+      let deliveryTime = new Date(order.deliveryTime);
+      deliveryTime.setDate(deliveryTime.getDate() + order.borrowTime);
+      let dValue = commonUtil.getDaysBetween(deliveryTime, now);
+      if (dValue > 0) {
+        order.orderTip = `已逾期${dValue}天`;
       }
     },
     /**
@@ -1006,6 +1355,125 @@ export default {
         order.counter = 900;
         // 计时器对象重置为空
         order.timer = null;
+      }
+    },
+    /**
+     * 安全保留两位小数
+     */
+    accToFixed(num) {
+      return parseFloat(parseFloat(num).toFixed(2));
+    }
+  },
+  watch: {
+    /**
+     * 监听续借费用变化
+     */
+    renewValue(val) {
+      if (this.$isEmpty(this.dialogOrder)) return;
+      if (this.$isEmpty(this.dialogOrder.orderItems)) return;
+      let amount = 0;
+      let borrowTime = this.dialogOrder.borrowTime;
+      for (let item of this.dialogOrder.orderItems) {
+        // 计算配送费
+        if (borrowTime >= item.freeDay) {
+          amount += val * item.borrowFee;
+        } else {
+          let dValue = borrowTime + val;
+          if (dValue > item.freeDay) {
+            amount += (dValue - item.freeDay) * item.borrowFee;
+          }
+        }
+      }
+      this.renewCost = this.accToFixed(amount);
+    },
+    /**
+     * 监听续借，归还操作弹窗数据
+     */
+    dialogOrder(val) {
+      const _this = this;
+      if (val.status === 6) {
+        let dueDate = new Date(val.deliveryTime);
+        dueDate.setDate(dueDate.getDate() + val.borrowTime + _this.$overduePeriod);
+        let now = new Date();
+        _this.pickerOptions = {
+          // 时间的快捷选项
+          shortcuts: [
+            {
+              text: '今天',
+              onClick(picker) {
+                picker.$emit('pick', new Date());
+              }
+            },
+            {
+              text: '明天',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24);
+                picker.$emit('pick', date);
+              }
+            },
+            {
+              text: '后天',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24);
+                picker.$emit('pick', date);
+              }
+            },
+            {
+              text: '一周后',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+                picker.$emit('pick', date);
+              }
+            }
+          ],
+          // 禁用日期
+          disabledDate(date) {
+            return date < now || date > dueDate;
+          }
+        };
+      } else {
+        _this.pickerOptions = {
+          // 时间的快捷选项
+          shortcuts: [
+            {
+              text: '今天',
+              onClick(picker) {
+                picker.$emit('pick', new Date());
+              }
+            },
+            {
+              text: '明天',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24);
+                picker.$emit('pick', date);
+              }
+            },
+            {
+              text: '后天',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24);
+                picker.$emit('pick', date);
+              }
+            },
+            {
+              text: '一周后',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+                picker.$emit('pick', date);
+              }
+            }
+          ],
+          // 禁用日期
+          disabledDate(date) {
+            return _this.computeDisabledRepayDate(date);
+          }
+        };
       }
     }
   }
@@ -1260,72 +1728,94 @@ export default {
           /* 付款按钮 */
           &.pay {
             background-color: var(--success-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--success-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--success-btn-a);
             }
           }
           /* 取消按钮 */
           &.cancel {
             background-color: var(--cancel-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--cancel-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--cancel-btn-a);
             }
           }
           /* 联系按钮 */
           &.contact {
             background-color: var(--contact-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--contact-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--contact-btn-a);
             }
           }
           /* 催促按钮 */
           &.urge {
             background-color: var(--urge-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--urge-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--urge-btn-a);
             }
           }
           /* 续借按钮 */
           &.renew {
             background-color: var(--renew-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--renew-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--renew-btn-a);
             }
           }
           /* 归还按钮 */
           &.repay {
             background-color: var(--repay-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--repay-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--repay-btn-a);
             }
           }
           /* 评价按钮 */
           &.comment {
             background-color: var(--comment-btn);
-            &:hover {
+            &:not(.disabled):hover {
               background-color: var(--comment-btn-h);
             }
-            &:active {
+            &:not(.disabled):active {
               background-color: var(--comment-btn-a);
             }
+          }
+          &.complete {
+            background-color: var(--complete-btn);
+            &:not(.disabled):hover {
+              background-color: var(--complete-btn-h);
+            }
+            &:not(.disabled):active {
+              background-color: var(--complete-btn-a);
+            }
+          }
+          &.asales {
+            background-color: var(--asales-btn);
+            &:not(.disabled):hover {
+              background-color: var(--asales-btn-h);
+            }
+            &:not(.disabled):active {
+              background-color: var(--asales-btn-a);
+            }
+          }
+          &.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
           }
         }
       }

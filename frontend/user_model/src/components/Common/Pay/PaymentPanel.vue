@@ -125,6 +125,13 @@ export default {
         return [];
       }
     },
+    /**
+     * 是否计时
+     */
+    timing: {
+      type: Boolean,
+      default: true
+    },
     amount: Number,
     money: Number,
     payType: String
@@ -151,7 +158,9 @@ export default {
     // this.computeAmount(this.payOrderList);
   },
   mounted() {
-    this.computeTimeCount(this.payOrderList);
+    if (this.timing) {
+      this.computeTimeCount(this.payOrderList);
+    }
   },
   methods: {
     computeTimeCount(obj) {
@@ -241,7 +250,7 @@ export default {
      * 支付完成
      */
     handlePayComplete(val) {
-      console.log('pay complete =>', val);
+      // console.log('pay complete =>', val);
       this.$emit('payComplete', val);
     },
     /**

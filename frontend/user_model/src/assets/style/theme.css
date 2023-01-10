@@ -41,6 +41,14 @@
     --comment-btn: #FAC03D;
     --comment-btn-h: #FBCD64;
     --comment-btn-a: #EBB439;
+    /* 完成按钮 */
+    --complete-btn: #7EBEA5;
+    --complete-btn-h: #98CBB7;
+    --complete-btn-a: #84BAA5;
+    /* 售后按钮 */
+    --asales-btn: #ED6D3D;
+    --asales-btn-h: #F18A64;
+    --asales-btn-a: #D96336;
     /* 渐变色 */
     --primary-g-1: #17EAD9;
     --primary-g-2: #6078EA;

@@ -99,7 +99,7 @@ export default {
      * 打开聊天窗口
      */
     openChatWindow(val) {
-      console.log('chat', val);
+      // console.log('chat', val);
       if (val === 'sys' || val === 'owner') {
         this.chatTitle = val;
       }

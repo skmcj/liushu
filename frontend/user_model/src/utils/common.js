@@ -31,6 +31,17 @@ const formatDate = function(date, fmt = 'YYYY-mm-dd') {
 }
 
 /**
+ * 计算两个日期之间相差的天数
+ * @param {*} start
+ * @param {*} end
+ * @returns  end - start 天
+ */
+const getDaysBetween = function(start, end) {
+  let days = (end - start) / (1 * 24 * 60 * 60 * 1000);
+  return parseInt(days);
+}
+
+/**
  * 将数字转化为指定位数的数字，高位默认补0
  * @param {Number} num 数字
  * @param {Number} unit 位数
@@ -45,5 +56,6 @@ const formatUnits = function(num, unit = 2, char = '0') {
 
 export default {
   formatDate,
-  formatUnits
+  formatUnits,
+  getDaysBetween
 }
