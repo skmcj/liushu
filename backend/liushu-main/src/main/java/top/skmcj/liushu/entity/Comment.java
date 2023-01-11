@@ -50,26 +50,31 @@ public class Comment implements Serializable {
     /**
      * 书店名
      */
+    @TableField(exist = false)
     private String storeName;
 
     /**
      * 图书名称
      */
+    @TableField(exist = false)
     private String bookName;
 
     /**
      * 图书封面
      */
+    @TableField(exist = false)
     private String bookCover;
 
     /**
      * 用户昵称
      */
+    @TableField(exist = false)
     private String nickname;
 
     /**
      * 用户头像
      */
+    @TableField(exist = false)
     private String userAvatar;
 
     /**

@@ -96,7 +96,6 @@ export default {
       this.withoutHiddenClass = true;
     },
     handleSuspItem(val) {
-      console.log('susp =>', val);
       switch (val) {
         case 'home':
           this.handleClose();

@@ -59,29 +59,149 @@
             <span>我的订单</span>
           </div>
           <div class="order-state-box">
-            <div class="order-state">
-              <i class="ic-no-payment"></i>
-              <span>待付款</span>
-            </div>
-            <div class="order-state">
-              <i class="ic-delivery"></i>
-              <span>待配送</span>
-            </div>
-            <div class="order-state">
-              <i class="ic-return-books"></i>
-              <span>待归还</span>
-            </div>
-            <div class="order-state">
-              <i class="ic-evaluate-1"></i>
-              <span>待评价</span>
-            </div>
-            <div class="order-state">
-              <i class="ic-more-2"></i>
-              <span>全部订单</span>
+            <div
+              class="order-state"
+              v-for="(state, index) in orderState"
+              :key="'order-state-' + index"
+              :class="{
+                'is-active': navCheck === state.value
+              }"
+              @click="handleClickOrderState(state.value)">
+              <i :class="state.icon"></i>
+              <span>{{ state.name }}</span>
             </div>
           </div>
           <div class="content-block">
-            <SvgPage class="no-order" name="no-order" :img-width="240" />
+            <!-- 订单列表 -->
+            <div class="order-list" v-if="!$isEmpty(orderList)">
+              <!-- 订单项 -->
+              <div
+                class="order-item"
+                v-for="(order, oi) in orderList"
+                :key="'order-item-' + oi"
+                @click.stop="handleDetail">
+                <!-- 订单主要内容 -->
+                <div class="order-content">
+                  <!-- 订单基本信息 -->
+                  <div class="order-mess-box">
+                    <div class="order-mess-item">
+                      <span class="label">订单号：</span>
+                      <span class="text">{{ order.number }}</span>
+                    </div>
+                    <div class="order-mess-item">
+                      <span class="label">商家名称：</span>
+                      <span class="text link">{{ order.storeName }}</span>
+                    </div>
+                  </div>
+                  <!-- 订单商品列表 -->
+                  <div class="orderr-goods-box">
+                    <div class="order-goods-list">
+                      <div
+                        class="order-goods-item"
+                        v-for="(goods, gi) in order.orderItems"
+                        :key="'order-goods-item-' + gi">
+                        <div class="order-goods-content">
+                          <div class="cover">
+                            <img :src="goods.bookCover" alt="goods" />
+                          </div>
+                          <div class="title">{{ goods.bookName }}</div>
+                        </div>
+                        <div class="order-goods-amount">
+                          <span>{{ '×' + goods.quantity }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 订单类型 -->
+                <!-- 待付款 -->
+                <div v-if="computeOrderStatus(order) === 'pay'" class="order-other">
+                  <!-- 订单类型 -->
+                  <!-- 待付款 -->
+                  <div class="order-type">
+                    <i class="ic-no-payment"></i>
+                    <span>待付款</span>
+                  </div>
+                </div>
+                <!-- 待配送 -->
+                <div v-if="computeOrderStatus(order) === 'send'" class="order-other">
+                  <!-- 待配送 -->
+                  <div class="order-type">
+                    <i class="ic-delivery"></i>
+                    <span>待配送</span>
+                  </div>
+                </div>
+                <!-- 待归还 -->
+                <div v-if="computeOrderStatus(order) === 'back'" class="order-other">
+                  <!-- 待归还 -->
+                  <div class="order-type" v-if="order.status == 2">
+                    <i class="ic-return-books"></i>
+                    <span>待归还</span>
+                  </div>
+                  <!-- 待上门 -->
+                  <div class="order-type" v-if="order.status == 3">
+                    <i class="ic-repay"></i>
+                    <span>待上门</span>
+                  </div>
+                  <!-- 逾期中 -->
+                  <div class="order-type" v-if="order.status === 6">
+                    <i class="ic-due"></i>
+                    <span>逾期中</span>
+                  </div>
+                </div>
+                <!-- 待评价 -->
+                <div v-if="computeOrderStatus(order) === 'comment'" class="order-other">
+                  <!-- 待评价 -->
+                  <div class="order-type" v-if="order.status === 4">
+                    <i class="ic-evaluate"></i>
+                    <span>待评价</span>
+                  </div>
+                </div>
+                <!-- 已完成 -->
+                <div v-if="computeOrderStatus(order) === 'complete'" class="order-other">
+                  <!-- 已完成 -->
+                  <div class="order-type" v-if="order.status === 5">
+                    <i class="ic-complete"></i>
+                    <span>已完成</span>
+                  </div>
+                  <!-- 已逾期 -->
+                  <div class="order-type" v-if="order.status === 7">
+                    <i class="ic-overdue"></i>
+                    <span>已逾期</span>
+                  </div>
+                </div>
+                <!-- 退款/售后 -->
+                <div v-if="computeOrderStatus(order) === 'after'" class="order-other">
+                  <!-- 退款/售后 -->
+                  <div class="order-type" v-if="order.amStatus === 0">
+                    <i class="ic-as-audit"></i>
+                    <span>售后审核中</span>
+                  </div>
+                  <div class="order-type" v-if="order.amStatus === 1">
+                    <i class="ic-as-progress"></i>
+                    <span>售后处理中</span>
+                  </div>
+                  <div class="order-type" v-if="order.amStatus === 2">
+                    <i class="ic-after-sales"></i>
+                    <span>售后完成</span>
+                  </div>
+                  <!-- 退款/售后 -->
+                  <div class="order-type" v-if="order.amStatus === 3">
+                    <i class="ic-as-fail"></i>
+                    <span>售后申请失败</span>
+                  </div>
+                </div>
+                <!-- 已取消订单 -->
+                <div v-if="computeOrderStatus(order) === 'cancel'" class="order-other">
+                  <!-- 已取消订单 -->
+                  <div class="order-type">
+                    <i class="ic-cancel-order"></i>
+                    <span>订单已取消</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <SvgPage v-if="$isEmpty(orderList)" class="no-order" name="no-order" :img-width="240" />
           </div>
         </div>
       </div>
@@ -102,7 +222,39 @@
             </div>
           </div>
           <div class="content-block">
-            <SvgPage class="no-mess" name="no-mess" :img-width="156" />
+            <template v-if="messActive === 'sys'">
+              <div class="conversation-list">
+                <div class="conversation-item" @click="handleClickCoversationSys('customerService')">
+                  <div class="cover">
+                    <img :src="customerSA" alt="客服" />
+                  </div>
+                  <div class="name">客服消息</div>
+                </div>
+              </div>
+            </template>
+            <template v-if="messActive === 'per'">
+              <div class="conversation-list" v-if="conversationList.length > 0">
+                <template v-for="item in conversationList">
+                  <div
+                    class="conversation-item"
+                    :key="'sm-' + item.conversationID"
+                    v-if="!excludeCoversationList[item.conversationID]"
+                    @click="handleClickCoversationPer(item)">
+                    <div class="cover">
+                      <Avatar style="width: 56px; height: 56px" :src="avatar(item)" shape="circle" :type="item.type" />
+                    </div>
+                    <div class="name" :title="item.userProfile.nick || item.userProfile.userID">
+                      {{ item.remark || item.userProfile.nick || item.userProfile.userID }}
+                    </div>
+                    <!-- 未读数 -->
+                    <div class="unread-count" v-if="showUnreadCount(item)">
+                      <span>{{ item.unreadCount > 99 ? '99+' : item.unreadCount }}</span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <SvgPage v-if="conversationList.length <= 0" class="no-mess" name="no-mess" :img-width="156" />
+            </template>
           </div>
         </div>
         <div class="tool-box">
@@ -110,15 +262,15 @@
             <span>工具入口</span>
           </div>
           <div class="tool-item-box">
-            <div class="tool-item">
+            <div class="tool-item" @click="handleAddress">
               <i class="ic-address-books"></i>
               <span>地址簿</span>
             </div>
-            <div class="tool-item">
+            <div class="tool-item" @click="handleColl">
               <i class="ic-star"></i>
               <span>收藏</span>
             </div>
-            <div class="tool-item">
+            <div class="tool-item" @click="handleComment">
               <i class="ic-assess"></i>
               <span>评价</span>
             </div>
@@ -173,14 +325,20 @@
 
 <script>
 import SvgPage from '@/components/Common/SvgPage';
+import Avatar from '@/components/Chat/Message/Avatar';
+import { mapGetters, mapState } from 'vuex';
+import customerSA from '@/assets/images/svg/customer-service.svg';
 import { getUserInfoApi } from '@/api/userApi';
+import { getAllOrderOgPageApi, getOrderByStatusOfPageApi } from '@/api/orderApi';
 
 export default {
   components: {
-    SvgPage
+    SvgPage,
+    Avatar
   },
   data() {
     return {
+      customerSA,
       width: 0,
       userInfo: {
         avatarUrl: '',
@@ -194,18 +352,133 @@ export default {
       // 弹窗控制参数
       dialogVisible: false,
       dialogTitle: '钱包',
-      moneyRecords: []
+      moneyRecords: [],
+      // 订单相关
+      navCheck: 'pay',
+      orderState: [
+        { icon: 'ic-no-payment', name: '待付款', value: 'pay' },
+        { icon: 'ic-delivery', name: '待配送', value: 'send' },
+        { icon: 'ic-return-books', name: '待归还', value: 'back' },
+        { icon: 'ic-evaluate-1', name: '待评价', value: 'comment' },
+        { icon: 'ic-more-2', name: '全部订单', value: 'all' }
+      ],
+      orderList: [],
+      currentPage: 1,
+      pageSize: 5
     };
   },
   created() {
-    this.moneyRecords = this.getRecordsTest(15);
+    // this.moneyRecords = this.getRecordsTest(15);
     this.updateUserInfo();
   },
   mounted() {
+    this.initOrderList();
     this.width = this.$el.offsetWidth;
     // this.getUserInfo();
   },
   methods: {
+    initOrderList() {
+      if (this.navCheck === 'all') {
+        this.getOrderPage();
+      } else if (this.navCheck === 'pay') {
+        this.getOrderPageByStatus(1);
+      } else if (this.navCheck === 'send') {
+        this.getOrderPageByStatus(2);
+      } else if (this.navCheck === 'back') {
+        this.getOrderPageByStatus(3);
+      } else if (this.navCheck === 'comment') {
+        this.getOrderPageByStatus(4);
+      } else if (this.navCheck === 'complete') {
+        this.getOrderPageByStatus(5);
+      } else if (this.navCheck === 'after') {
+        this.getOrderPageByStatus(6);
+      } else {
+        this.getOrderPage();
+      }
+    },
+    /**
+     * 分页获取订单
+     */
+    getOrderPage() {
+      getAllOrderOgPageApi(this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.orderList = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
+        }
+      });
+    },
+    /**
+     * 根据状态分页获取订单
+     */
+    getOrderPageByStatus(status) {
+      getOrderByStatusOfPageApi(status, this.currentPage, this.pageSize).then(res => {
+        if (res.data.flag) {
+          this.orderList = res.data.data.records;
+          this.total = res.data.data.total;
+        } else {
+          this.$showMsg('订单数据获取失败，请稍后再试', { type: 'error' });
+        }
+      });
+    },
+    /**
+     * 计算当前订单的状态 待付款 | 待配送 | 待归还 | 待评价
+     * status 订单状态，0-待配送；1-待收货；2-待归还；3-待上门；4-待评价；5-已完成；6-逾期中；7-已逾期；8-售后中
+     * amStatus 售后状态，0-待售后；1-待退款；2-已退款；3-待退货；4-已退货
+     * payStatus 支付状态，0-未支付，1-已支付
+     * tradeStatus 交易状态，0-进行中；1-已完成；2-已取消
+     */
+    computeOrderStatus(item) {
+      if (item.tradeStatus === 2) {
+        return 'cancel';
+      }
+      if (item.tradeStatus === 0 && item.payStatus === 0) {
+        return 'pay';
+      }
+      if (item.status === 0 || item.status === 1) {
+        return 'send';
+      }
+      if (item.status === 2 || item.status === 3 || item.status === 6) {
+        return 'back';
+      }
+      if (item.status === 4) {
+        return 'comment';
+      }
+      if (item.status === 5 || item.status === 7) {
+        return 'complete';
+      }
+      if (item.status === 8) {
+        return 'after';
+      }
+    },
+    // 工具入口
+    handleAddress() {
+      this.$router.push('/mine/address');
+    },
+    handleColl() {
+      this.$router.push('/mine/coll');
+    },
+    handleComment() {
+      this.$router.push('/mine/comment');
+    },
+    /**
+     * 点击订单
+     */
+    handleDetail() {
+      this.$showMsg('请转到[我的订单]页面进行查看处理');
+    },
+    /**
+     * 点击订单类别
+     */
+    handleClickOrderState(value) {
+      if (value === 'all') {
+        this.$router.push('/mine/order');
+      } else {
+        this.navCheck = value;
+        this.initOrderList();
+      }
+    },
     /**
      * 更新用户信息
      */
@@ -270,6 +543,55 @@ export default {
         this.$router.push('/mine/cart');
       }
     },
+    /**
+     * 点击私人消息会话
+     */
+    handleClickCoversationPer(conversation) {
+      this.$bus.$emit('openChatWindow', 'owner');
+      if (conversation.conversationID !== this.currentConversation.conversationID) {
+        this.$store.dispatch('checkoutConversation', conversation.conversationID);
+      }
+    },
+    /**
+     * 点击系统消息会话
+     */
+    handleClickCoversationSys(cId) {
+      this.$bus.$emit('openChatWindow', 'sys');
+      let conversationID = '';
+      switch (cId) {
+        case 'customerService':
+          conversationID = 'C2Ccustomerservice';
+          break;
+        default:
+          break;
+      }
+      if (conversationID !== this.currentConversation.conversationID) {
+        this.$store.dispatch('checkoutConversation', conversationID);
+      }
+    },
+    /**
+     * 会话头像
+     */
+    avatar(conversation) {
+      switch (conversation.type) {
+        case 'GROUP':
+          return conversation.groupProfile.avatar;
+        case 'C2C':
+          return conversation.userProfile.avatar;
+        default:
+          return '';
+      }
+    },
+    /**
+     * 未读数量
+     */
+    showUnreadCount(conversation) {
+      if (this.$store.getters.hidden) {
+        return conversation.unreadCount > 0;
+      }
+      // 是否显示未读计数。当前会话和未读计数为0的会话，不显示。
+      return this.currentConversation.conversationID !== conversation.conversationID && conversation.unreadCount > 0;
+    },
     getRecordsTest(n) {
       let list = [];
       for (let i = 0; i < n; i++) {
@@ -286,6 +608,13 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      conversationList: state => state.conversation.conversationList,
+      currentConversation: state => state.conversation.currentConversation,
+      currentUserProfile: state => state.user.currentUserProfile,
+      excludeCoversationList: state => state.conversation.excludeCoversationList
+    }),
+    ...mapGetters(['toAccount']),
     walletBoxStyle() {
       let style = {};
       style.width = this.width - 540 + 'px';
@@ -587,6 +916,10 @@ export default {
         justify-content: center;
         flex-direction: column;
         transition: all 0.5s ease-in-out;
+        i,
+        span {
+          transition: color 0.5s ease-in-out;
+        }
         i {
           font-size: 36px;
           color: var(--regular-text);
@@ -603,9 +936,16 @@ export default {
         &:active {
           box-shadow: 0px 3px 12px 0px rgba(0, 0, 0, 0.16);
         }
+        &.is-active {
+          i,
+          span {
+            color: var(--primary);
+          }
+        }
       }
     }
     .content-block {
+      width: 100%;
       margin-top: 24px;
       .no-order {
         margin: 24px 0;
@@ -648,6 +988,32 @@ export default {
       }
     }
     .content-block {
+      width: 100%;
+      max-height: 240px;
+      overflow-y: auto;
+      &::-webkit-scrollbar {
+        transition: all 0.5s ease-in-out;
+        /*滚动条整体样式*/
+        width: 0px; /*高宽分别对应横竖滚动条的尺寸*/
+        height: 1px;
+      }
+      &::-webkit-scrollbar-thumb {
+        /*滚动条里面小方块*/
+        border-radius: 2.5px;
+        box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.15);
+        background: #9aa7b1;
+      }
+      &::-webkit-scrollbar-track {
+        /*滚动条里面轨道*/
+        box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.15);
+        border-radius: 2.5px;
+        background: #f5f3f2;
+      }
+      &:hover {
+        &::-webkit-scrollbar {
+          width: 5px;
+        }
+      }
       .no-mess {
         margin: 24px 0;
       }
@@ -844,6 +1210,237 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+.order-list {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  .order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: #f3f3f2;
+    .order-other {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      .order-type {
+        user-select: none;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 0 32px;
+        box-sizing: border-box;
+        i {
+          font-size: 48px;
+          color: #666666;
+        }
+        span {
+          margin-top: 5px;
+          font-size: 12px;
+          color: #666666;
+        }
+      }
+    }
+    & + .order-item {
+      margin-top: 12px;
+    }
+  }
+}
+.order-content {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  .order-mess-box {
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .order-mess-item {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      .label {
+        color: var(--primary-text);
+      }
+      .text {
+        color: #6b798e;
+        &.link {
+          cursor: pointer;
+          transition: color 0.5s ease-in-out;
+          &:hover {
+            color: var(--link-text);
+          }
+        }
+      }
+    }
+  }
+  .orderr-goods-box {
+    margin-top: 12px;
+    width: 100%;
+    border-radius: 8px;
+    box-sizing: border-box;
+    padding: 8px;
+    background-color: #fff;
+    overflow: hidden;
+    .order-goods-list {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 92px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      &::-webkit-scrollbar {
+        height: 5px;
+        background-color: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        width: 25px;
+        border-radius: 2.5px;
+        background-color: rgba(216, 216, 216, 0);
+      }
+      &:hover {
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(216, 216, 216, 0.5);
+        }
+      }
+      .order-goods-item {
+        user-select: none;
+        width: 92px;
+        height: 92px;
+        border-radius: 5px;
+        overflow: hidden;
+        display: flex;
+        flex-shrink: 0;
+        justify-content: space-between;
+        align-items: flex-end;
+        .order-goods-content {
+          display: flex;
+          flex-direction: column;
+          width: 72px;
+          height: 100%;
+          align-items: center;
+          justify-content: space-between;
+          .cover {
+            width: 72px;
+            height: 72px;
+            border-radius: 5px;
+            overflow: hidden;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+          .title {
+            width: 100%;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+        }
+        .order-goods-amount {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          span {
+            font-size: 10px;
+            color: #d8d8d8;
+          }
+        }
+        & + .order-goods-item {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  .order-tip-box {
+    margin-top: 6px;
+    padding-left: 18px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 24px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    color: #999;
+    i {
+      color: #f6ad49;
+    }
+    span {
+      margin-left: 12px;
+    }
+  }
+}
+.conversation-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 5px 0;
+  .conversation-item {
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.15);
+    .cover {
+      width: 56px;
+      height: 56px;
+      border-radius: 5px;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    .name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .unread-count {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      padding: 0 6px;
+      height: 18px;
+      border-radius: 10px;
+      background-color: #f35f5f;
+      overflow: hidden;
+      text-align: center;
+      line-height: 18px;
+      span {
+        color: #fff;
+        font-size: 10px;
+      }
+    }
+    &:active {
+      box-shadow: inset 0px -1px 0px 0px rgba(0, 0, 0, 0.15);
+    }
+    & + .conversation-item {
+      margin-top: 8px;
+    }
   }
 }
 </style>

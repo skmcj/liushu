@@ -504,7 +504,7 @@ export default {
     handlePayPanelClose() {
       // 暂时跳转到首页
       // this.$router.replace('/');
-      this.$router.replace('/mine/cart');
+      this.$router.replace('/mine/order');
     },
     /**
      * 删除购物车项
