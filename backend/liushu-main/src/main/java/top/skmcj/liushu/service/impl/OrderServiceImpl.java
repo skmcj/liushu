@@ -868,7 +868,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 关闭售后
         AfterSales afs = new AfterSales();
         afs.setId(sales.getId());
-        afs.setStatus(7);
+        // 5-已退款
+        afs.setStatus(5);
         asService.updateById(afs);
         // 退款 - 将订单 amStatus 设为 2-已结束
         Order order = new Order();

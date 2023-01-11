@@ -536,7 +536,7 @@ public class FrontendOrderController {
         asWrapper.eq(AfterSales::getOrderId, mOrder.getId());
         AfterSales afterSales = asService.getOne(asWrapper);
         if(afterSales == null) return Result.error("查无相关售后单据");
-        if(!afterSales.getStatus().equals(5)) return Result.error("订单售后处理正常，无需返回售后前状态");
+        if(afterSales.getStatus().equals(5)) return Result.error("订单售后处理正常，无需返回售后前状态");
         Order sOrder = new Order();
         sOrder.setId(mOrder.getId());
         sOrder.setStatus(afterSales.getOrderStatus());

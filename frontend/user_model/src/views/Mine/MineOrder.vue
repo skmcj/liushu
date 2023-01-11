@@ -91,7 +91,7 @@
           <div class="order-tools">
             <div class="order-btn urge" v-if="order.status === 0" @click.stop="handleUrge(order)">我要催单</div>
             <div class="order-btn" v-if="order.status === 1" @click.stop="handleConfirm(order, oi)">确认收货</div>
-            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order, oi)">申请售后</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -123,7 +123,7 @@
               @click.stop="handleRepay(order, oi)">
               {{ order.status === 3 ? '已预约' : '预约归还' }}
             </div>
-            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order, oi)">申请售后</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -139,7 +139,7 @@
             <div class="order-btn comment" v-if="!order.isComment" @click.stop="handleComment(order, oi)">去评价</div>
             <div class="order-btn comment" v-if="order.isComment" @click.stop="handleComment(order, oi)">查看评价</div>
             <div class="order-btn complete" @click.stop="handleComplete(order, oi)">确认完成</div>
-            <div class="order-btn asales" @click.stop="handleAfterSales(order)">申请售后</div>
+            <div class="order-btn asales" @click.stop="handleAfterSales(order, oi)">申请售后</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
           </div>
         </div>
@@ -168,9 +168,17 @@
         <!-- 退款/售后 -->
         <div v-if="computeOrderStatus(order) === 'after'" class="order-other">
           <!-- 退款/售后 -->
-          <div class="order-type" v-if="order.amStatus !== 3">
+          <div class="order-type" v-if="order.amStatus === 0">
+            <i class="ic-as-audit"></i>
+            <span>售后审核中</span>
+          </div>
+          <div class="order-type" v-if="order.amStatus === 1">
+            <i class="ic-as-progress"></i>
+            <span>售后处理中</span>
+          </div>
+          <div class="order-type" v-if="order.amStatus === 2">
             <i class="ic-after-sales"></i>
-            <span>退款/售后</span>
+            <span>售后完成</span>
           </div>
           <!-- 退款/售后 -->
           <div class="order-type" v-if="order.amStatus === 3">
@@ -182,8 +190,15 @@
             <div
               class="order-btn urge"
               v-if="order.afterSales && order.afterSales.status === 1"
-              @click.stop="handleRepayOfAS(order)">
+              @click.stop="handleRepayOfAS(order, oi)">
               预约退货
+            </div>
+            <div
+              v-if="order.amStatus === 3 && order.afterSales.orderStatus !== 5"
+              title="返回申请售后前的订单状态"
+              class="order-btn asales"
+              @click.stop="handleReturnPreAS(order, oi)">
+              还原订单
             </div>
             <div class="order-btn asales" @click.stop="handleOpenAS(order)">售后单据</div>
             <div class="order-btn contact" @click.stop="handleContact(order)">联系商家</div>
@@ -235,7 +250,7 @@
         <el-button type="primary" :disabled="isOvertime" @click="handlePay" round>确认 支付</el-button>
       </span>
     </el-dialog>
-    <!-- 归还付款dialog -->
+    <!-- 续借归还付款dialog -->
     <el-dialog
       title="收银台"
       :visible.sync="payOfRepayVisible"
@@ -485,13 +500,175 @@
     <!-- 售后dialog -->
     <el-dialog
       class="after-dialog"
-      :title="'预约归还'"
+      :title="'售后申请'"
       :visible.sync="afterDgVisable"
       :modal-append-to-body="false"
-      :close-on-click-modal="false">
-      <div class="dialog-main-box"></div>
+      :close-on-click-modal="afterBtnDisabled">
+      <div class="dialog-main-box">
+        <!-- 售后商品 -->
+        <div class="order-content">
+          <!-- 订单基本信息 -->
+          <div class="order-mess-box">
+            <div class="order-mess-item">
+              <span class="label">订单号：</span>
+              <span class="text">{{ afterDgOrder.number }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">创建时间：</span>
+              <span class="text">{{ afterDgOrder.createTime }}</span>
+            </div>
+            <div class="order-mess-item">
+              <span class="label">商家名称：</span>
+              <span class="text">{{ afterDgOrder.storeName }}</span>
+            </div>
+          </div>
+          <!-- 订单商品列表 -->
+          <div class="orderr-goods-box">
+            <div class="order-goods-list">
+              <div
+                class="order-goods-item"
+                v-for="(goods, gi) in afterDgOrder.orderItems"
+                :key="'order-goods-item-' + gi">
+                <div class="order-goods-content">
+                  <div class="cover">
+                    <img :src="goods.bookCover" alt="goods" />
+                  </div>
+                  <div class="title">{{ goods.bookName }}</div>
+                </div>
+                <div class="order-goods-amount">
+                  <span>{{ '×' + goods.quantity }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 售后表单(类型、原因) -->
+        <div class="dialog-form">
+          <!-- 售后类型 -->
+          <div class="dialog-form-item">
+            <div class="dialog-form__label">售后类型：</div>
+            <div class="dialog-form__content">
+              <!-- 售后类型选择器 -->
+              <el-select
+                popper-class="dialog-form_select"
+                :popper-append-to-body="false"
+                v-model="afterDgForm.type"
+                placeholder="请选择售后类型"
+                :disabled="!$isEmpty(afterDgForm.id)">
+                <el-option
+                  v-for="item in afterDgOptions"
+                  :key="'as-dg-op-' + item.value"
+                  :label="item.label"
+                  :value="item.value"
+                  :disabled="item.value === 1 && afterDgOrder.status === 5">
+                  <div class="option-item">
+                    <span class="title">{{ item.label }}</span>
+                    <span class="desc">{{ item.desc }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </div>
+          </div>
+          <!-- 售后原因 -->
+          <div class="dialog-form-item">
+            <div class="dialog-form__label">售后原因：</div>
+            <div class="dialog-form__content">
+              <!-- 如果售后凭证已生成 -->
+              <el-input
+                type="textarea"
+                :rows="5"
+                placeholder="请简要描述您申请售后的原因"
+                v-model="afterDgForm.reason"
+                :disabled="!$isEmpty(afterDgForm.id)">
+              </el-input>
+            </div>
+          </div>
+          <!-- 售后补充凭证 -->
+          <div class="dialog-form-item" v-if="afterDgForm.proof && !$isEmpty(afterDgForm.proofList)">
+            <div class="dialog-form__label">售后补充凭证：</div>
+            <div class="dialog-form__content">
+              <div class="proof-list">
+                <img
+                  v-for="(img, ii) in afterDgForm.proofList"
+                  :key="'proof-' + ii"
+                  :src="afterDgForm.proof"
+                  alt="售后凭证" />
+              </div>
+            </div>
+          </div>
+          <!-- 售后失败原因 -->
+          <div class="dialog-form-item" v-if="afterDgForm.failReason">
+            <div class="dialog-form__label">售后失败原因：</div>
+            <div class="dialog-form__content">
+              <div class="reason disabled">
+                <p>{{ afterDgForm.failReason }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- 售后退款金额 -->
+          <div class="dialog-form-item" v-if="afterDgForm.refundAmount">
+            <div class="dialog-form__label">退款金额：</div>
+            <div class="dialog-form__content">
+              <div class="money-line">
+                <span class="unit">￥</span>
+                <span class="money">{{ $keepTwoNum(afterDgForm.refundAmount) }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- 售后退货预约时间 -->
+          <div class="dialog-form-item" v-if="afterDgForm.returnTime || afterDgForm.isReturn">
+            <div class="dialog-form__label">预约时间：</div>
+            <div class="dialog-form__content">
+              <el-date-picker
+                v-model="afterDgForm.returnTime"
+                type="datetime"
+                placeholder="选择日期时间"
+                align="right"
+                :picker-options="pickerAfterOptions"
+                value-format="yyyy-MM-dd HH:mm"
+                format="yyyy-MM-dd HH:mm"
+                :disabled="afterDgForm.status !== 1">
+              </el-date-picker>
+            </div>
+          </div>
+          <!-- 售后退货回收时间 -->
+          <div class="dialog-form-item" v-if="afterDgForm.recycleTime">
+            <div class="dialog-form__label">回收时间：</div>
+            <div class="dialog-form__content">
+              <div class="time-line">
+                <span class="time">{{ afterDgForm.recycleTime }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- 售后退款时间 -->
+          <div class="dialog-form-item" v-if="afterDgForm.refundTime">
+            <div class="dialog-form__label">退款时间：</div>
+            <div class="dialog-form__content">
+              <div class="time-line">
+                <span class="time">{{ afterDgForm.refundTime }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- 售后状态 -->
+          <div class="dialog-form-item" v-if="!$isEmpty(afterDgForm.status)">
+            <div class="dialog-form__label">售后状态：</div>
+            <div class="dialog-form__content">
+              <div class="status-line">
+                <span class="status">{{ afterDgStatus[afterDgForm.status] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 提示：申请售后前，请先与商家沟通清楚 -->
+        <div v-if="!afterBtnDisabled" class="tip-box">
+          <i class="ic-info"></i>
+          <span>申请售后前，请先与商家沟通清楚</span>
+        </div>
+      </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAfterSales">提交 申请</el-button>
+        <el-button v-if="!afterBtnDisabled" type="primary" @click="submitAfterSales">
+          {{ afterDgForm.isReturn ? '预约 退货' : '提交 申请' }}
+        </el-button>
       </span>
     </el-dialog>
     <!-- 详情dialog -->
@@ -591,6 +768,7 @@
 
 <script>
 import Vue from 'vue';
+import { mapState } from 'vuex';
 import SvgPage from '@/components/Common/SvgPage';
 import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
 import commonUtil from '@/utils/common';
@@ -701,6 +879,66 @@ export default {
       isOvertime: false,
       // 售后申请
       afterDgVisable: false,
+      afterDgOrder: {},
+      afterDgIndex: 0,
+      afterDgStatus: {
+        0: '审核中',
+        1: '待退货',
+        2: '待回收',
+        3: '待退款',
+        4: '已退货',
+        5: '已退款',
+        6: '待换货',
+        7: '售后已结束'
+      },
+      pickerAfterOptions: {
+        // 时间的快捷选项
+        shortcuts: [
+          {
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date());
+            }
+          },
+          {
+            text: '明天',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24);
+              picker.$emit('pick', date);
+            }
+          },
+          {
+            text: '后天',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24);
+              picker.$emit('pick', date);
+            }
+          },
+          {
+            text: '一周后',
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', date);
+            }
+          }
+        ],
+        // 禁用日期
+        disabledDate(date) {
+          return date < Date.now();
+        }
+      },
+      afterDgForm: {
+        type: '',
+        reason: ''
+      },
+      afterDgOptions: [
+        { value: 0, label: '我要退款(无需退货)', desc: '没收到货，或与商家协商同意不用退货只退款' },
+        { value: 1, label: '我要退货退款', desc: '已收到货，需归还已收到的货物' }
+      ],
+      afterBtnDisabled: false,
       // 计时
       // 设置计时，单位：s => 15分钟
       counter: 900
@@ -973,7 +1211,14 @@ export default {
     /**
      * 联系商家
      */
-    handleContact(item) {},
+    handleContact(order) {
+      if (!order.storeId) return;
+      this.$bus.$emit('openChatWindow', 'owner');
+      let conversationID = `C2C${order.storeId}`;
+      if (conversationID !== this.currentConversation.conversationID) {
+        this.$store.dispatch('checkoutConversation', conversationID);
+      }
+    },
     /**
      * 催单
      */
@@ -986,19 +1231,128 @@ export default {
     /**
      * 申请售后
      */
-    handleAfterSales(order, index) {},
+    handleAfterSales(order, index) {
+      this.afterBtnDisabled = false;
+      this.afterDgForm = {
+        type: '',
+        reason: ''
+      };
+      this.afterDgOrder = order;
+      this.afterDgIndex = index;
+      this.afterDgVisable = true;
+    },
     /**
      * 提交售后申请
      */
-    submitAfterSales() {},
+    submitAfterSales() {
+      if (this.afterDgOrder.status !== 8) {
+        // 申请售后
+        let afterSales = {
+          orderId: this.afterDgOrder.id,
+          type: this.afterDgForm.type,
+          reason: this.afterDgForm.reason
+        };
+        // console.log('售后 ==> ', afterSales);
+        applyOrderToASApi(afterSales)
+          .then(res => {
+            if (res.data.flag) {
+              return getOrderByIdApi(this.afterDgOrder.id);
+            } else {
+              this.$showMsg(res.data.msg, {
+                type: 'error',
+                duration: 1200
+              });
+            }
+          })
+          .then(res => {
+            if (res.data.flag) {
+              // console.log('order ==> ', res.data.data);
+              this.orderList[this.afterDgIndex] = res.data.data;
+              this.$showMsg('售后申请已提交，请耐心等候结果', { type: 'success' });
+              this.$forceUpdate();
+            }
+          })
+          .catch(err => {
+            this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+          })
+          .finally(() => {
+            this.afterDgVisable = false;
+          });
+      } else {
+        // 预约退货
+        repayOrderOfASApi(this.afterDgForm.id, this.afterDgForm.returnTime + ':00')
+          .then(res => {
+            if (res.data.flag) {
+              return getOrderByIdApi(this.afterDgOrder.id);
+            } else {
+              this.$showMsg(res.data.msg, {
+                type: 'error',
+                duration: 1200
+              });
+            }
+          })
+          .then(res => {
+            if (res.data.flag) {
+              this.computeOrderOfRefundTip(res.data.data);
+              this.orderList[this.afterDgIndex] = res.data.data;
+              this.$showMsg('预约成功，请耐心等待', { type: 'success' });
+              this.$forceUpdate();
+            }
+          })
+          .catch(err => {
+            this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+          })
+          .finally(() => {
+            this.afterDgVisable = false;
+          });
+      }
+    },
     /**
      * 查看售后单据
      */
-    handleOpenAS(order) {},
+    handleOpenAS(order) {
+      this.afterBtnDisabled = true;
+      this.afterDgOrder = order;
+      this.afterDgForm = order.afterSales;
+      this.afterDgVisable = true;
+    },
+    /**
+     * 返回售前状态
+     */
+    handleReturnPreAS(order, index) {
+      revertOrderStatusOfASApi(order.id)
+        .then(res => {
+          if (res.data.flag) {
+            return getOrderByIdApi(order.id);
+          } else {
+            this.$showMsg(res.data.msg, { type: 'error' });
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            if (res.data.data.status === 3) {
+              this.computeOrderOfRepayTip(res.data.data);
+            }
+            this.orderList[index] = res.data.data;
+            this.$forceUpdate();
+          }
+        })
+        .catch(err => {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+        });
+    },
     /**
      * 预约退货
      */
-    handleRepayOfAS(item) {},
+    handleRepayOfAS(order, index) {
+      this.afterBtnDisabled = false;
+      this.afterDgForm = order.afterSales;
+      this.afterDgForm.returnTime = '';
+      this.afterDgForm.isReturn = true;
+      this.afterDgOrder = order;
+      this.afterDgIndex = index;
+      this.afterDgVisable = true;
+    },
     /**
      * 确认收货
      */
@@ -1264,6 +1618,27 @@ export default {
           this.computeOrderOfRepayTip(order);
           continue;
         }
+        // 退货订单已预约
+        if (order.status === 8 && order.afterSales.status === 2) {
+          this.computeOrderOfRefundTip(order);
+          continue;
+        }
+      }
+    },
+    /**
+     * 计算退货预约上门订单的提示
+     */
+    computeOrderOfRefundTip(order) {
+      if (!order.afterSales) return;
+      let now = new Date();
+      let returnTime = new Date(order.afterSales.returnTime);
+      let dValue = commonUtil.getDaysBetween(now, returnTime);
+      if (dValue > 0) {
+        order.orderTip = `预约上门时间：${order.afterSales.returnTime} (预计${dValue}天后)`;
+      } else if (dValue === 0) {
+        order.orderTip = `预约上门时间：${order.afterSales.returnTime} (今天)`;
+      } else {
+        order.orderTip = `预约上门时间：${order.afterSales.returnTime} (已超过${dValue * -1}天)`;
       }
     },
     /**
@@ -1363,6 +1738,11 @@ export default {
     accToFixed(num) {
       return parseFloat(parseFloat(num).toFixed(2));
     }
+  },
+  computed: {
+    ...mapState({
+      currentConversation: state => state.conversation.currentConversation
+    })
   },
   watch: {
     /**
@@ -1838,7 +2218,8 @@ export default {
 }
 .comment-dialog,
 .renew-dialog,
-.repay-dialog {
+.repay-dialog,
+.after-dialog {
   :deep(.el-dialog) {
     .el-button--primary {
       border-radius: 20px;
@@ -1905,9 +2286,11 @@ export default {
         display: flex;
         align-items: center;
         .dialog-form__label {
+          min-width: 8em;
           user-select: none;
           font-size: 12px;
           color: #666;
+          text-align: right;
           margin-right: 5px;
         }
         .dialog-form__content {
@@ -1924,6 +2307,93 @@ export default {
             color: #999;
             margin-left: 5px;
           }
+          .dialog-form_select {
+            .el-select-dropdown__item {
+              height: auto;
+              line-height: normal;
+              & + .el-select-dropdown__item {
+                margin-top: 6px;
+              }
+            }
+            .option-item {
+              display: flex;
+              flex-direction: column;
+              .title {
+                font-size: 15px;
+                font-weight: bold;
+              }
+              .desc {
+                margin-top: 3px;
+                font-size: 12px;
+                color: var(--placeholder-text);
+              }
+            }
+          }
+          .proof-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            img {
+              width: 120px;
+              height: 120px;
+              border-radius: 8px;
+            }
+          }
+          .reason {
+            display: flex;
+            flex-direction: column;
+            p {
+              text-indent: 2em;
+              font-size: 14px;
+              color: var(--placeholder-text);
+              & + p {
+                margin-top: 8px;
+              }
+            }
+            &.disabled {
+              user-select: none;
+            }
+          }
+          .money-line {
+            width: 96%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            user-select: none;
+            .unit {
+              font-size: 16px;
+            }
+            .money {
+              margin-left: 6px;
+              font-size: 14px;
+              color: var(--danger);
+            }
+          }
+          .time-line {
+            width: 96%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            user-select: none;
+            span {
+              font-size: 14px;
+              color: var(--placeholder-text);
+            }
+          }
+          .status-line {
+            width: 96%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            user-select: none;
+            .status {
+              font-size: 12px;
+              color: var(--placeholder-text);
+            }
+          }
+        }
+        & + .dialog-form-item {
+          margin-top: 18px;
         }
       }
     }
@@ -2056,7 +2526,8 @@ export default {
   }
 }
 .renew-dialog,
-.repay-dialog {
+.repay-dialog,
+.after-dialog {
   .order-content {
     max-width: 100%;
     border-radius: 12px;
