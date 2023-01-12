@@ -180,7 +180,7 @@
             <!-- 商品评论 -->
             <div class="book-comment" id="bookComment">
               <div class="tab-content-tit">
-                <span>{{ '商品评论(' + (comment.length > 99 ? '99+' : comment.length) + '条)' }}</span>
+                <span>{{ '商品评论(' + (commentTotal > 99 ? '99+' : commentTotal) + '条)' }}</span>
               </div>
               <div class="comment-content">
                 <BookComment
@@ -194,6 +194,17 @@
                   :score="item.score"
                   :content="item.content"
                   :reply="item.reply" />
+                <el-pagination
+                  class="comment-page-tool"
+                  @size-change="handleSizeChangeOfComment"
+                  @current-change="handleCurrentChangeOfComment"
+                  :current-page.sync="commentCurrentPage"
+                  :page-sizes="[5, 10, 15]"
+                  :page-size="commentPageSize"
+                  layout="sizes, prev, pager, next"
+                  :total="commentTotal"
+                  hide-on-single-page>
+                </el-pagination>
               </div>
             </div>
           </div>
@@ -281,7 +292,11 @@ export default {
       activeAside: 0,
       bookRank: [],
       asideTop: 120,
+      // 评论
       comment: [],
+      commentTotal: 0,
+      commentCurrentPage: 1,
+      commentPageSize: 5,
       /** @type {HTMLElement} */
       contentBoxDom: {},
       /** @type {HTMLElement} */
@@ -374,11 +389,31 @@ export default {
      * 获取图书评论
      */
     getComment() {
-      getCommentByBookId(1).then(res => {
-        if (res.data.flag) {
-          this.comment = res.data.data;
-        }
-      });
+      getCommentByBookId(this.bookId, this.commentCurrentPage, this.commentPageSize)
+        .then(res => {
+          if (res.data.flag) {
+            console.log('comment ==> ', res.data.data);
+            this.comment = res.data.data.records;
+            this.commentTotal = res.data.data.total;
+          }
+        })
+        .finally(() => {
+          this.$forceUpdate();
+        });
+    },
+    /**
+     * 评论页数量改变
+     */
+    handleSizeChangeOfComment(val) {
+      this.commentPageSize = val;
+      this.getComment();
+    },
+    /**
+     * 评论页码改变
+     */
+    handleCurrentChangeOfComment(val) {
+      this.commentCurrentPage = val;
+      this.getComment();
     },
     /**
      * 获取图书详情
@@ -920,6 +955,10 @@ export default {
             & + .comment-item {
               margin-top: 8px;
             }
+          }
+          .comment-page-tool {
+            margin: 0 auto;
+            margin-top: 24px;
           }
         }
       }
