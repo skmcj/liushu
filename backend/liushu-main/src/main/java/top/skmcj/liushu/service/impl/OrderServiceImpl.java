@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.skmcj.liushu.dao.mapper.OrderMapper;
+import top.skmcj.liushu.dto.CommentDto;
 import top.skmcj.liushu.dto.OrderDto;
 import top.skmcj.liushu.entity.*;
 import top.skmcj.liushu.service.*;
@@ -53,6 +54,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private AfterSalesService asService;
 
+    @Autowired
+    private CommentService commentService;
+
     /**
      * 逾期缓存期限
      */
@@ -72,41 +76,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public OrderDto getOrderById(Long id) {
-        OrderDto orderDto = new OrderDto();
         // 获取订单基本信息
         Order order = this.getById(id);
         // 获取订单详情项
-        LambdaQueryWrapper<OrderItem> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(OrderItem::getOrderId, id);
-        List<OrderItem> list = orderItemService.list(queryWrapper);
-        BeanUtils.copyProperties(order, orderDto);
-        list.stream().forEach(item -> {
-            Book book = bookService.getById(item.getBookId());
-            item.setBookName(book.getName());
-            item.setBookCover(book.getCover());
-        });
-        if(order.getStatus().equals(2) || order.getStatus().equals(6)) {
-            // 订单可续借或归还
-            // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
-            list.stream().forEach(orderItem -> {
-                LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
-                costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
-                BookCost cost = costService.getOne(costWrapper);
-                orderItem.setBorrowFee(cost.getBorrowCost());
-                orderItem.setFreeDay(cost.getFreeDay());
-            });
-        }
-        // 订单申请了售后
-        if(order.getStatus().equals(8)) {
-            // 获取售后信息
-            LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
-            asWrapper.eq(AfterSales::getOrderId, order.getId());
-            AfterSales sales = asService.getOne(asWrapper);
-            orderDto.setAfterSales(sales);
-        }
-        Bookstore store = storeService.getById(order.getStoreId());
-        orderDto.setStoreName(store.getStoreName());
-        orderDto.setOrderItems(list);
+        OrderDto orderDto = getOrderDtoByOrder(order, "");
+        return orderDto;
+    }
+
+    /**
+     * 根据id获取订单完整信息
+     * @param id
+     * @param imgDoMain
+     * @return
+     */
+    @Override
+    public OrderDto getOrderById(Long id, String imgDoMain) {
+        // 获取订单基本信息
+        Order order = this.getById(id);
+        // 获取订单详情项
+        OrderDto orderDto = getOrderDtoByOrder(order, imgDoMain);
         return orderDto;
     }
 
@@ -261,41 +249,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (orders != null) {
             // 封装为 OrderDto
             orderDtos = orders.stream().map(item -> {
-                Bookstore bookstore = storeService.getById(item.getStoreId());
-                LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
-                orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
-                // 获取订单项
-                List<OrderItem> orderItems = orderItemService.list(orderItemWrapper);
-                // 获取订单图书封面
-                orderItems.stream().forEach(orderItem -> {
-                    Book book = bookService.getById(orderItem.getBookId());
-                    orderItem.setBookName(book.getName());
-                    orderItem.setBookCover(imgDoMain + book.getCover());
-                });
-                if(item.getStatus().equals(2) || item.getStatus().equals(6)) {
-                    // 订单可续借或归还
-                    // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
-                    orderItems.stream().forEach(orderItem -> {
-                        LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
-                        costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
-                        BookCost cost = costService.getOne(costWrapper);
-                        orderItem.setBorrowFee(cost.getBorrowCost());
-                        orderItem.setFreeDay(cost.getFreeDay());
-                    });
-                }
-                // 封装
-                OrderDto orderDto = packingOrderDto(item, orderItems);
-
-                // 订单申请了售后
-                if(item.getStatus().equals(8)) {
-                    // 获取售后信息
-                    LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
-                    asWrapper.eq(AfterSales::getOrderId, item.getId());
-                    AfterSales sales = asService.getOne(asWrapper);
-                    orderDto.setAfterSales(sales);
-                }
-
-                orderDto.setStoreName(bookstore.getStoreName());
+                OrderDto orderDto = getOrderDtoByOrder(item, imgDoMain);
                 return orderDto;
             }).collect(Collectors.toList());
         }
@@ -334,40 +288,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (orders != null) {
             // 封装为 OrderDto
             orderDtos = orders.stream().map(item -> {
-                Bookstore bookstore = storeService.getById(item.getStoreId());
-                LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
-                orderItemWrapper.eq(OrderItem::getOrderId, item.getId());
-                // 获取订单项
-                List<OrderItem> orderItems = orderItemService.list(orderItemWrapper);
-                // 获取订单图书封面
-                orderItems.stream().forEach(orderItem -> {
-                    Book book = bookService.getById(orderItem.getBookId());
-                    orderItem.setBookName(book.getName());
-                    orderItem.setBookCover(imgDoMain + book.getCover());
-                });
-                if(item.getStatus().equals(2) || item.getStatus().equals(6)) {
-                    // 订单可续借或归还
-                    // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
-                    orderItems.stream().forEach(orderItem -> {
-                        LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
-                        costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
-                        BookCost cost = costService.getOne(costWrapper);
-                        orderItem.setBorrowFee(cost.getBorrowCost());
-                        orderItem.setFreeDay(cost.getFreeDay());
-                    });
-                }
-                // 封装
-                OrderDto orderDto = packingOrderDto(item, orderItems);
-                // 订单申请了售后
-                if(item.getStatus().equals(8)) {
-                    // 获取售后信息
-                    LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
-                    asWrapper.eq(AfterSales::getOrderId, item.getId());
-                    AfterSales sales = asService.getOne(asWrapper);
-                    orderDto.setAfterSales(sales);
-                }
-
-                orderDto.setStoreName(bookstore.getStoreName());
+                OrderDto orderDto = getOrderDtoByOrder(item, imgDoMain);
                 return orderDto;
             }).collect(Collectors.toList());
         }
@@ -922,6 +843,56 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderDto.setIsComment(order.getIsComment());
 
         orderDto.setOrderItems(orderItems);
+        return orderDto;
+    }
+
+    /**
+     * 根据订单数据获取订单完整信息
+     * @param order
+     * @param imgDoMain
+     * @return
+     */
+    private OrderDto getOrderDtoByOrder(Order order, String imgDoMain) {
+        Bookstore bookstore = storeService.getById(order.getStoreId());
+        LambdaQueryWrapper<OrderItem> orderItemWrapper = new LambdaQueryWrapper<>();
+        orderItemWrapper.eq(OrderItem::getOrderId, order.getId());
+        // 获取订单项
+        List<OrderItem> orderItems = orderItemService.list(orderItemWrapper);
+        // 获取订单图书封面
+        orderItems.stream().forEach(orderItem -> {
+            Book book = bookService.getById(orderItem.getBookId());
+            orderItem.setBookName(book.getName());
+            orderItem.setBookCover(imgDoMain + book.getCover());
+            // 如果订单已评论，获取评论内容
+            if(orderItem.getIsComment().equals(1)) {
+                // 订单已评论
+                CommentDto commentDto = commentService.getCommentByOrderItem(orderItem.getId(), imgDoMain);
+                orderItem.setComment(commentDto);
+            }
+        });
+        if(order.getStatus().equals(2) || order.getStatus().equals(6)) {
+            // 订单可续借或归还
+            // 获取图书借阅费(每日)及免费天数，方便前端计算借阅费
+            orderItems.stream().forEach(orderItem -> {
+                LambdaQueryWrapper<BookCost> costWrapper = new LambdaQueryWrapper<>();
+                costWrapper.eq(BookCost::getBookId, orderItem.getBookId());
+                BookCost cost = costService.getOne(costWrapper);
+                orderItem.setBorrowFee(cost.getBorrowCost());
+                orderItem.setFreeDay(cost.getFreeDay());
+            });
+        }
+        // 封装
+        OrderDto orderDto = packingOrderDto(order, orderItems);
+        // 订单申请了售后
+        if(order.getStatus().equals(8)) {
+            // 获取售后信息
+            LambdaQueryWrapper<AfterSales> asWrapper = new LambdaQueryWrapper<>();
+            asWrapper.eq(AfterSales::getOrderId, order.getId());
+            AfterSales sales = asService.getOne(asWrapper);
+            orderDto.setAfterSales(sales);
+        }
+
+        orderDto.setStoreName(bookstore.getStoreName());
         return orderDto;
     }
 

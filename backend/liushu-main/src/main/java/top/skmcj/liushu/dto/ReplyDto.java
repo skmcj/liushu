@@ -14,5 +14,5 @@ public class ReplyDto extends Reply {
     /**
      * 回复的回复列表
      */
-    private List<ReplyDto> replyList;
+    private ReplyDto reply;
 }

@@ -14,5 +14,5 @@ public class CommentDto extends Comment {
     /**
      * 评论的回复列表
      */
-    private List<ReplyDto> replyList;
+    private ReplyDto reply;
 }

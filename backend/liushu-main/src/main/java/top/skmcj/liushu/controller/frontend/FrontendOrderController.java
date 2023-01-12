@@ -52,6 +52,9 @@ public class FrontendOrderController {
     @Autowired
     private AfterSalesService asService;
 
+    @Autowired
+    private CommentService commentService;
+
     /**
      * 逾期缓存期限
      */
@@ -297,12 +300,9 @@ public class FrontendOrderController {
      */
     @GetMapping("/id/{id}")
     public Result<OrderDto> getOrderById(@PathVariable Long id, HttpServletRequest request) {
-        OrderDto orderDto = orderService.getOrderById(id);
-        List<OrderItem> orderItems = orderDto.getOrderItems();
         String imgDoMain = CommonUtil.getImgDoMain(request);
-        orderItems.stream().forEach(item -> {
-            item.setBookCover(imgDoMain + item.getBookCover());
-        });
+        OrderDto orderDto = orderService.getOrderById(id, imgDoMain);
+
         return Result.success(orderDto);
     }
 
@@ -492,11 +492,24 @@ public class FrontendOrderController {
 
     /**
      * 评价
-     * @param order
+     * @param comment
      * @return
      */
     @PutMapping("/comment")
-    public Result<String> commentOfOrder(@RequestBody Order order) {
+    public Result<String> commentOfOrder(@RequestBody Comment comment, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        User user = JwtUtil.verifyTokenOfUser(token);
+        Comment sComment = new Comment();
+        sComment.setOrderId(comment.getOrderId());
+        sComment.setOrderItemId(comment.getOrderItemId());
+        sComment.setBookId(comment.getBookId());
+        sComment.setUserId(user.getId());
+        sComment.setStoreId(comment.getStoreId());
+        sComment.setContent(comment.getContent());
+        sComment.setScore(comment.getScore());
+        sComment.setIsAnonymous(comment.getIsAnonymous());
+        boolean flag = commentService.save(sComment);
+        if(!flag) return Result.error("评论失败");
         return Result.success("评论成功");
     }
 

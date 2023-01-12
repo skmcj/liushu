@@ -14,6 +14,8 @@ public interface OrderService extends IService<Order> {
 
     OrderDto getOrderById(Long id);
 
+    OrderDto getOrderById(Long id, String imgDoMain);
+
     Page getOrderPage(OrderPageVo pageVo, Long storeId);
 
     OrderDto generateOrder(OrderDto orderDto);

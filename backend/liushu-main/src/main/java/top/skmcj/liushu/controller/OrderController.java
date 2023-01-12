@@ -15,6 +15,7 @@ import top.skmcj.liushu.entity.Employee;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.service.AfterSalesService;
 import top.skmcj.liushu.service.OrderService;
+import top.skmcj.liushu.util.CommonUtil;
 import top.skmcj.liushu.util.JwtUtil;
 import top.skmcj.liushu.util.TimeUtil;
 import top.skmcj.liushu.vo.OrderPageVo;
@@ -66,8 +67,9 @@ public class OrderController {
      * @return
      */
     @GetMapping
-    public Result<OrderDto> getOrderById(Long id) {
-        OrderDto orderDto = orderService.getOrderById(id);
+    public Result<OrderDto> getOrderById(Long id, HttpServletRequest request) {
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        OrderDto orderDto = orderService.getOrderById(id, imgDoMain);
         return Result.success(orderDto);
     }
 

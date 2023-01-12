@@ -2,6 +2,7 @@ package top.skmcj.liushu.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+import top.skmcj.liushu.dto.CommentDto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -75,6 +76,17 @@ public class OrderItem implements Serializable {
      * 押金
      */
     private BigDecimal deposit;
+
+    /**
+     * 评论状态，0-未评论；1-已评论
+     */
+    private Integer isComment;
+
+    /**
+     * 回复
+     */
+    @TableField(exist = false)
+    private CommentDto comment;
 
     /**
      * 商品每日借阅费
