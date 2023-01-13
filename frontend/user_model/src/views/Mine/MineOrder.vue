@@ -281,56 +281,17 @@
       :modal-append-to-body="false"
       :close-on-click-modal="false">
       <div class="goods-comment-list">
-        <div class="goods-comment-item" v-for="(comment, ci) in commentDgList" :key="'comment-item-' + ci">
-          <div class="goods-comment-top">
-            <!-- 顶部商品信息 -->
-            <div class="goods-mess">
-              <div class="goods-cover">
-                <img :src="comment.bookCover" alt="goods-cover" />
-              </div>
-              <div class="goods-name">{{ comment.bookName }}</div>
-            </div>
-            <div class="goods-rate-box">
-              <div class="goods-rate-title">评分：</div>
-              <div class="goods-rate">
-                <el-rate
-                  v-model="comment.score"
-                  :max="5"
-                  allow-half
-                  :icon-classes="['ic-score', 'ic-score', 'ic-score']"
-                  :colors="['#83ccd2', '#83ccd2', '#83ccd2']"
-                  void-icon-class="ic-score"
-                  disabled-void-icon-class="ic-score"
-                  show-score
-                  text-color="#83ccd2"
-                  disabled-void-color="#999999"
-                  score-template="{value}">
-                </el-rate>
-              </div>
-            </div>
-          </div>
-          <!-- 评论内容 -->
-          <div class="goods-comment-content">
-            <el-input type="textarea" :rows="5" placeholder="请输入评价内容" v-model="comment.content"></el-input>
-          </div>
-          <!-- 是否匿名 -->
-          <div class="goods-comment-anonymity">
-            <div class="text">{{ comment.isAnonymous === 0 ? '未匿名' : '已匿名' }}</div>
-            <div class="switch">
-              <el-switch
-                v-model="comment.isAnonymous"
-                active-color="#83ccd2"
-                :active-value="1"
-                :inactive-value="0"
-                @change="commentSwitchChange(comment)">
-              </el-switch>
-            </div>
-          </div>
+        <div class="goods-comment-item" v-for="(orderItem, ci) in itemCommentList" :key="'comment-item-' + ci">
+          <Comment
+            :item-id="orderItem.id"
+            :comment="orderItem.comment"
+            :disabled="orderItem.isComment ? true : false"
+            @submit="handleSubmitComment"
+            @reply="handleSubmitReply"
+            @delete="handleDeleteComment" />
         </div>
       </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitComment">提交 评价</el-button>
-      </span>
+      <span slot="footer" class="dialog-footer"></span>
     </el-dialog>
     <!-- 续借dialog -->
     <el-dialog
@@ -770,8 +731,10 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import SvgPage from '@/components/Common/SvgPage';
+import Comment from '@/components/Common/Comment/Comment';
 import PaymentPanel from '@/components/Common/Pay/PaymentPanel';
 import commonUtil from '@/utils/common';
+import { addCommentOfOrderItemApi, deleteCommentApi, replyComentByUserApi } from '@/api/commentApi';
 import {
   getAllOrderOgPageApi,
   getOrderByStatusOfPageApi,
@@ -793,7 +756,8 @@ import {
 export default {
   components: {
     PaymentPanel,
-    SvgPage
+    SvgPage,
+    Comment
   },
   data() {
     return {
@@ -812,9 +776,12 @@ export default {
       currentPage: 1,
       pageSize: 5,
       total: 0,
+      // 评论
       commentDgVisable: false,
+      commentDgOrder: {},
+      commentDgIndex: 0,
       commentDgTitle: '',
-      commentDgList: {},
+      itemCommentList: [],
       renewVisable: false,
       repayDgVisable: false,
       dialogOrder: {},
@@ -1545,48 +1512,114 @@ export default {
     /**
      * 评价
      */
-    handleComment(item) {
-      this.commentDgList = [];
-      for (let i = 0; i < item.orderItems.length; i++) {
-        let comment = {
-          // 订单id
-          orderId: item.id,
-          // 订单详情id
-          orderItemId: item.orderItems[i].id,
-          // 用户id
-          userId: item.userId,
-          // 图书id
-          bookId: item.orderItems[i].bookId,
-          // 书店id
-          storeId: item.storeId,
-          // 图书名称
-          bookName: item.orderItems[i].bookName,
-          // 图书封面
-          bookCover: item.orderItems[i].bookCover,
-          // 用户昵称
-          nickname: this.userInfo.nickname,
-          // 评论内容
-          content: '',
-          // 评分
-          score: 0,
-          // 是否匿名，0-不匿；1-匿名
-          isAnonymous: 0
-        };
-        this.commentDgList.push(comment);
+    handleComment(order, index) {
+      this.itemCommentList = [];
+      for (let orderItem of order.orderItems) {
+        if (!orderItem.comment) {
+          let comment = {
+            orderId: orderItem.orderId,
+            orderItemId: orderItem.id,
+            bookId: orderItem.bookId,
+            storeId: order.storeId,
+            content: '',
+            score: 0,
+            isAnonymous: 0,
+            bookCover: orderItem.bookCover,
+            bookName: orderItem.bookName
+          };
+          orderItem.comment = comment;
+        }
+        this.itemCommentList.push(orderItem);
       }
-      this.commentDgTitle = item.number;
+      this.commentDgTitle = order.number;
       this.commentDgVisable = true;
-    },
-    // 评价匿名处理
-    commentSwitchChange(item) {
-      item.nickname = item.isAnonymous === 0 ? this.userInfo.nickname : '';
+      this.commentDgOrder = order;
+      this.commentDgIndex = index;
     },
     /**
      * 提交评价
      */
-    submitComment() {
-      this.commentDgVisable = false;
-      console.log('comment =>', this.commentDgList);
+    handleSubmitComment(comment) {
+      // this.commentDgVisable = false;
+      console.log('提交评价 =>', comment);
+      addCommentOfOrderItemApi(comment)
+        .then(res => {
+          if (res.data.flag) {
+            return getOrderByIdApi(this.commentDgOrder.id);
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            this.orderList[this.commentDgIndex] = res.data.data;
+            this.$forceUpdate();
+            this.$showMsg('评价成功', { type: 'success' });
+          }
+        })
+        .catch(err => {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+        })
+        .finally(() => {
+          this.commentDgVisable = false;
+        });
+    },
+    /**
+     * 回复
+     */
+    handleSubmitReply(reply) {
+      console.log('提交回复 ==>', reply);
+      replyComentByUserApi(reply)
+        .then(res => {
+          if (res.data.flag) {
+            return getOrderByIdApi(this.commentDgOrder.id);
+          }
+        })
+        .then(res => {
+          if (res.data.flag) {
+            this.orderList[this.commentDgIndex] = res.data.data;
+            this.$forceUpdate();
+            this.$showMsg('回复成功', { type: 'success' });
+          }
+        })
+        .catch(err => {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+        })
+        .finally(() => {
+          this.commentDgVisable = false;
+        });
+    },
+    /**
+     * 删除评价
+     */
+    handleDeleteComment(commentId) {
+      console.log('删除评价 ==>', commentId);
+      this.$confirm('评价删除后将不可恢复, 是否继续?', '提示', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'danger'
+      })
+        .then(() => {
+          deleteCommentApi(commentId)
+            .then(res => {
+              if (res.data.flag) {
+                return getOrderByIdApi(this.commentDgOrder.id);
+              }
+            })
+            .then(res => {
+              if (res.data.flag) {
+                this.orderList[this.commentDgIndex] = res.data.data;
+                this.$forceUpdate();
+                this.$showMsg('删除成功', { type: 'success' });
+              }
+            })
+            .catch(err => {
+              this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+            })
+            .finally(() => {
+              this.commentDgVisable = false;
+            });
+        })
+        .catch(() => {});
     },
     /**
      * 计算剩余时长

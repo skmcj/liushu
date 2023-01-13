@@ -246,7 +246,7 @@ import { getBookDetailByIdApi } from '@/api/bookApi';
 import { getBookCateApi } from '@/api/cateApi';
 import { addCartItemApi } from '@/api/cartApi';
 import { getShopByIdApi, getBookRankOfShopApi } from '@/api/shopAPi';
-import { getCommentByBookId } from '@/api/commentApi';
+import { getCommentByBookIdApi } from '@/api/commentApi';
 
 export default {
   components: {
@@ -389,7 +389,7 @@ export default {
      * 获取图书评论
      */
     getComment() {
-      getCommentByBookId(this.bookId, this.commentCurrentPage, this.commentPageSize)
+      getCommentByBookIdApi(this.bookId, this.commentCurrentPage, this.commentPageSize)
         .then(res => {
           if (res.data.flag) {
             console.log('comment ==> ', res.data.data);

@@ -15,7 +15,9 @@ import top.skmcj.liushu.util.CommonUtil;
 import top.skmcj.liushu.util.JwtUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评论接口
@@ -47,6 +49,11 @@ public class CommentController {
         Order order = orderService.getById(comment.getOrderId());
         if(order == null) return Result.error("查无对应订单");
         if(order.getStatus() < 4) return Result.error("订单尚不可评论");
+        if(comment.getOrderId() == null) return Result.error("评价订单ID不可为空");
+        if(comment.getOrderItemId() == null) return Result.error("评价订单项ID不可为空");
+        if(comment.getBookId() == null) return Result.error("评价图书ID不可为空");
+        if(comment.getStoreId() == null) return Result.error("评价商家ID不可为空");
+
         String token = request.getHeader("Authorization");
         User user = JwtUtil.verifyTokenOfUser(token);
         Comment sComment = new Comment();
@@ -149,6 +156,21 @@ public class CommentController {
         String imgDoMain = CommonUtil.getImgDoMain(request);
         Page<CommentDto> commentDtoPage = commentService.getCommentPageByUser(user.getId(), currentPage, pageSize,
                 imgDoMain);
+        // 封装存入订单号
+        // 订单字典
+        Map<Long, Order> orderMap = new HashMap<>();
+        List<CommentDto> commentDtos = commentDtoPage.getRecords();
+        commentDtos.stream().forEach(item -> {
+            if(orderMap.containsKey(item.getOrderId())) {
+                // 字典存有订单信息
+                Order order = orderMap.get(item.getOrderId());
+                item.setOrderNumber(order.getNumber());
+            } else {
+                Order order = orderService.getById(item.getOrderId());
+                orderMap.put(item.getOrderId(), order);
+                item.setOrderNumber(order.getNumber());
+            }
+        });
         return Result.success(commentDtoPage);
     }
 
@@ -166,6 +188,21 @@ public class CommentController {
         String imgDoMain = CommonUtil.getImgDoMain(request);
         Page<CommentDto> commentDtoPage = commentService.getCommentPageByStore(employee.getStoreId(), currentPage
                 , pageSize, imgDoMain);
+        // 封装存入订单号
+        // 订单字典
+        Map<Long, Order> orderMap = new HashMap<>();
+        List<CommentDto> commentDtos = commentDtoPage.getRecords();
+        commentDtos.stream().forEach(item -> {
+            if(orderMap.containsKey(item.getOrderId())) {
+                // 字典存有订单信息
+                Order order = orderMap.get(item.getOrderId());
+                item.setOrderNumber(order.getNumber());
+            } else {
+                Order order = orderService.getById(item.getOrderId());
+                orderMap.put(item.getOrderId(), order);
+                item.setOrderNumber(order.getNumber());
+            }
+        });
         return Result.success(commentDtoPage);
     }
 

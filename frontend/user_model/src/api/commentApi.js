@@ -7,7 +7,7 @@ import request from '@/utils/request';
  * @param {Number} pageSize 每页数量
  * @returns
  */
-export const getCommentByBookId = function(bookId, currentPage, pageSize) {
+export const getCommentByBookIdApi = function(bookId, currentPage, pageSize) {
   return request.get('/comment/book', {
     params: {
       bookId,
@@ -15,4 +15,50 @@ export const getCommentByBookId = function(bookId, currentPage, pageSize) {
       pageSize
     }
   });
+}
+
+/**
+ * 分页获取用户评价
+ * @param {*} currentPage 页码
+ * @param {*} pageSize 每页数量
+ * @returns
+ */
+export const getCommentPageByUserApi = function(currentPage, pageSize) {
+  return request.get('/comment/user', {
+    params: {
+      currentPage,
+      pageSize
+    }
+  });
+}
+
+/**
+ * 添加评论
+ * @param {*} comment 评论内容
+ * @returns
+ */
+export const addCommentOfOrderItemApi = function(comment) {
+  return request.post('/comment', comment);
+}
+
+/**
+ * 根据ID删除评论
+ * @param {*} commentId 评论ID
+ * @returns
+ */
+export const deleteCommentApi = function(commentId) {
+  return request.delete('/comment', {
+    params: {
+      id: commentId
+    }
+  });
+}
+
+/**
+ * 用户回复
+ * @param {*} reply 回复
+ * @returns
+ */
+export const replyComentByUserApi = function(reply) {
+  return request.post('/comment/user/reply', reply);
 }

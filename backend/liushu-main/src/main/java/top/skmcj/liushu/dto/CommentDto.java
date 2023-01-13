@@ -15,4 +15,9 @@ public class CommentDto extends Comment {
      * 评论的回复列表
      */
     private ReplyDto reply;
+
+    /**
+     * 订单号
+     */
+    private String orderNumber;
 }
