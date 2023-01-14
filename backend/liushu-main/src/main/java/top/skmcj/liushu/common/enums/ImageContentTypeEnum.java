@@ -15,6 +15,7 @@ public enum ImageContentTypeEnum {
     GIF("gif", "image/gif"),
     JFIF("jfif", "image/jpeg"),
     PNG("png", "image/png"),
+    SVG("svg", "image/svg+xml"),
     TIF("tif", "image/tiff"),
     ICO("ico", "image/x-icon"),
     JPEG("jpeg", "image/jpeg"),

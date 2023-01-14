@@ -24,8 +24,8 @@ module.exports = defineConfig({
     }
   },
   devServer: {
-    port: 8081,
+    port: 8081
     // 设置跨域代理
-    proxy: 'http://localhost:8080/api'
+    // proxy: 'http://localhost:8080/api'
   }
 })

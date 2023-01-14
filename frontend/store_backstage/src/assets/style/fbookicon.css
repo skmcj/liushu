@@ -1,8 +1,8 @@
 @font-face {
   font-family: "fbookfont"; /* Project id 3567073 */
-  src: url('//at.alicdn.com/t/c/font_3567073_kig2lce0z3.woff2?t=1665735194140') format('woff2'),
-       url('//at.alicdn.com/t/c/font_3567073_kig2lce0z3.woff?t=1665735194140') format('woff'),
-       url('//at.alicdn.com/t/c/font_3567073_kig2lce0z3.ttf?t=1665735194140') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_3567073_8cwh71up6jr.woff2?t=1673423108139') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3567073_8cwh71up6jr.woff?t=1673423108139') format('woff'),
+       url('//at.alicdn.com/t/c/font_3567073_8cwh71up6jr.ttf?t=1673423108139') format('truetype');
 }
 
 .fbookfont {
@@ -11,6 +11,110 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.ic-as-progress:before {
+  content: "\e642";
+}
+
+.ic-as-complete:before {
+  content: "\e643";
+}
+
+.ic-as-audit:before {
+  content: "\e644";
+}
+
+.ic-complete:before {
+  content: "\e641";
+}
+
+.ic-as-fail:before {
+  content: "\e640";
+}
+
+.ic-due:before {
+  content: "\e88f";
+}
+
+.ic-repay:before {
+  content: "\e63e";
+}
+
+.ic-overdue:before {
+  content: "\e63d";
+}
+
+.ic-time-tip:before {
+  content: "\e754";
+}
+
+.ic-cancel-order:before {
+  content: "\e6cc";
+}
+
+.ic-union-pay:before {
+  content: "\e64b";
+}
+
+.ic-file-zip:before {
+  content: "\e653";
+}
+
+.ic-file-img:before {
+  content: "\e654";
+}
+
+.ic-file-txt:before {
+  content: "\e655";
+}
+
+.ic-files:before {
+  content: "\e67d";
+}
+
+.ic-loading-fail:before {
+  content: "\e64f";
+}
+
+.ic-loading-2:before {
+  content: "\e770";
+}
+
+.ic-loading-3:before {
+  content: "\e684";
+}
+
+.ic-loading-1:before {
+  content: "\e6de";
+}
+
+.ic-send:before {
+  content: "\e652";
+}
+
+.ic-file:before {
+  content: "\e63c";
+}
+
+.ic-back:before {
+  content: "\eb11";
+}
+
+.ic-wechat-pay:before {
+  content: "\e689";
+}
+
+.ic-alipay:before {
+  content: "\e68a";
+}
+
+.ic-after-sales:before {
+  content: "\e63b";
+}
+
+.ic-next:before {
+  content: "\e63a";
 }
 
 .ic-not-found-text:before {

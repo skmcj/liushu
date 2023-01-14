@@ -1062,6 +1062,7 @@ export default {
       box.scrollLeft += step;
     },
     handleNav(item) {
+      this.currentPage = 1;
       this.navCheck = item.value;
       // 获取指定订单
       this.initOrderList();
@@ -1541,7 +1542,7 @@ export default {
      */
     handleSubmitComment(comment) {
       // this.commentDgVisable = false;
-      console.log('提交评价 =>', comment);
+      // console.log('提交评价 =>', comment);
       addCommentOfOrderItemApi(comment)
         .then(res => {
           if (res.data.flag) {
@@ -1566,7 +1567,7 @@ export default {
      * 回复
      */
     handleSubmitReply(reply) {
-      console.log('提交回复 ==>', reply);
+      // console.log('提交回复 ==>', reply);
       replyComentByUserApi(reply)
         .then(res => {
           if (res.data.flag) {
@@ -1591,7 +1592,7 @@ export default {
      * 删除评价
      */
     handleDeleteComment(commentId) {
-      console.log('删除评价 ==>', commentId);
+      // console.log('删除评价 ==>', commentId);
       this.$confirm('评价删除后将不可恢复, 是否继续?', '提示', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',

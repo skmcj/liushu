@@ -61,6 +61,32 @@ export const loginEmployeeApi = function(username, password) {
 }
 
 /**
+ * 获取商家TIM签名公钥
+ * @param {*} storeId 商家ID
+ * @returns
+ */
+export const getStoreSigApi = function(storeId) {
+  return request.get('/business/im/sig', {
+    params: {
+      storeId
+    }
+  });
+}
+
+/**
+ * 验证员工Token是否有效
+ * @param {*} token 员工Token
+ * @returns
+ */
+export const validateEmployeeTokenApi = function(token) {
+  return request.get('/business/validate/token', {
+    params: {
+      token
+    }
+  });
+}
+
+/**
  * 修改员工状态
  * @returns
  */

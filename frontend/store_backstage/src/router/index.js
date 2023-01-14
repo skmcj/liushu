@@ -244,8 +244,8 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  // base: process.env.BASE_URL,
-  base: process.env.NODE_ENV === 'development' ? process.env.BASE_URL : '/store/',
+  base: process.env.BASE_URL,
+  // base: process.env.NODE_ENV === 'development' ? process.env.BASE_URL : '/store/',
   routes
 });
 

@@ -3,6 +3,10 @@ import App from './App.vue';
 import router from './router';
 import store from '@/store';
 import md5 from 'js-md5';
+// TIM
+import tim from '@/packages/tim-sdk/tim';
+import TIM from '@/packages/tim-sdk/tim-js-friendship';
+
 import { Message } from 'element-ui';
 
 // 引入项目图标库
@@ -24,7 +28,12 @@ Vue.prototype.$staticUrl = 'http://localhost:8080';
    * @param {Function} closeFunc 关闭后执行函数
    * @param {Number} duration 存在时间
    */
-Vue.prototype.$showMsgs = function(msg, { type = 'info', isClose = true, closeFunc = () => {}, duration = 1200 } = {}) {
+Vue.prototype.$showMsgs = function(msg, {
+  type = 'info',
+  isClose = true,
+  closeFunc = () => {},
+  duration = 1200
+} = {}) {
   Message({
     message: msg,
     type: type,
@@ -33,6 +42,46 @@ Vue.prototype.$showMsgs = function(msg, { type = 'info', isClose = true, closeFu
     duration: duration
   });
 }
+
+/**
+ * 判断传入对象是否为空
+ * @param {Object} obj 一个对象
+ * @returns 布尔结果
+ */
+Vue.prototype.$isEmpty = function(obj) {
+  let str = JSON.stringify(obj);
+  let flag = false;
+  switch(str) {
+    case '""':
+      flag = true;
+      break;
+    case '[]':
+      flag = true;
+      break;
+    case '{}':
+      flag = true;
+      break;
+    case 'null':
+      flag = true;
+      break;
+    case undefined:
+      flag = true;
+      break;
+  }
+  return flag;
+}
+
+/**
+ * TIM 服务
+ */
+window.tim = tim;
+window.TIM = TIM;
+
+Vue.prototype.tim = tim;
+Vue.prototype.TIM = TIM;
+Vue.prototype.$bus = new Vue();
+// 图床域名
+Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
 
 const Root = new Vue({
   router,

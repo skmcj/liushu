@@ -2,6 +2,7 @@ package top.skmcj.liushu.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import top.skmcj.liushu.vo.ExamineBusinessVo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,6 +216,36 @@ public class BusinessController {
         // 登录成功后
         // 判断所属店铺是否已经审核通过，通过则执行下列，未通过则登录失败，返回提示
         // 如果所属店铺审核资料未提交且所登录员工权限为店长，转到审核资料填写界面(前端实现，后端返回相应状态)
+    }
+
+
+    /**
+     * 获取TIM 服务的 StoreSig
+     * @param storeId
+     * @return
+     */
+    @GetMapping("/im/sig")
+    public Result<String> getStoreSig(@RequestParam String storeId) {
+        String storeSig = TLSSigUtil.genUserSig(storeId);
+        return Result.success(storeSig, StatusCodeEnum.GET_OK);
+    }
+
+    /**
+     * 校验员工token
+     * @param token
+     * @return
+     */
+    @GetMapping("/validate/token")
+    public Result<Map> validateToken(@RequestParam String token) throws Exception {
+        // System.out.println(token);
+        DecodedJWT verify = JwtUtil.verifyToken(token);
+        if(!verify.getClaim("type").asString().equals("employee")) {
+            throw new JWTDecodeException("无法解析为员工对象");
+        }
+        Map<String, String> data = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        data.put("expiresAt", sdf.format(verify.getExpiresAt()));
+        return Result.success(data, StatusCodeEnum.JWT_OK);
     }
 
     /**

@@ -12,7 +12,7 @@
     <!-- 右边信息区域 -->
     <div class="right">
       <!-- 信息按钮 -->
-      <i class="icon fbookfont ic-mess-1"></i>
+      <i class="icon fbookfont ic-mess-1" @click.stop="handleOpenChat"></i>
       <!-- 登录人姓名 -->
       <span class="name">{{ name }}</span>
       <!-- 退出按钮 -->
@@ -70,6 +70,13 @@ export default {
       window.localStorage.removeItem('employeeInfo');
       this.exitDialogVisible = false;
       this.$router.push('/login');
+    },
+    /**
+     * 打开即时通信窗口
+     */
+    handleOpenChat() {
+      this.$store.commit('resetCurrentConversation');
+      this.$bus.$emit('openChatWindow', 'sys');
     }
   }
 };

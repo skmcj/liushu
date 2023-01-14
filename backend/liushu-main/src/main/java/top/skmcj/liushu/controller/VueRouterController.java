@@ -4,6 +4,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.skmcj.liushu.annotation.Unprefix;
+import top.skmcj.liushu.common.enums.FileContentTypeEnum;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -75,6 +76,9 @@ public class VueRouterController {
             // 输入流
             FileInputStream fileInputStream = null;
             ClassPathResource reqPathResource = new ClassPathResource(request.getRequestURI());
+            String type = request.getRequestURI().substring(request.getRequestURI().lastIndexOf(".") + 1);
+            // System.out.println("request uri ==> " + type);
+            this.addContentTypeOfResponse(response, type);
             if(reqPathResource.exists()) {
                 // 路径存在，直接返回
                 if(reqPathResource.getFile().isFile()) {
@@ -105,5 +109,15 @@ public class VueRouterController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 根据文件类型动态添加 Content-Type
+     * @param response
+     */
+    private void addContentTypeOfResponse(HttpServletResponse response, String fileType) {
+        String contentType = FileContentTypeEnum.getTypeOfContentType(fileType);
+        if(contentType == null) return;
+        response.setContentType(contentType);
     }
 }

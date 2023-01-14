@@ -27,6 +27,7 @@ module.exports = {
     'operator-linebreak': 'off',
     'array-bracket-spacing': 'off',
     'space-before-function-paren': 'off',
-    'padded-blocks': 'off'
+    'padded-blocks': 'off',
+    'no-unneeded-ternary': 'off'
   }
 }
