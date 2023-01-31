@@ -43,7 +43,7 @@ request.interceptors.response.use(
               type: 'error',
               onClose: () => {
                 window.localStorage.removeItem('employeeInfo');
-                Vue.$router.replace('/login');
+                Vue.$router.replace('/login').catch(err => {});
               },
               duration: 1500
             });

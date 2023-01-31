@@ -96,8 +96,67 @@
   }
 }
 
+.el-button--primary {
+  color: var(--white);
+  border-color: var(--primary-btn);
+  background-color: var(--primary-btn);
+  &:focus {
+    color: var(--white);
+    border-color: var(--primary-btn);
+    background-color: var(--primary-btn);
+  }
+  &:hover {
+    color: var(--white);
+    border-color: var(--primary-btn-h);
+    background-color: var(--primary-btn-h);
+  }
+  &:active {
+    color: var(--white);
+    border-color: var(--primary-btn-a);
+    background-color: var(--primary-btn-a);
+  }
+  &.danger {
+    color: var(--white);
+    border-color: var(--delete);
+    background-color: var(--delete);
+    &:focus {
+      color: var(--white);
+      border-color: var(--delete);
+      background-color: var(--delete);
+    }
+    &:hover {
+      color: var(--white);
+      border-color: var(--delete-btn-h);
+      background-color: var(--delete-btn-h);
+    }
+    &:active {
+      color: var(--white);
+      border-color: var(--delete-btn-a);
+      background-color: var(--delete-btn-a);
+    }
+  }
+  &.is-disabled {
+    &,
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: var(--primary-btn-d);
+      border-color: var(--primary-btn-d);
+    }
+  }
+}
+
 /* Element-UI相关样式
 ---------------------- */
+
+// el-textarea
+.el-textarea {
+  .el-textarea__inner {
+    &:focus {
+      border-color: var(--primary);
+    }
+  }
+}
 
 // dialog 弹窗
 .el-dialog {

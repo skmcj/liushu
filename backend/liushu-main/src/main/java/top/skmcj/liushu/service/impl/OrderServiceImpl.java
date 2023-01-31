@@ -102,26 +102,49 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 获取商家订单数据
      * @param pageVo
      * @param storeId
+     * 1 - 待付款 payStatus: 0 - 不获取未付款订单(暂时与商家无关)
+     * 2 - 待配送 status: 0、1
+     * 3 - 待归还 status: 2、3、6
+     * 4 - 待评价 status: 4
+     * 5 - 已完成 status: 5、7
+     * 6 - 退款/售后 status: 8
      * @return
      */
     @Override
-    public Page getOrderPage(OrderPageVo pageVo, Long storeId) {
+    public Page<OrderDto> getOrderPage(OrderPageVo pageVo, Long storeId, String imgDoMain) {
+        Page<OrderDto> orderDtoPage = new Page<>();
         // 构建分页构造器
-        Page pageInfo = new Page(pageVo.getPage(), pageVo.getPageSize());
+        Page<Order> orderPage = new Page(pageVo.getPage(), pageVo.getPageSize());
         // 构建条件构造器
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         // 添加条件
         queryWrapper.eq(Order::getStoreId, storeId);
+        // 值获取已付款订单
+        queryWrapper.eq(Order::getPayStatus, 1);
 
         queryWrapper.eq(pageVo.getStatus() != null, Order::getStatus, pageVo.getStatus());
         queryWrapper.like(StringUtils.isNotEmpty(pageVo.getConsignee()), Order::getConsignee, pageVo.getConsignee());
-        queryWrapper.like(StringUtils.isNotEmpty(pageVo.getNumber()), Order::getNumber, pageVo.getNumber());
+        queryWrapper.eq(StringUtils.isNotEmpty(pageVo.getNumber()), Order::getNumber, pageVo.getNumber());
         queryWrapper.like(StringUtils.isNotEmpty(pageVo.getPhone()), Order::getPhone, pageVo.getPhone());
         queryWrapper.like(StringUtils.isNotEmpty(pageVo.getAddress()), Order::getAddress, pageVo.getAddress());
 
-        this.page(pageInfo, queryWrapper);
+        queryWrapper.orderByDesc(Order::getUpdateTime);
 
-        return pageInfo;
+        this.page(orderPage, queryWrapper);
+        List<Order> orders = orderPage.getRecords();
+        List<OrderDto> orderDtos = null;
+        if (orders != null) {
+            // 封装为 OrderDto
+            orderDtos = orders.stream().map(item -> {
+                OrderDto orderDto = getOrderDtoByOrder(item, imgDoMain);
+                return orderDto;
+            }).collect(Collectors.toList());
+        }
+        orderDtoPage.setRecords(orderDtos);
+        orderDtoPage.setTotal(orderPage.getTotal());
+        orderDtoPage.setSize(orderPage.getSize());
+        orderDtoPage.setCurrent(orderPage.getCurrent());
+        return orderDtoPage;
     }
 
     /**
@@ -905,7 +928,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *  3 - 待归还 status: 2、3、6
      *  4 - 待评价 status: 4
      *  5 - 已完成 status: 5、7
-     *  5 - 退款/售后 status: 8
+     *  6 - 退款/售后 status: 8
      * @return
      */
     private LambdaQueryWrapper<Order> getOrderWrapperByStatus(Long userId, int status) {

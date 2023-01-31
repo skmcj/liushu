@@ -50,4 +50,36 @@
     --delete-btn-a: #E07C7C;
     /* shadow阴影色 */
     --grayish: #BABECC;
+    /* 按钮色 */
+    --detail-btn: #83CCD2;
+    --detail-btn-h: #9CD6DB;
+    --detail-btn-a: #7EC4C9;
+
+    --delivery-btn: #FEDC5E;
+    --delivery-btn-h: #FEE37E;
+    --delivery-btn-a: #EBCB57;
+
+    --receipt-btn: #99BCAC;
+    --receipt-btn-h: #ADC9BD;
+    --receipt-btn-a: #91B3A3;
+
+    --recycle-btn: #68945C;
+    --recycle-btn-h: #86A97D;
+    --recycle-btn-a: #618A56;
+
+    --reply-btn: #A67EB7;
+    --reply-btn-h: #B898C5;
+    --reply-btn-a: #9D77AD;
+
+    --complete-btn: #98D98E;
+    --complete-btn-h: #ADE1A5;
+    --complete-btn-a: #91CF87;
+
+    --overdue-btn: #D0576B;
+    --overdue-btn-h: #D97989;
+    --overdue-btn-a: #C95468;
+
+    --after-sales-btn: #686A67;
+    --after-sales-btn-h: #868885;
+    --after-sales-btn-a: #626361;
 }

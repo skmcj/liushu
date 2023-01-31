@@ -53,11 +53,12 @@ public class OrderController {
      * @return
      */
     @GetMapping("/page")
-    public Result<Page> getOrderPage(OrderPageVo pageVo, HttpServletRequest request) throws Exception {
+    public Result<Page<OrderDto>> getOrderPage(OrderPageVo pageVo, HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization");
         // 当前登录用户token信息
         Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
-        Page orderPage = orderService.getOrderPage(pageVo, lEmployee.getStoreId());
+        String imgDoMain = CommonUtil.getImgDoMain(request);
+        Page<OrderDto> orderPage = orderService.getOrderPage(pageVo, lEmployee.getStoreId(), imgDoMain);
         return Result.success(orderPage);
     }
 
@@ -138,7 +139,7 @@ public class OrderController {
         // 获取订单对象
         Order mOrder = orderService.getById(order.getId());
         if(mOrder == null) return Result.error("查无相关订单");
-        // 订单不是 4-已上门，不可确认完成
+        // 订单不是 4-已上门 或 6-逾期中，不可确认完成
         if(!mOrder.getStatus().equals(4)) return Result.error("订单状态异常，不可确认完成");
         // 预约归还时间与当前时间差值
         long dValue = TimeUtil.compareToDay(mOrder.getRecycleTime(), LocalDateTime.now());
@@ -317,6 +318,26 @@ public class OrderController {
         // 退款
         orderService.refundOfOrder(order.getId());
         return Result.success("订单退款成功");
+    }
+
+    /**
+     * 修改订单可续借时长
+     * @param order
+     * @return
+     */
+    @PutMapping("/renew")
+    public Result<String> updateRenewDurationOfOrder(@RequestBody Order order) {
+        // 获取订单数据
+        Order mOrder = orderService.getById(order.getId());
+        if(mOrder == null) return Result.error("查无相关订单");
+        // 订单未售后，不可退款
+        if(mOrder.getStatus() > 2) return Result.error("订单状态异常，不可更改");
+        Order sOrder = new Order();
+        sOrder.setId(order.getId());
+        sOrder.setRenewDuration(order.getRenewDuration());
+        boolean flag = orderService.updateById(sOrder);
+        if(!flag) return Result.error("续借时长更改失败");
+        return Result.success("续借时长更改成功");
     }
 
 }

@@ -243,6 +243,8 @@ public class FrontendOrderController {
         if (!payPass.equals(orderPayVo.getPayPass())) return Result.error(StatusCodeEnum.ORDER_PAY_PASS_ERR);
         boolean payFlag = orderService.payOrder(orderPayVo.getOrderId());
         if (!payFlag) return Result.error(StatusCodeEnum.ORDER_PAY_ERR);
+        // 取消监听订单
+        TimingWheelUtil.cancelTimeoutTask(orderPayVo.getOrderId());
         // 扣除相应余额
         UserInfo moneyInfo = new UserInfo();
         moneyInfo.setId(userInfo.getId());

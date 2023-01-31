@@ -63,7 +63,7 @@ export default {
           this.$showMsgs('Token已过期，请重新登录', {
             type: 'warning',
             closeFunc: () => {
-              this.$router.replace('/login');
+              this.$router.replace('/login').catch(err => {});
             }
           });
         }
