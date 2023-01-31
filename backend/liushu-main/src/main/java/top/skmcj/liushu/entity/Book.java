@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -99,6 +100,11 @@ public class Book implements Serializable {
      * 总借阅量
      */
     private Integer tba;
+
+    /**
+     * 评分
+     */
+    private BigDecimal score;
 
     /**
      * 创建时间

@@ -52,7 +52,7 @@ public class Bookstore implements Serializable {
     /**
      * 评分
      */
-    private String score;
+    private BigDecimal score;
 
     /**
      * 店铺地址

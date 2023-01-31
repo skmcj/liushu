@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import top.skmcj.liushu.common.GlobalData;
+import top.skmcj.liushu.common.task.order.OrderMonthlyTask;
 import top.skmcj.liushu.common.task.service.OrderHandleTask;
 import top.skmcj.liushu.util.GlobalDataUtil;
 
@@ -28,6 +29,9 @@ public class ScheduledTask {
     @Autowired
     private OrderHandleTask orderHandleTask;
 
+    @Autowired
+    private OrderMonthlyTask orderMonthlyTask;
+
     /**
      * 每月 1 号 00:00:00 执行
      */
@@ -37,6 +41,7 @@ public class ScheduledTask {
         log.info("每月任务执行 =>" + System.currentTimeMillis());
         // 统计前一个月订单，计算各个图书的月借阅量及总借阅量
         // 统计前一个月订单，计算各个商家的月借阅量
+        orderMonthlyTask.handleOrderMonthly();
     }
 
     /**

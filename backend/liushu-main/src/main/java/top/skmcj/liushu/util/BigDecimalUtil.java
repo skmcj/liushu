@@ -131,6 +131,17 @@ public class BigDecimalUtil {
     }
 
     /**
+     * 除 - 评分
+     * @param totalScore
+     * @param count
+     * @return
+     */
+    public static BigDecimal divideScore(BigDecimal totalScore, Integer count) {
+        BigDecimal dCount = new BigDecimal(count);
+        return totalScore.divide(dCount).setScale(1, RoundingMode.HALF_DOWN);
+    }
+
+    /**
      * a > b
      * a 大于 b
      * @param a
