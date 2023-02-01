@@ -148,8 +148,7 @@
 <script>
 import BarChart from '@/components/Chart/BarChart';
 import ToolBox from '@/components/Common/ToolBox';
-import { getOrderQuantityApi } from '@/api/orderApi';
-import { getBookRankApi } from '@/api/bookApi';
+import { getOrderQuantityApi, getBookRankApi } from '@/api/orderApi';
 import { getStoreInfoApi, editStoreStatusApi } from '@/api/shopApi';
 import chartHandler from '@/utils/chartDataHandler';
 
@@ -283,7 +282,9 @@ export default {
      */
     getOrderChartOption() {
       getOrderQuantityApi().then(res => {
-        this.orderOption = chartHandler.packingOrderData(res.data);
+        if (res.data.flag) {
+          this.orderOption = chartHandler.packingOrderData(res.data.data);
+        }
       });
     },
     /**
@@ -291,8 +292,9 @@ export default {
      */
     refreshOrderChart() {
       getOrderQuantityApi().then(res => {
-        res.data[3][1] -= 12;
-        this.orderOption.dataset.source = res.data;
+        if (res.data.flag) {
+          this.orderOption.dataset.source = res.data.data;
+        }
       });
     },
     /**
@@ -300,7 +302,9 @@ export default {
      */
     getBookRankChart() {
       getBookRankApi().then(res => {
-        this.bookRankOption = chartHandler.packingBookRank(res.data);
+        if (res.data.flag) {
+          this.bookRankOption = chartHandler.packingBookRank(res.data.data);
+        }
       });
     },
     /**
@@ -309,8 +313,9 @@ export default {
     refreshBookRankChart() {
       // vue的watch似乎无法监听嵌套对象的多维数组元素的值变化
       getBookRankApi().then(res => {
-        res.data.data[4][1] += 50;
-        this.bookRankOption.dataset.source = res.data.data;
+        if (res.data.flag) {
+          this.bookRankOption.dataset.source = res.data.data.data;
+        }
       });
     },
     /**

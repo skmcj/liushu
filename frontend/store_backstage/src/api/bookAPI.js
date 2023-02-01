@@ -18,13 +18,6 @@ export const getBookPageApi = function(param) {
 }
 
 /**
- * 获取图书借阅榜信息
- */
-export const getBookRankApi = function() {
-  return request.get('/mockdata/bookrank.json');
-}
-
-/**
  * 根据id获取图书信息
  * @param {*} id
  * @returns

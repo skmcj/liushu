@@ -161,5 +161,13 @@ export const getOrdersTestApi = function(param) {
 }
 
 export const getOrderQuantityApi = function() {
-  return request.get('/mockdata/orderData.json');
+  return request.get('/order/od/week/2');
+}
+
+
+/**
+ * 获取图书借阅榜信息
+ */
+export const getBookRankApi = function() {
+  return request.get('/order/ba/top10');
 }

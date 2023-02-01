@@ -7,13 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import top.skmcj.liushu.bo.BookChartDataBo;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.dto.OrderDto;
 import top.skmcj.liushu.entity.AfterSales;
+import top.skmcj.liushu.entity.Book;
 import top.skmcj.liushu.entity.Employee;
 import top.skmcj.liushu.entity.Order;
 import top.skmcj.liushu.service.AfterSalesService;
+import top.skmcj.liushu.service.BookService;
 import top.skmcj.liushu.service.OrderService;
 import top.skmcj.liushu.util.CommonUtil;
 import top.skmcj.liushu.util.JwtUtil;
@@ -22,6 +25,9 @@ import top.skmcj.liushu.vo.OrderPageVo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/order")
@@ -32,6 +38,9 @@ public class OrderController {
 
     @Autowired
     private AfterSalesService asService;
+
+    @Autowired
+    private BookService bookService;
 
     @Value("${liushu.order.confirm-buff-day}")
     private int confirmBuffDay;
@@ -338,6 +347,87 @@ public class OrderController {
         boolean flag = orderService.updateById(sOrder);
         if(!flag) return Result.error("续借时长更改失败");
         return Result.success("续借时长更改成功");
+    }
+
+    /**
+     * 获取近14天商家订单数据
+     * @param request
+     * @return
+     */
+    @GetMapping("/od/week/2")
+    public Result<List<List>> getODOfNearly2Week(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        List<List> data = new ArrayList<>();
+        LocalDateTime start = TimeUtil.todayStartTime();
+        LocalDateTime end = TimeUtil.todayEndTime();
+        for(int i = 0; i < 14; i++) {
+            LocalDateTime nStart = start.minusDays(13 - i);
+            LocalDateTime nEnd = end.minusDays(13 - i);
+            LambdaQueryWrapper<Order> orderWrapper = new LambdaQueryWrapper<>();
+            orderWrapper.eq(Order::getStoreId, lEmployee.getStoreId());
+            orderWrapper.ge(Order::getCreateTime, nStart);
+            orderWrapper.le(Order::getCreateTime, nEnd);
+            int count = (int) orderService.count(orderWrapper);
+            List item = new ArrayList();
+            String dateStr = nStart.getMonthValue() + "." + nStart.getDayOfMonth();
+            item.add(dateStr);
+            item.add(count);
+            data.add(item);
+        }
+        return Result.success(data);
+    }
+
+    /**
+     * 获取商家图书借阅版Top10
+     * @param request
+     * @return
+     */
+    @GetMapping("/ba/top10")
+    public Result<BookChartDataBo> getBookOfTop10(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        // 当前登录用户token信息
+        Employee lEmployee = JwtUtil.verifyTokenOfEmployee(token);
+        LambdaQueryWrapper<Book> bookWrapper = new LambdaQueryWrapper<>();
+        bookWrapper.eq(Book::getStoreId, lEmployee.getStoreId());
+        bookWrapper.orderByDesc(Book::getTba);
+        bookWrapper.orderByDesc(Book::getMba);
+        bookWrapper.orderByDesc(Book::getUpdateTime);
+        bookWrapper.last("LIMIT 10");
+        List<Book> books = bookService.list(bookWrapper);
+        BookChartDataBo data = new BookChartDataBo();
+        data.setMax(books.get(0).getTba());
+        Book firstBook = books.get(0);
+        Book lastBook = books.get(books.size() - 1);
+        if(firstBook.getTba() != null) {
+            data.setMax(firstBook.getTba());
+        } else if(firstBook.getMba() != null) {
+            data.setMax(firstBook.getMba());
+        } else {
+            data.setMax(0);
+        }
+        if(lastBook.getTba() != null) {
+            data.setMin(lastBook.getTba());
+        } else if(lastBook.getMba() != null) {
+            data.setMin(lastBook.getMba());
+        } else {
+            data.setMin(0);
+        }
+        List<List> list = books.stream().map(item -> {
+            List book = new ArrayList();
+            book.add(item.getName());
+            if(item.getTba() != null) {
+                book.add(item.getTba());
+            } else if(item.getMba() != null) {
+                book.add(item.getMba());
+            } else {
+                book.add(0);
+            }
+            return book;
+        }).collect(Collectors.toList());
+        data.setData(list);
+        return Result.success(data);
     }
 
 }
