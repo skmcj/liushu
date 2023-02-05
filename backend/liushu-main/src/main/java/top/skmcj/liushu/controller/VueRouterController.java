@@ -30,6 +30,8 @@ public class VueRouterController {
             // 输入流
             FileInputStream fileInputStream = null;
             ClassPathResource reqPathResource = new ClassPathResource(request.getRequestURI());
+            String type = request.getRequestURI().substring(request.getRequestURI().lastIndexOf(".") + 1);
+            this.addContentTypeOfResponse(response, type);
             if(reqPathResource.exists()) {
                 // 路径存在，直接返回
                 if(reqPathResource.getFile().isFile()) {

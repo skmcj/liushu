@@ -32,6 +32,7 @@ import MineComment from '@/views/Mine/MineComment';
 import Settlement from '@/views/Common/Settlement';
 import Agreement from '@/views/Common/Agreement';
 import PrivacyPolicy from '@/views/Common/PrivacyPolicy';
+import NotFound from '@/views/NotFound/NotFound';
 
 Vue.use(VueRouter)
 
@@ -353,6 +354,18 @@ const routes = [
         meta: {
           title: '结算页面',
           rootLink: '/settlement'
+        }
+      },
+      {
+        path: '*',
+        name: 'notFound',
+        component: NotFound,
+        meta: {
+          title: '404 NotFound',
+          head: 'NotFound',
+          asideItemIndex: '/404',
+          returnFlag: false,
+          noVerify: true
         }
       }
     ]

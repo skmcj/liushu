@@ -32,6 +32,8 @@ Vue.prototype.$md5 = md5;
 // 将sha256绑定到vue上
 Vue.prototype.$sha256 = sha256;
 
+Vue.prototype.$storeUrl = '/store';
+
 /** 封装使用率高的工具函数 */
 /**
    * 封装$message

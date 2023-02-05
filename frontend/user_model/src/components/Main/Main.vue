@@ -54,7 +54,10 @@ export default {
     /**
      * 进入商家入口
      */
-    gotoStore() {},
+    gotoStore() {
+      window.open(this.$storeUrl);
+      // this.$router.push('/404');
+    },
     /**
      * 退出登录
      */
