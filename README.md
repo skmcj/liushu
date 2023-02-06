@@ -96,6 +96,16 @@ sql                                 -- 项目数据库
 
 ## 部署配置
 
+### 前端配置
+
+
+
+### 后端配置
+
+主要为`application.yml`
+
+
+
 后续完善
 
 ## 项目截图
@@ -117,6 +127,12 @@ sql                                 -- 项目数据库
 ![商家模块店铺](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608632114.png)
 
 ![商家模块图书](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608653729.png)
+
+### 邮件
+
+![验证码邮件](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675666221489.png)
+
+![审核状态邮件](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675666266369.png)
 
 ## 声明
 
