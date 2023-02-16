@@ -6,7 +6,7 @@
         <span class="link" @click="gotoStore">我是商家</span>
         <span v-if="$store.state.loginFlag" class="link" @click="logout">退出登录</span>
       </div>
-      <Header :is-login="$store.state.loginFlag" :avatar-url="$store.state.userInfo.avatarUrl" />
+      <Header :is-login="$store.state.loginFlag" :avatar-url="$store.state.userInfo.avatarUrl" @search="handleSearch" />
     </div>
     <!-- 主要显示内容 -->
     <div class="main">
@@ -164,6 +164,19 @@ export default {
             type: 'error'
           });
         });
+    },
+    /**
+     * 搜索
+     */
+    handleSearch(val) {
+      // console.log('search', val);
+      // this.$store.dispatch('setSearchContent', val);
+      this.$bus.$emit('searchBook', val);
+      this.$bus.$emit('searchShop', val);
+      this.$store.dispatch('setKeyword', val);
+      if (this.$route.meta.rootLink !== '/search') {
+        this.$router.push('/search/book').catch(err => {});
+      }
     }
   },
   computed: {

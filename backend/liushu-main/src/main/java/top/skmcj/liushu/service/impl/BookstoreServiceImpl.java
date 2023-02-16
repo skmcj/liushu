@@ -1,7 +1,9 @@
 package top.skmcj.liushu.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -120,5 +122,21 @@ public class BookstoreServiceImpl extends ServiceImpl<BookstoreMapper, Bookstore
         bookstore.setIncome(BigDecimalUtil.add(store.getIncome(), rIncome));
         boolean flag = this.updateById(bookstore);
         return flag;
+    }
+
+    /**
+     * 搜索商家
+     * @param keyword
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<Bookstore> searchStorePage(String keyword, int currentPage, int pageSize) {
+        Page<Bookstore> page = new Page<>(currentPage, pageSize);
+        LambdaQueryWrapper<Bookstore> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotEmpty(keyword), Bookstore::getStoreName, keyword);
+        this.page(page, wrapper);
+        return page;
     }
 }

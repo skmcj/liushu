@@ -1,5 +1,6 @@
 package top.skmcj.liushu.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.skmcj.liushu.dto.BookstoreDto;
 import top.skmcj.liushu.entity.Bookstore;
@@ -14,4 +15,6 @@ public interface BookstoreService extends IService<Bookstore> {
     BookstoreDto getStoreMessById(Long storeId);
 
     boolean addIncome(Long storeId, BigDecimal income);
+
+    Page<Bookstore> searchStorePage(String keyword, int currentPage, int pageSize);
 }

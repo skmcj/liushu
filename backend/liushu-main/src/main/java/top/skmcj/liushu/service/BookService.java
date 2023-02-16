@@ -44,4 +44,6 @@ public interface BookService extends IService<Book> {
 
     Page<BookCardDto> getBookPageBySearchOfStore(Long storeId, String text, int currentPage, int pageSize);
 
+    Page<BookCardDto> searchBookOfGlobal(String keyword, int currentPage, int pageSize);
+
 }

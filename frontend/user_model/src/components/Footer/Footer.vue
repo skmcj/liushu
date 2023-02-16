@@ -17,17 +17,17 @@
         <!-- 链接组 -->
         <div class="link-group">
           <span class="link" @click="handleLink('/cate')">分类图书</span>
-          <span class="link" @click="handleLink('/logon')">商家入驻</span>
+          <span class="link" @click="handleLink($storeUrl)">商家入驻</span>
         </div>
         <div class="link-group">
-          <span class="link" @click="handleLink('/about/intro')">本站简介</span>
-          <span class="link" @click="handleLink('/about/')">关于我们</span>
-          <span class="link" @click="handleLink('/about/contact')">联系我们</span>
+          <span class="link" @click="handleLink('/about/profile')">本站简介</span>
+          <span class="link" @click="handleLink('/about/our')">联系我们</span>
+          <span class="link" @click="handleLink('/about/link')">友情链接</span>
         </div>
         <div class="link-group">
-          <span class="link" @click="handleLink('/about/issue')">常见问题</span>
+          <span class="link" @click="handleLink('/about/problem')">常见问题</span>
           <span class="link" @click="handleLink('/agreement')">服务协议</span>
-          <span class="link" @click="handleLink('/privacy')">隐私政策</span>
+          <span class="link" @click="handleLink('/privacy_policy')">隐私政策</span>
         </div>
       </div>
     </div>
@@ -52,7 +52,7 @@ export default {
   methods: {
     // 点击站内链接
     handleLink(link) {
-      // this.$router.push(link);
+      this.$router.push(link).catch(err => {});
     }
   }
 };

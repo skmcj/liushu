@@ -94,6 +94,7 @@ export default {
     handleSearch() {
       if (this.isShow) {
         // console.log(this.searchContent);
+        this.$emit('search', this.searchContent);
       } else {
         this.isShow = true;
       }

@@ -32,18 +32,18 @@
           </div>
         </div>
       </div>
-      <el-pagination
-        class="page-tool"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[9, 12, 15, 20]"
-        :page-size="pageSize"
-        hide-on-single-page
-        layout="total, sizes, prev, pager, next"
-        :total="total">
-      </el-pagination>
     </div>
+    <el-pagination
+      class="page-tool"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[9, 12, 15, 20]"
+      :page-size="pageSize"
+      hide-on-single-page
+      layout="total, sizes, prev, pager, next"
+      :total="total">
+    </el-pagination>
   </div>
 </template>
 
@@ -115,7 +115,6 @@ export default {
     width: 100%;
     box-sizing: border-box;
     padding: 0 18px;
-    padding-bottom: 120px;
     display: grid;
     justify-content: space-between;
     row-gap: 16px;
@@ -213,5 +212,8 @@ export default {
 .page-tool {
   margin: auto;
   margin-top: 24px;
+}
+.mine-coll {
+  padding-bottom: 120px;
 }
 </style>

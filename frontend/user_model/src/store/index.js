@@ -45,6 +45,10 @@ const actions = {
   setToken(context, value) {
     // 'setToken' 是mutations中相应操作的名称
     context.commit('setToken', value);
+  },
+  // keyword
+  setKeyword(context, value) {
+    context.commit('setKeyword', value);
   }
 };
 // 准备mutations -> 用于操作数据(state)
@@ -99,6 +103,11 @@ const mutations = {
       duration: options.duration || 2000,
       offset: 40
     });
+  },
+  // 设置全局搜索关键词
+  setKeyword(state, value) {
+    sessionStorage.setItem('keyword', JSON.stringify(value));
+    state.keyword = value;
   }
 };
 // 准备state -> 用于存储数据
@@ -119,7 +128,9 @@ const state = {
   // TIM 相关
   current: Date.now(), // 当前时间
   intervalID: 0,
-  message: undefined
+  message: undefined,
+  // 全局搜索
+  keyword: ''
 };
 
 const getters = {

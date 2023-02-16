@@ -33,6 +33,9 @@ import Settlement from '@/views/Common/Settlement';
 import Agreement from '@/views/Common/Agreement';
 import PrivacyPolicy from '@/views/Common/PrivacyPolicy';
 import NotFound from '@/views/NotFound/NotFound';
+import Search from '@/views/Search/Search';
+import SearchBook from '@/views/Search/SearchBook';
+import SearchShop from '@/views/Search/SearchShop';
 
 Vue.use(VueRouter)
 
@@ -355,6 +358,38 @@ const routes = [
           title: '结算页面',
           rootLink: '/settlement'
         }
+      },
+      {
+        path: '/search',
+        name: 'search',
+        component: Search,
+        meta: {
+          title: '流书网',
+          rootLink: '/search'
+        },
+        children: [
+          {
+            path: 'book',
+            name: 'searchBook',
+            component: SearchBook,
+            alias: ['/', '/book'],
+            meta: {
+              title: '搜索图书',
+              rootLink: '/search',
+              nav: 'book'
+            }
+          },
+          {
+            path: 'shop',
+            name: 'searchShop',
+            component: SearchShop,
+            meta: {
+              title: '搜索商家',
+              rootLink: '/search',
+              nav: 'shop'
+            }
+          }
+        ]
       },
       {
         path: '*',
