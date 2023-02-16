@@ -137,3 +137,12 @@ export const getTIMUserSigApi = function(userId) {
     }
   });
 }
+
+/**
+ * 为用户本地账户充值金额
+ * @param {{cardNumber: String, money: Number, payPass: String}} form 表单信息
+ * @returns
+ */
+export const rechargeOfUserApi = function(form) {
+  return request.post('/user/local/recharge', form);
+}

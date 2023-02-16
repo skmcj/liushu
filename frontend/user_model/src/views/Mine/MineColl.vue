@@ -5,43 +5,66 @@
       <span class="text">我的收藏</span>
       <div class="hr"></div>
     </div>
+    <template v-if="$isEmpty(colls)">
+      <SvgPage name="no-content" :img-width="480" text="暂无收藏记录" />
+    </template>
     <div class="mine-coll-box">
       <div
         class="coll-item"
-        v-for="(item, index) in collShop"
+        v-for="(item, index) in colls"
         :key="'coll-shop-' + index"
-        @click.stop="handleColl(item.id)">
+        @click.stop="handleColl(item.storeId)">
         <div class="cover">
-          <img :src="$noCoverUrl" alt="cover" />
+          <img :src="item.storeCover ? item.storeCover : $noCoverUrl" alt="cover" />
         </div>
         <div class="mess-box">
           <div class="title">{{ item.storeName }}</div>
           <div class="score">
             <i class="ic-score"></i>
-            <span>{{ item.score }}</span>
+            <span>{{ item.score ? item.score : '暂无' }}</span>
           </div>
           <div class="amount">
             <span class="tit">月借阅：</span>
-            <span>{{ item.amount }}</span>
+            <span>{{ item.mba ? item.mba : '暂无' }}</span>
           </div>
           <div class="lbs" v-if="item.labelList">
             <div class="lb" v-for="(label, index) in item.labelList" :key="'coll-lb-' + index">{{ label }}</div>
           </div>
         </div>
       </div>
+      <el-pagination
+        class="page-tool"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[9, 12, 15, 20]"
+        :page-size="pageSize"
+        hide-on-single-page
+        layout="total, sizes, prev, pager, next"
+        :total="total">
+      </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
+import SvgPage from '@/components/Common/SvgPage';
+import { getCollectionPageApi } from '@/api/collectionApi';
+
 export default {
+  components: {
+    SvgPage
+  },
   data() {
     return {
-      collShop: []
+      colls: [],
+      currentPage: 1,
+      pageSize: 12,
+      total: 0
     };
   },
   created() {
-    this.collShop = this.getShopTest(13);
+    this.getCollectionPage();
   },
   methods: {
     getShopTest(n) {
@@ -57,6 +80,26 @@ export default {
         list.push(shop);
       }
       return list;
+    },
+    getCollectionPage() {
+      getCollectionPageApi(this.currentPage, this.pageSize)
+        .then(res => {
+          if (res.data.flag) {
+            this.colls = res.data.data.records;
+            this.total = res.data.data.total;
+          }
+        })
+        .catch(err => {
+          this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+        });
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+      this.getCollectionPage();
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.getCollectionPage();
     },
     handleColl(id) {
       this.$router.push({ path: '/shop', query: { id } });
@@ -85,6 +128,7 @@ export default {
       border-radius: 8px;
       overflow: hidden;
       background-color: #f7f7f7;
+      box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.16);
       .cover {
         min-width: 140px;
         width: 52%;
@@ -165,5 +209,9 @@ export default {
       grid-template-columns: repeat(4, 270px);
     }
   }
+}
+.page-tool {
+  margin: auto;
+  margin-top: 24px;
 }
 </style>

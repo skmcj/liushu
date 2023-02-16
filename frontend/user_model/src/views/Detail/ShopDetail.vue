@@ -197,6 +197,7 @@ import {
   getBookPageBySearchOfShopApi
 } from '@/api/shopAPi';
 import { getGoodsCateApi } from '@/api/cateApi';
+import { isCollectionApi, addCollectionApi, cancelCollectionApi } from '@/api/collectionApi';
 
 export default {
   components: {
@@ -269,6 +270,7 @@ export default {
       this.getShopDetail();
       this.getBookRank();
       this.getBookPageByHot();
+      this.getShopCollMess();
     },
     /**
      * 监听滚动
@@ -318,6 +320,11 @@ export default {
      */
     handleCollection(flag) {
       console.log('点击收藏 =>', flag);
+      if (this.isColl) {
+        this.cancelCollection();
+      } else {
+        this.addCollection();
+      }
     },
     /**
      * 点击搜索
@@ -443,6 +450,29 @@ export default {
           this.bookRank = res.data.data;
         } else {
           this.$showMsg('榜单获取失败', { type: 'warning' });
+        }
+      });
+    },
+    getShopCollMess() {
+      isCollectionApi(this.storeId).then(res => {
+        if (res.data.flag) {
+          this.isColl = true;
+        } else {
+          this.isColl = false;
+        }
+      });
+    },
+    addCollection() {
+      addCollectionApi(this.storeId).then(res => {
+        if (res.data.flag) {
+          this.isColl = true;
+        }
+      });
+    },
+    cancelCollection() {
+      cancelCollectionApi(this.storeId).then(res => {
+        if (res.data.flag) {
+          this.isColl = false;
         }
       });
     }

@@ -289,8 +289,8 @@
           <div class="title">我的零钱(元)</div>
           <div class="money">{{ $keepTwoNum(userInfo.money) }}</div>
           <div class="btns">
-            <div class="btn grey">充值</div>
-            <div class="btn">提现</div>
+            <div class="btn grey" @click="cardPkgVisible = true">充值</div>
+            <div class="btn" @click="$showMsg('暂未实现，敬请期待')">提现</div>
           </div>
         </div>
         <div class="record-box">
@@ -320,21 +320,61 @@
         <SvgPage name="no-coupon" :img-width="240" text="暂无优惠卷" />
       </div>
     </el-dialog>
+
+    <el-dialog class="card-pkg-dg" title="卡包" :visible.sync="cardPkgVisible" append-to-body :modal="false">
+      <div class="card-pkg-dg-main">
+        <BankCard
+          :card-number="getCardNumber(userInfo.id)"
+          end-year="37"
+          end-month="06"
+          investor="流书网测试账户"
+          :owner="userInfo.nickname"
+          click
+          @onSelect="onSelectCard" />
+        <div class="bank-card-form">
+          <el-form
+            label-position="top"
+            label-width="72px"
+            :model="bankCardForm"
+            :rules="bankCardRules"
+            ref="bankCardForm">
+            <el-form-item label="卡号" prop="cardNumber">
+              <el-input v-model="bankCardForm.cardNumber" placeholder="请输入卡号"></el-input>
+            </el-form-item>
+            <el-form-item label="充值金额" prop="money">
+              <el-input v-model="bankCardForm.money" placeholder="请输入充值金额"></el-input>
+            </el-form-item>
+            <el-form-item label="支付密码" prop="payPass">
+              <el-input
+                type="password"
+                autocomplete="off"
+                v-model="bankCardForm.payPass"
+                placeholder="请输入支付密码"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="onRecharge">充值</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import SvgPage from '@/components/Common/SvgPage';
 import Avatar from '@/components/Chat/Message/Avatar';
+import BankCard from '@/components/Common/BankCard/BankCard';
 import { mapGetters, mapState } from 'vuex';
 import customerSA from '@/assets/images/svg/customer-service.svg';
-import { getUserInfoApi } from '@/api/userApi';
+import { getUserInfoApi, rechargeOfUserApi } from '@/api/userApi';
 import { getAllOrderOgPageApi, getOrderByStatusOfPageApi } from '@/api/orderApi';
 
 export default {
   components: {
     SvgPage,
-    Avatar
+    Avatar,
+    BankCard
   },
   data() {
     return {
@@ -364,7 +404,19 @@ export default {
       ],
       orderList: [],
       currentPage: 1,
-      pageSize: 5
+      pageSize: 5,
+      // 卡包
+      cardPkgVisible: false,
+      bankCardForm: {
+        cardNumber: '',
+        money: '',
+        payPass: ''
+      },
+      bankCardRules: {
+        cardNumber: [{ required: true, message: '请输入卡号', trigger: 'blur' }],
+        money: [{ required: true, message: '请输入充值金额', trigger: 'blur' }],
+        payPass: [{ required: true, message: '请输入支付密码', trigger: 'blur' }]
+      }
     };
   },
   created() {
@@ -592,6 +644,35 @@ export default {
       // 是否显示未读计数。当前会话和未读计数为0的会话，不显示。
       return this.currentConversation.conversationID !== conversation.conversationID && conversation.unreadCount > 0;
     },
+    /**
+     * 充值
+     */
+    onRecharge() {
+      this.$refs.bankCardForm.validate(valid => {
+        if (valid) {
+          let card = {
+            cardNumber: this.bankCardForm.cardNumber,
+            money: this.bankCardForm.money,
+            payPass: this.$sha256(this.bankCardForm.payPass)
+          };
+          console.log(card);
+          rechargeOfUserApi(card)
+            .then(res => {
+              if (res.data.flag) {
+                this.userInfo.money = res.data.data;
+                this.$showMsg('充值成功', { type: 'success' });
+                this.cardPkgVisible = false;
+              }
+            })
+            .catch(err => {
+              this.$showMsg('网络繁忙，请稍后重试', { type: 'error' });
+            });
+        }
+      });
+    },
+    onSelectCard(card) {
+      this.bankCardForm.cardNumber = card.cardNumber;
+    },
     getRecordsTest(n) {
       let list = [];
       for (let i = 0; i < n; i++) {
@@ -605,6 +686,24 @@ export default {
         list.push(record);
       }
       return list;
+    },
+    getTimeStr(dateStr, text, count = 2) {
+      let date = new Date(dateStr);
+      if (text === 'year') {
+        return date
+          .getFullYear()
+          .toString()
+          .slice(count * -1);
+      }
+      if (text === 'month') {
+        return (date.getMonth() + 1).toString().padStart(count, '0');
+      }
+      if (text === 'day') {
+        return date.getDate().toString().padStart(count, '0');
+      }
+    },
+    getCardNumber(numStr) {
+      return String(numStr).substr(1, 16);
     }
   },
   computed: {
@@ -1440,6 +1539,22 @@ export default {
     }
     & + .conversation-item {
       margin-top: 8px;
+    }
+  }
+}
+.card-pkg-dg {
+  .card-pkg-dg-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px 36px;
+  }
+  .bank-card-form {
+    flex-grow: 1;
+  }
+  @media (max-width: 1280px) {
+    .card-pkg-dg-main {
+      flex-direction: column;
     }
   }
 }

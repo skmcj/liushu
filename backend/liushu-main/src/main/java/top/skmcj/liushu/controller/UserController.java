@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import top.skmcj.liushu.bo.RechargeBo;
 import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.common.task.service.OrderHandleTask;
@@ -19,6 +20,7 @@ import top.skmcj.liushu.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +43,12 @@ public class UserController {
 
     @Value("${liushu.captcha.time}")
     private int mailTime;
+
+    @Value("${liushu.user.recharge-mode}")
+    private String rechargeMode;
+
+    @Value("${liushu.user.single-max}")
+    private BigDecimal singleMax;
 
     /**
      * 用户登录
@@ -436,6 +444,46 @@ public class UserController {
     public Result<String> getUserSig(@RequestParam String userId) {
         String userSig = TLSSigUtil.genUserSig(userId);
         return Result.success(userSig, StatusCodeEnum.GET_OK);
+    }
+
+
+    /**
+     * 充值指定金额到本地账户
+     * 用以实现用户账户金额的增加
+     *   - 也可通过引入一个任务系统，用户通过做任务(广告)积累
+     * @param request
+     * @return
+     */
+    @PostMapping("/local/recharge")
+    public Result<BigDecimal> rechargeOfUser(@RequestBody RechargeBo rechargeBo, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization");
+        User user = JwtUtil.verifyTokenOfUser(token);
+        LambdaQueryWrapper<UserInfo> infoWrapper = new LambdaQueryWrapper<>();
+        infoWrapper.eq(UserInfo::getUserId, user.getId());
+        UserInfo userInfo = userInfoService.getOne(infoWrapper);
+        if(rechargeMode.equals("infinite")) {
+            // 无限模式，用户输入多少给多少
+            if(BigDecimalUtil.gt(rechargeBo.getMoney(), singleMax)) return Result.error("单次充值金额过多");
+            // 校验支付密码
+            if(userInfo.getPayPass() == null) return Result.error("用户尚未设置支付密码");
+            if(!userInfo.getPayPass().equals(rechargeBo.getPayPass())) return Result.error("支付密码错误");
+            // 无效模式不校验卡号
+            // 充值，修改用户账户余额
+            UserInfo pInfo = new UserInfo();
+            pInfo.setId(userInfo.getId());
+            pInfo.setMoney(BigDecimalUtil.add(userInfo.getMoney(), rechargeBo.getMoney()));
+            boolean flag = userInfoService.updateById(pInfo);
+            if(!flag) return Result.error("充值失败");
+        } else {
+            return Result.error("未知错误");
+        }
+        /**
+         * 后期可模拟实现用户银行卡系统
+         * 新建一个银行卡表，记录卡信息
+         * limit 有限模式，即只能充值不超过用户银行里的金额，暂不实现
+         * real 使用真实的交易系统，暂时无法实现
+         */
+        return Result.success(BigDecimalUtil.add(userInfo.getMoney(), rechargeBo.getMoney()));
     }
 
 }
