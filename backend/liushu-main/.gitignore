@@ -40,4 +40,5 @@ src/main/resources/other/
 src/test/
 # 开发阶段不上传配置信息，防止敏感信息泄露
 **/application.yml
+src/main/resources/application-bk.yml
 src/main/resources/application.yml
