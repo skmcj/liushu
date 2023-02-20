@@ -37,7 +37,7 @@
 backend                             -- 后端
 └── liushu-main                     -- 核心模块
 	├── src/main/java~
-		├── annotation              -- 自定义注解
+		├── annotation      -- 自定义注解
         ├── bo                      -- BO模块
         ├── config                  -- 配置模块
         ├── common                  -- 通用模块
@@ -56,19 +56,19 @@ backend                             -- 后端
 frontend                            -- 前端
 ├── store_backstage                 -- 商家模块
 └── user_model                      -- 用户模块
-	├── public                      -- 外部静态资源
+	├── public                  -- 外部静态资源
 	├── src
-		├── api                     -- API模块
-		├── assets                  -- 内部静态资源
-		├── router                  -- 路由模块
-		├── utils                   -- 工具模块
+		├── api             -- API模块
+		├── assets          -- 内部静态资源
+		├── router          -- 路由模块
+		├── utils           -- 工具模块
         ├── components              -- 自定义组件
         ├── packages                -- 功能引入包
         ├── store                   -- VUEX模块
         ├── views                   -- 视图组件
         ├── App.vue                 -- 根组件
         └── main.js                 -- 入口文件
-	└── vue.config.js               -- 项目配置
+	└── vue.config.js           -- 项目配置
 sql                                 -- 项目数据库
 └── liushu.sql
 ```
