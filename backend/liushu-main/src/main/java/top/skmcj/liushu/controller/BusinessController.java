@@ -564,23 +564,12 @@ public class BusinessController {
         Map<String, String> data = new HashMap<>();
         data.put("cause", "您之前所提交的书店审核资料结果已出");
         data.put("result", examineVo.getResult().toString());
+        boolean examineFlag = mailServerUtil.handleMailMode(store.getEmail(), data, "examine");
         if(examineVo.getResult() == 1) {
-            try {
-                // 发送邮件
-                mailServerUtil.sendExTemplateMail(store.getEmail(), "审核状态", data);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return Result.error("邮件发送失败", StatusCodeEnum.STORE_PROCESS_OK);
-            }
+            if(!examineFlag) return Result.error("邮件发送失败", StatusCodeEnum.STORE_PROCESS_OK);
             return Result.success("邮件发送成功", StatusCodeEnum.STORE_PROCESS_OK);
         } else {
-            try {
-                // 发送邮件
-                mailServerUtil.sendExTemplateMail(store.getEmail(), "审核状态", data);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return Result.error("邮件发送失败", StatusCodeEnum.STORE_PROCESS_FP);
-            }
+            if(!examineFlag) return Result.error("邮件发送失败", StatusCodeEnum.STORE_PROCESS_FP);
             return Result.error("邮件发送成功", StatusCodeEnum.STORE_PROCESS_FP);
         }
     }

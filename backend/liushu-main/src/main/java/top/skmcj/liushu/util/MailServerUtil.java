@@ -2,6 +2,7 @@ package top.skmcj.liushu.util;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,8 +13,10 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class MailServerUtil {
 
@@ -28,6 +31,9 @@ public class MailServerUtil {
 
     @Value("${spring.mail.username}")
     private String from;
+
+    @Value("${liushu.mail.mode}")
+    private String mailMode;
 
     /**
      * 发送简单邮件
@@ -146,6 +152,60 @@ public class MailServerUtil {
         messageHelper.setText(content, true);
         // 发送邮件
         mailSender.send(message);
+    }
+
+    /**
+     * 处理邮件模式
+     * @param to
+     * @param data
+     * @param type [code | examine | link]
+     * @return
+     */
+    public boolean handleMailMode(String to, Map<String, String> data, String type) {
+        /**
+         * code - 验证码
+         * examine - 商家审核
+         * link - 友情链接审核
+         */
+        if("console".equals(mailMode)) {
+            switch (type) {
+                case "code":
+                    log.info("邮件信息(验证码)······\n==>\t目标邮箱: {}\n==>\t提示信息: {}\n==>\t验 证 码: {}\n==>\t有效时间: " +
+                              "{}\n==>\t创建时间: {}",
+                            to, data.get("cause"), data.get("vCode"), data.get("validTime") + " 分钟",
+                            LocalDateTime.now());
+                    break;
+                case "examine":
+                    log.info("邮件信息(商家审核通知)······\n==>\t目标邮箱: {}\n==>\t提示信息: {}\n==>\t审核结果: {}\n==>\t创建时间: {}",
+                            to, data.get("cause"), data.get("result"), LocalDateTime.now());
+                    break;
+                case "link":
+                    log.info("邮件信息(友情链接审核通知)······\n==>\t目标邮箱: {}\n==>\t提示信息: {}\n==>\t审核结果: {}\n==>\t创建时间: {}",
+                            to, data.get("cause"), data.get("result"), LocalDateTime.now());
+                    break;
+            }
+        } else if("send".equals(mailMode)) {
+            try {
+                // 发送邮件
+                switch (type) {
+                    case "code":
+                        this.sendVCTemplateMail(to, "验证码", data);
+                        break;
+                    case "examine":
+                        this.sendExTemplateMail(to, "审核状态", data);
+                        break;
+                    case "link":
+                        this.sendPrTemplateMail(to, "审核状态", data);
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+
+        }
+        return true;
     }
 
 }

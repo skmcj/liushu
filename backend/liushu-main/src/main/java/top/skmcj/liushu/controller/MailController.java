@@ -1,5 +1,6 @@
 package top.skmcj.liushu.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +16,14 @@ import top.skmcj.liushu.vo.LinkVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 邮件相关接口
  */
+@Slf4j
 @RestController
 @RequestMapping("/mail")
 public class MailController {
@@ -37,6 +40,9 @@ public class MailController {
     @Value("${liushu.captcha.time}")
     private int mailTime;
 
+    @Value("${liushu.mail.mode}")
+    private String mailMode;
+
     /**
      * 发送邮箱验证码
      * @param type 发件原因类型
@@ -51,18 +57,12 @@ public class MailController {
         HttpSession session = request.getSession();
         session.setAttribute("code", code);
         session.setAttribute("codeTime", System.currentTimeMillis() + mailTime * 1000);
-        System.out.println("生成的验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟, 验证码类型 =>" + type);
         Map<String, String> data = new HashMap<>();
         data.put("cause", cause);
         data.put("vCode", code);
         data.put("validTime", String.valueOf(mailTime / 60));
-        try {
-            // 发送邮件
-            // mailServerUtil.sendVCTemplateMail(to, "验证码", data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
-        }
+        boolean flag = mailServerUtil.handleMailMode(to, data, "code");
+        if(!flag) return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
 
@@ -76,14 +76,9 @@ public class MailController {
         Bookstore store = bookstoreService.getById(storeId);
         Map<String, String> data = new HashMap<>();
         data.put("cause", "您之前所提交的书店审核资料结果已出");
-        data.put("result", store.getAuditStatus() == 2 ? "1" : "0");
-        try {
-            // 发送邮件
-            mailServerUtil.sendExTemplateMail(store.getEmail(), "审核状态", data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
-        }
+        data.put("result", store.getAuditStatus() == 2 ? "通过" : "不通过");
+        boolean flag = mailServerUtil.handleMailMode(store.getEmail(), data, "examine");
+        if(!flag) return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
 
@@ -102,13 +97,8 @@ public class MailController {
         Map<String, String> data = new HashMap<>();
         data.put("cause", "您之前所提交的友情链接审核结果已出");
         data.put("result", link.getFlag() == 1 ? "通过" : "不通过");
-        try {
-            // 发送邮件
-            mailServerUtil.sendPrTemplateMail(link.getEmail(), "审核状态", data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
-        }
+        boolean flag = mailServerUtil.handleMailMode(link.getEmail(), data, "link");
+        if(!flag) return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
 

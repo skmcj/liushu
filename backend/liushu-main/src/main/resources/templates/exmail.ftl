@@ -33,7 +33,7 @@
                         style="width: 100%; font-size: 16px; color: #666; line-height: 24px; box-sizing: border-box; padding: 18px 24px;">${cause}</div>
                     <div style="font-size: 18px; margin-top: 12px; color: #333;">您的审核状态为</div>
                     <div style="letter-spacing: 5px; font-size: 27px; font-weight: bold; color: #83ccd2; margin: 16px;">
-                        <#if result  == "0">
+                        <#if result  == "不通过">
                             不通过
                         <#else>
                             通过
@@ -46,7 +46,7 @@
                                 src="https://i.328888.xyz/img/2022/12/01/ip9Dx.png" alt="tip" />
                         </div>
                         <span style="font-size: 14px; color: #b2b6b6;">
-                            <#if result  == "0">
+                            <#if result  == "不通过">
                                 很抱歉，您审核资料审核不通过。如对审核结果有异议，可编辑申述邮件致liushumail@liushu.com
                             <#else>
                                 恭喜您，成功入驻流书网-图书外卖，现在，您可以使用之前注册的邮箱、密码登录后台管理您的店铺了

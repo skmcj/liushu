@@ -1,5 +1,6 @@
 package top.skmcj.liushu.controller;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,9 +10,7 @@ import top.skmcj.liushu.common.enums.FileContentTypeEnum;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 @Unprefix
 @RestController
@@ -76,7 +75,8 @@ public class VueRouterController {
              * 否则，返回首页文件
              */
             // 输入流
-            FileInputStream fileInputStream = null;
+            // FileInputStream fileInputStream = null;
+            InputStream fileInputStream = null;
             ClassPathResource reqPathResource = new ClassPathResource(request.getRequestURI());
             String type = request.getRequestURI().substring(request.getRequestURI().lastIndexOf(".") + 1);
             // System.out.println("request uri ==> " + type);
@@ -86,15 +86,18 @@ public class VueRouterController {
                 if(reqPathResource.getFile().isFile()) {
                     // 是文件，直接返回
                     fileInputStream = new FileInputStream(reqPathResource.getFile());
+                    fileInputStream = reqPathResource.getInputStream();
                 } else {
                     // 不是文件，返回首页
                     ClassPathResource pathResource = new ClassPathResource("/front/index.html");
-                    fileInputStream = new FileInputStream(pathResource.getFile());
+                    // fileInputStream = new FileInputStream(pathResource.getFile());
+                    fileInputStream = pathResource.getInputStream();
                 }
             } else {
                 // 文件不存在，返回首页
                 ClassPathResource pathResource = new ClassPathResource("/front/index.html");
-                fileInputStream = new FileInputStream(pathResource.getFile());
+                // fileInputStream = new FileInputStream(pathResource.getFile());
+                fileInputStream = pathResource.getInputStream();
             }
             // 输出流，将文件响应给浏览器
             ServletOutputStream outputStream = response.getOutputStream();

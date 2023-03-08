@@ -11,7 +11,7 @@
     <!-- 项目介绍 -->
     <groupId>top.skmcj</groupId>
     <artifactId>liushu-main</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>liushu-main</name>
     <description>基于 SSM + vue 的校园图书外卖系统</description>
     <properties>

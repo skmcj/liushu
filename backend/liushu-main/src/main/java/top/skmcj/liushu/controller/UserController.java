@@ -376,18 +376,12 @@ public class UserController {
         HttpSession session = request.getSession();
         session.setAttribute("code", code);
         session.setAttribute("codeTime", System.currentTimeMillis() + mailTime * 1000);
-        System.out.println(to + " 用户注册：验证码 => " + code + ", 有效时间 => " + String.valueOf(mailTime / 60) + "分钟");
         Map<String, String> data = new HashMap<>();
         data.put("cause", cause);
         data.put("vCode", code);
         data.put("validTime", String.valueOf(mailTime / 60));
-        try {
-            // 发送邮件
-            // mailServerUtil.sendVCTemplateMail(to, "验证码", data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
-        }
+        boolean flag = mailServerUtil.handleMailMode(to, data, "code");
+        if(!flag) return Result.error(StatusCodeEnum.MAIL_SEND_ERR);
         return Result.success(StatusCodeEnum.MAIL_SEND_OK);
     }
 
