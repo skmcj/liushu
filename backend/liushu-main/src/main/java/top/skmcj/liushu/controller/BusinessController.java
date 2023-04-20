@@ -437,7 +437,7 @@ public class BusinessController {
      */
     @GetMapping("/name")
     public Result<Bookstore> getStoreName(Long storeId, HttpServletRequest request) {
-        String prefix = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/";
+        String prefix = CommonUtil.getImgDoMain(request);
         // System.out.println("storeId => " + storeId + ", type => " + storeId.getClass().getName());
         Bookstore store = storeService.getById(storeId);
         store.setCoverUrl(prefix + store.getCover());

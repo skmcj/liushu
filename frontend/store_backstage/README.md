@@ -14,36 +14,36 @@
 
 ### 代码结构
 
-- `public` — 
-- `src` — 
-  - `api`
-  - `assets`
-  - `components`
-  - `router`
-  - `store`
-  - `utils`
-  - `views`
-  - `App.vue`
-  - `main.js`
-- `vue.config.js` — 
-- `package.json` — 
-
-## 开发进度
-
-- [x] 侧边导航
-- [x] 顶部导航
-- [x] 静态页面
-- [x] 登录注册
-- [x] 员工管理
-- [x] 分类管理
-- [x] 图书管理
-- [x] 订单管理
-- [x] 商家管理
-- [x] 商家图表
-- [x] 即时通信
+- `public` — 公用静态资源
+- `src` — 源码文件
+  - `api` 项目接口
+  - `assets` 项目内静态资源
+  - `components` 组件
+  - `router` 路由
+  - `store` 共享数据
+  - `utils` 工具
+  - `views` 视图
+  - `App.vue` 根组件
+  - `main.js` 入口文件
+- `vue.config.js` — 项目配置
+- `package.json` — 项目依赖
 
 ## 构建运行
 
+- 安装依赖
 
+  ```sh
+  npm install
+  ```
 
-后续更新。。。
+- 运行
+
+  ```sh
+  npm run serve
+  ```
+
+- 打包
+
+  ```sh
+  npm run build
+  ```

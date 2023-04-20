@@ -43,6 +43,7 @@ export default {
 
 <style lang="less" scoped>
 .about-problem-result-box {
+  padding-bottom: 120px;
   margin-top: 12px;
   width: 100%;
   display: flex;

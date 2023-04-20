@@ -3,12 +3,16 @@ import App from './App.vue';
 import router from './router';
 import store from '@/store';
 import md5 from 'js-md5';
-import { sha256 } from 'js-sha256';
+import {
+  sha256
+} from 'js-sha256';
 // TIM
 import tim from '@/packages/tim-sdk/tim';
 import TIM from '@/packages/tim-sdk/tim-js-friendship';
 
-import { Message } from 'element-ui';
+import {
+  Message
+} from 'element-ui';
 
 // 导入通用样式
 import '@/assets/style/theme.css';
@@ -36,14 +40,19 @@ Vue.prototype.$storeUrl = '/store';
 
 /** 封装使用率高的工具函数 */
 /**
-   * 封装$message
-   * @param {String} msg 消息体
-   * @param {String} type 消息类型 success/warning/info/error
-   * @param {Boolean} isClose 是否可以关闭
-   * @param {Function} closeFunc 关闭后执行函数
-   * @param {Number} duration 存在时间
-   */
-Vue.prototype.$showMsg = function(msg, { type = 'info', isClose = true, closeFunc = () => {}, duration = 800 } = {}) {
+ * 封装$message
+ * @param {String} msg 消息体
+ * @param {String} type 消息类型 success/warning/info/error
+ * @param {Boolean} isClose 是否可以关闭
+ * @param {Function} closeFunc 关闭后执行函数
+ * @param {Number} duration 存在时间
+ */
+Vue.prototype.$showMsg = function(msg, {
+  type = 'info',
+  isClose = true,
+  closeFunc = () => {},
+  duration = 800
+} = {}) {
   Message({
     message: msg,
     type: type,
@@ -51,7 +60,7 @@ Vue.prototype.$showMsg = function(msg, { type = 'info', isClose = true, closeFun
     onClose: closeFunc,
     duration: duration
   });
-}
+};
 /**
  * 判断传入对象是否为空
  * @param {Object} obj 一个对象
@@ -60,7 +69,7 @@ Vue.prototype.$showMsg = function(msg, { type = 'info', isClose = true, closeFun
 Vue.prototype.$isEmpty = function(obj) {
   let str = JSON.stringify(obj);
   let flag = false;
-  switch(str) {
+  switch (str) {
     case '""':
       flag = true;
       break;
@@ -78,7 +87,7 @@ Vue.prototype.$isEmpty = function(obj) {
       break;
   }
   return flag;
-}
+};
 
 /**
  * 保留两位小数
@@ -100,7 +109,7 @@ Vue.prototype.$keepTwoNum = function(num) {
     numStr += '0';
   }
   return numStr;
-}
+};
 
 /**
  * 通用操作
@@ -114,7 +123,7 @@ Vue.prototype.$clearLoginInfo = function() {
   window.sessionStorage.removeItem('loginFlag');
   // 清除本地存储
   window.localStorage.removeItem('userInfo');
-}
+};
 
 /**
  * TIM 服务
@@ -126,8 +135,8 @@ Vue.prototype.tim = tim;
 Vue.prototype.TIM = TIM;
 Vue.prototype.$bus = new Vue();
 // 图床域名
+// 开发环境
 Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
-
 
 /** 加载插件 */
 // const VueMasonryPlugin = window['vue-masonry-plugin'].VueMasonryPlugin;

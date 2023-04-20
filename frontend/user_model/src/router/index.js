@@ -1,43 +1,79 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 // 组件
-import Login from '@/views/Login/Login';
-import Logon from '@/views/Login/Logon';
-import Main from '@/components/Main/Main';
-import Home from '@/views/Home/Home';
-import Cate from '@/views/Cate/Cate';
-import CateDetail from '@/views/Cate/CateDetail';
-import BookDetail from '@/views/Detail/BookDetail';
-import ShopDetail from '@/views/Detail/ShopDetail';
-import About from '@/views/About/About';
-import AboutProfile from '@/views/About/AboutProfile';
-import AboutProblem from '@/views/About/AboutProblem';
-import AboutProblemResult from '@/views/About/AboutProblemResult';
-import AboutOur from '@/views/About/AboutOur';
-import AboutLink from '@/views/About/AboutLink';
-import Mine from '@/views/Mine/Mine';
-import MineMain from '@/views/Mine/MineMain';
-import MineCenter from '@/views/Mine/MineCenter';
-import MineCenterPer from '@/views/Mine/MineCenterPer';
-import MineCenterAcc from '@/views/Mine/MineCenterAcc';
-import MineCenterPay from '@/views/Mine/MineCenterPay';
-import MineCart from '@/views/Mine/MineCart';
-import MineOrder from '@/views/Mine/MineOrder';
-import MineMess from '@/views/Mine/MineMess';
-import MineMessSys from '@/views/Mine/MineMessSys';
-import MineMessPer from '@/views/Mine/MineMessPer';
-import MineAddress from '@/views/Mine/MineAddress';
-import MineColl from '@/views/Mine/MineColl';
-import MineComment from '@/views/Mine/MineComment';
-import Settlement from '@/views/Common/Settlement';
-import Agreement from '@/views/Common/Agreement';
-import PrivacyPolicy from '@/views/Common/PrivacyPolicy';
-import NotFound from '@/views/NotFound/NotFound';
-import Search from '@/views/Search/Search';
-import SearchBook from '@/views/Search/SearchBook';
-import SearchShop from '@/views/Search/SearchShop';
+// import Login from '@/views/Login/Login';
+// import Logon from '@/views/Login/Logon';
+// import Main from '@/components/Main/Main';
+// import Home from '@/views/Home/Home';
+// import Cate from '@/views/Cate/Cate';
+// import CateDetail from '@/views/Cate/CateDetail';
+// import BookDetail from '@/views/Detail/BookDetail';
+// import ShopDetail from '@/views/Detail/ShopDetail';
+// import About from '@/views/About/About';
+// import AboutProfile from '@/views/About/AboutProfile';
+// import AboutProblem from '@/views/About/AboutProblem';
+// import AboutProblemResult from '@/views/About/AboutProblemResult';
+// import AboutOur from '@/views/About/AboutOur';
+// import AboutLink from '@/views/About/AboutLink';
+// import Mine from '@/views/Mine/Mine';
+// import MineMain from '@/views/Mine/MineMain';
+// import MineCenter from '@/views/Mine/MineCenter';
+// import MineCenterPer from '@/views/Mine/MineCenterPer';
+// import MineCenterAcc from '@/views/Mine/MineCenterAcc';
+// import MineCenterPay from '@/views/Mine/MineCenterPay';
+// import MineCart from '@/views/Mine/MineCart';
+// import MineOrder from '@/views/Mine/MineOrder';
+// import MineMess from '@/views/Mine/MineMess';
+// import MineMessSys from '@/views/Mine/MineMessSys';
+// import MineMessPer from '@/views/Mine/MineMessPer';
+// import MineAddress from '@/views/Mine/MineAddress';
+// import MineColl from '@/views/Mine/MineColl';
+// import MineComment from '@/views/Mine/MineComment';
+// import Settlement from '@/views/Common/Settlement';
+// import Agreement from '@/views/Common/Agreement';
+// import PrivacyPolicy from '@/views/Common/PrivacyPolicy';
+// import NotFound from '@/views/NotFound/NotFound';
+// import Search from '@/views/Search/Search';
+// import SearchBook from '@/views/Search/SearchBook';
+// import SearchShop from '@/views/Search/SearchShop';
 
-Vue.use(VueRouter)
+const Login = () => import(/* webpackChunkName: 'login' */ '@/views/Login/Login');
+const Logon = () => import(/* webpackChunkName: 'login' */ '@/views/Login/Logon');
+const Main = () => import('@/components/Main/Main');
+const Home = () => import(/* webpackChunkName: 'home' */ '@/views/Home/Home');
+const Cate = () => import(/* webpackChunkName: 'cate' */ '@/views/Cate/Cate');
+const CateDetail = () => import(/* webpackChunkName: 'cate' */ '@/views/Cate/CateDetail');
+const BookDetail = () => import(/* webpackChunkName: 'detail' */ '@/views/Detail/BookDetail');
+const ShopDetail = () => import(/* webpackChunkName: 'detail' */ '@/views/Detail/ShopDetail');
+const About = () => import(/* webpackChunkName: 'about' */ '@/views/About/About');
+const AboutProfile = () => import(/* webpackChunkName: 'about' */ '@/views/About/AboutProfile');
+const AboutProblem = () => import(/* webpackChunkName: 'about' */ '@/views/About/AboutProblem');
+const AboutProblemResult = () => import(/* webpackChunkName: 'about' */ '@/views/About/AboutProblemResult');
+const AboutOur = () => import(/* webpackChunkName: 'about' */ '@/views/About/AboutOur');
+const AboutLink = () => import(/* webpackChunkName: 'about' */ '@/views/About/AboutLink');
+const Mine = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/Mine');
+const MineMain = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineMain');
+const MineCenter = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineCenter');
+const MineCenterPer = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineCenterPer');
+const MineCenterAcc = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineCenterAcc');
+const MineCenterPay = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineCenterPay');
+const MineCart = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineCart');
+const MineOrder = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineOrder');
+const MineMess = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineMess');
+const MineMessSys = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineMessSys');
+const MineMessPer = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineMessPer');
+const MineAddress = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineAddress');
+const MineColl = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineColl');
+const MineComment = () => import(/* webpackChunkName: 'mine' */ '@/views/Mine/MineComment');
+const Settlement = () => import(/* webpackChunkName: 'settlement' */ '@/views/Common/Settlement');
+const Agreement = () => import(/* webpackChunkName: 'agreement' */ '@/views/Common/Agreement');
+const PrivacyPolicy = () => import(/* webpackChunkName: 'agreement' */ '@/views/Common/PrivacyPolicy');
+const NotFound = () => import(/* webpackChunkName: 'nofound' */ '@/views/NotFound/NotFound');
+const Search = () => import(/* webpackChunkName: 'search' */ '@/views/Search/Search');
+const SearchBook = () => import(/* webpackChunkName: 'search' */ '@/views/Search/SearchBook');
+const SearchShop = () => import(/* webpackChunkName: 'search' */ '@/views/Search/SearchShop');
+
+Vue.use(VueRouter);
 
 const routes = [
   // 登录页
@@ -422,10 +458,10 @@ router.beforeEach((to, from, next) => {
     document.title = '流书网'; // 此处是默认的title
   }
   // 登录验证
-  if(to.meta.rootLink === '/mine' || to.name === 'settlement') {
+  if (to.meta.rootLink === '/mine' || to.name === 'settlement') {
     // 前往个人页面或结算界面
     const isLogin = JSON.parse(sessionStorage.getItem('loginFlag')) || false;
-    if(isLogin) {
+    if (isLogin) {
       next();
     } else {
       next('/login');

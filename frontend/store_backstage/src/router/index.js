@@ -1,22 +1,39 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import Login from '@/views/Login/Login';
-import Logon from '@/views/Login/Logon';
-import Container from '@/components/Container/Container';
-import Employee from '@/views/Employee/Employee.vue';
-import Cate from '@/views/Cate/Cate.vue';
-import Books from '@/views/Books/Books.vue';
-import Orders from '@/views/Orders/Orders.vue';
-import Shop from '@/views/Shop/Shop.vue';
-import AddEmployee from '@/views/Employee/AddEmployee';
-import AddBook from '@/views/Books/AddBook';
-import EditBaseInfo from '@/views/Shop/EditBaseInfo';
-import EditAuthInfo from '@/views/Shop/EditAuthInfo';
-import Agreement from '@/views/Agreement/Agreement';
-import PrivacyPolicy from '@/views/Agreement/PrivacyPolicy';
-import NotFound from '@/views/Common/NotFound';
-import AuthMess from '@/views/Login/AuthMess';
+// import Login from '@/views/Login/Login';
+// import Logon from '@/views/Login/Logon';
+// import Container from '@/components/Container/Container';
+// import Employee from '@/views/Employee/Employee.vue';
+// import Cate from '@/views/Cate/Cate.vue';
+// import Books from '@/views/Books/Books.vue';
+// import Orders from '@/views/Orders/Orders.vue';
+// import Shop from '@/views/Shop/Shop.vue';
+// import AddEmployee from '@/views/Employee/AddEmployee';
+// import AddBook from '@/views/Books/AddBook';
+// import EditBaseInfo from '@/views/Shop/EditBaseInfo';
+// import EditAuthInfo from '@/views/Shop/EditAuthInfo';
+// import Agreement from '@/views/Agreement/Agreement';
+// import PrivacyPolicy from '@/views/Agreement/PrivacyPolicy';
+// import NotFound from '@/views/Common/NotFound';
+// import AuthMess from '@/views/Login/AuthMess';
+
+const Login = () => import(/* webpackChunkName: 'login' */ '@/views/Login/Login');
+const Logon = () => import(/* webpackChunkName: 'login' */ '@/views/Login/Logon');
+const Container = () => import('@/components/Container/Container');
+const Employee = () => import(/* webpackChunkName: 'employee' */ '@/views/Employee/Employee.vue');
+const Cate = () => import(/* webpackChunkName: 'cate' */ '@/views/Cate/Cate.vue');
+const Books = () => import(/* webpackChunkName: 'book' */ '@/views/Books/Books.vue');
+const Orders = () => import(/* webpackChunkName: 'order' */ '@/views/Orders/Orders.vue');
+const Shop = () => import(/* webpackChunkName: 'shop' */ '@/views/Shop/Shop.vue');
+const AddEmployee = () => import(/* webpackChunkName: 'employee' */ '@/views/Employee/AddEmployee');
+const AddBook = () => import(/* webpackChunkName: 'book' */ '@/views/Books/AddBook');
+const EditBaseInfo = () => import(/* webpackChunkName: 'shop' */ '@/views/Shop/EditBaseInfo');
+const EditAuthInfo = () => import(/* webpackChunkName: 'shop' */ '@/views/Shop/EditAuthInfo');
+const Agreement = () => import(/* webpackChunkName: 'agreement' */ '@/views/Agreement/Agreement');
+const PrivacyPolicy = () => import(/* webpackChunkName: 'agreement' */ '@/views/Agreement/PrivacyPolicy');
+const NotFound = () => import(/* webpackChunkName: 'notfount' */ '@/views/Common/NotFound');
+const AuthMess = () => import(/* webpackChunkName: 'login' */ '@/views/Login/AuthMess');
 
 Vue.use(VueRouter);
 
@@ -256,17 +273,17 @@ router.beforeEach((to, from, next) => {
     document.title = '商家后台'; // 此处写默认的title
   }
   // 登录验证
-  if(to.name === 'logon' || to.meta.noVerify) {
+  if (to.name === 'logon' || to.meta.noVerify) {
     // 如果访问注册页，直接放行
     next();
-  } else if(to.name === 'login') {
+  } else if (to.name === 'login') {
     // 如果访问登录页，判断是否已登录，登录则不出来，未登录就放行
     const isLogin = window.localStorage.getItem('lsBusinessInfo');
-    if(!isLogin) {
+    if (!isLogin) {
       next();
-    } else if(isLogin && from.meta.title === '404 NotFound') {
+    } else if (isLogin && from.meta.title === '404 NotFound') {
       next('/');
-    } else if(isLogin && JSON.stringify(from.meta) === '{}') {
+    } else if (isLogin && JSON.stringify(from.meta) === '{}') {
       next('/');
     } else {
       document.title = from.meta.title;
@@ -274,7 +291,7 @@ router.beforeEach((to, from, next) => {
   } else {
     // 如果访问其它页面，判断是否登录，登录放行，未登录则跳转到登录页
     const isLogin = JSON.parse(window.localStorage.getItem('employeeInfo'));
-    if(isLogin) {
+    if (isLogin) {
       next();
     } else {
       next('/login');

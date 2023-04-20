@@ -18,22 +18,21 @@ Vue.config.productionTip = false;
 // 将md5绑定到vue上
 Vue.prototype.$md5 = md5;
 // 设置项目静态资源
+// 开发环境
 Vue.prototype.$staticUrl = 'http://localhost:8080';
 
 /**
-   * 封装$message
-   * @param {String} msg 消息体
-   * @param {String} type 消息类型 success/warning/info/error
-   * @param {Boolean} isClose 是否可以关闭
-   * @param {Function} closeFunc 关闭后执行函数
-   * @param {Number} duration 存在时间
-   */
-Vue.prototype.$showMsgs = function(msg, {
-  type = 'info',
-  isClose = true,
-  closeFunc = () => {},
-  duration = 1200
-} = {}) {
+ * 封装$message
+ * @param {String} msg 消息体
+ * @param {String} type 消息类型 success/warning/info/error
+ * @param {Boolean} isClose 是否可以关闭
+ * @param {Function} closeFunc 关闭后执行函数
+ * @param {Number} duration 存在时间
+ */
+Vue.prototype.$showMsgs = function (
+  msg,
+  { type = 'info', isClose = true, closeFunc = () => {}, duration = 1200 } = {}
+) {
   Message({
     message: msg,
     type: type,
@@ -41,17 +40,17 @@ Vue.prototype.$showMsgs = function(msg, {
     onClose: closeFunc,
     duration: duration
   });
-}
+};
 
 /**
  * 判断传入对象是否为空
  * @param {Object} obj 一个对象
  * @returns 布尔结果
  */
-Vue.prototype.$isEmpty = function(obj) {
+Vue.prototype.$isEmpty = function (obj) {
   let str = JSON.stringify(obj);
   let flag = false;
-  switch(str) {
+  switch (str) {
     case '""':
       flag = true;
       break;
@@ -69,13 +68,13 @@ Vue.prototype.$isEmpty = function(obj) {
       break;
   }
   return flag;
-}
+};
 
 /**
  * 保留两位小数
  * @param {Number} num
  */
-Vue.prototype.$keepTwoNum = function(num) {
+Vue.prototype.$keepTwoNum = function (num) {
   // 四舍五入
   let mNum = Math.round(num * 100) / 100;
   let numStr = mNum.toString();
@@ -91,7 +90,7 @@ Vue.prototype.$keepTwoNum = function(num) {
     numStr += '0';
   }
   return numStr;
-}
+};
 
 /**
  * TIM 服务
@@ -103,6 +102,7 @@ Vue.prototype.tim = tim;
 Vue.prototype.TIM = TIM;
 Vue.prototype.$bus = new Vue();
 // 图床域名
+// 开发环境
 Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
 
 const Root = new Vue({

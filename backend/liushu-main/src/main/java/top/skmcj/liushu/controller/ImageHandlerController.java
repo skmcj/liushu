@@ -7,6 +7,7 @@ import top.skmcj.liushu.common.Result;
 import top.skmcj.liushu.common.enums.ImageContentTypeEnum;
 import top.skmcj.liushu.common.enums.StatusCodeEnum;
 import top.skmcj.liushu.entity.Image;
+import top.skmcj.liushu.util.CommonUtil;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class ImageHandlerController {
         String suffix = fileName.substring(fileName.lastIndexOf("."));
         // 生成保存文件名
         String uri = type + "-" + UUID.randomUUID().toString() + suffix;
-        String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/" + uri;
+        String url = CommonUtil.getImgDoMain(request) + uri;
         // 返回数据
         Image image = new Image();
         image.setName(fileName);

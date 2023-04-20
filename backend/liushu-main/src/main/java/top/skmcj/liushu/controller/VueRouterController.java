@@ -2,6 +2,8 @@ package top.skmcj.liushu.controller;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.skmcj.liushu.annotation.Unprefix;
@@ -27,24 +29,27 @@ public class VueRouterController {
              * 否则，返回首页文件
              */
             // 输入流
-            FileInputStream fileInputStream = null;
+            InputStream fileInputStream = null;
             ClassPathResource reqPathResource = new ClassPathResource(request.getRequestURI());
             String type = request.getRequestURI().substring(request.getRequestURI().lastIndexOf(".") + 1);
             this.addContentTypeOfResponse(response, type);
             if(reqPathResource.exists()) {
                 // 路径存在，直接返回
-                if(reqPathResource.getFile().isFile()) {
+                if(this.customGetInputStream(reqPathResource) != null) {
                     // 是文件，直接返回
-                    fileInputStream = new FileInputStream(reqPathResource.getFile());
+                    if(this.customIsFile(request.getRequestURI())) {
+                        fileInputStream = reqPathResource.getInputStream();
+                    } else {
+                        fileInputStream = this.customGetInputStreamOfIndex("/store/index.html");
+                    }
+
                 } else {
                     // 不是文件，返回首页
-                    ClassPathResource pathResource = new ClassPathResource("/store/index.html");
-                    fileInputStream = new FileInputStream(pathResource.getFile());
+                    fileInputStream = this.customGetInputStreamOfIndex("/store/index.html");
                 }
             } else {
                 // 文件不存在，返回首页
-                ClassPathResource pathResource = new ClassPathResource("/store/index.html");
-                fileInputStream = new FileInputStream(pathResource.getFile());
+                fileInputStream = this.customGetInputStreamOfIndex("/store/index.html");
             }
             // 输出流，将文件响应给浏览器
             ServletOutputStream outputStream = response.getOutputStream();
@@ -83,21 +88,22 @@ public class VueRouterController {
             this.addContentTypeOfResponse(response, type);
             if(reqPathResource.exists()) {
                 // 路径存在，直接返回
-                if(reqPathResource.getFile().isFile()) {
+
+                if(this.customGetInputStream(reqPathResource) != null) {
                     // 是文件，直接返回
-                    fileInputStream = new FileInputStream(reqPathResource.getFile());
-                    fileInputStream = reqPathResource.getInputStream();
+                    if(this.customIsFile(request.getRequestURI())) {
+                        fileInputStream = reqPathResource.getInputStream();
+                    } else {
+                        // 不是文件，返回首页
+                        fileInputStream = this.customGetInputStreamOfIndex("/front/index.html");
+                    }
                 } else {
                     // 不是文件，返回首页
-                    ClassPathResource pathResource = new ClassPathResource("/front/index.html");
-                    // fileInputStream = new FileInputStream(pathResource.getFile());
-                    fileInputStream = pathResource.getInputStream();
+                    fileInputStream = this.customGetInputStreamOfIndex("/front/index.html");
                 }
             } else {
                 // 文件不存在，返回首页
-                ClassPathResource pathResource = new ClassPathResource("/front/index.html");
-                // fileInputStream = new FileInputStream(pathResource.getFile());
-                fileInputStream = pathResource.getInputStream();
+                fileInputStream = this.customGetInputStreamOfIndex("/front/index.html");
             }
             // 输出流，将文件响应给浏览器
             ServletOutputStream outputStream = response.getOutputStream();
@@ -124,5 +130,35 @@ public class VueRouterController {
         String contentType = FileContentTypeEnum.getTypeOfContentType(fileType);
         if(contentType == null) return;
         response.setContentType(contentType);
+    }
+
+
+    private InputStream customGetInputStream(Resource resource) {
+        InputStream is;
+        try {
+            is = resource.getInputStream();
+        } catch (IOException e) {
+            // e.printStackTrace();
+            is = null;
+        }
+        return is;
+    }
+
+    private boolean customIsFile(String uri) {
+        boolean flag = false;
+        String lastPath = uri.substring(uri.lastIndexOf("/") + 1);
+        if(lastPath != null && lastPath.lastIndexOf(".") != -1) {
+            String suffix = lastPath.substring(lastPath.lastIndexOf(".") + 1);
+            if(suffix.length() > 0) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+    private InputStream customGetInputStreamOfIndex(String indexPath) throws IOException {
+        ClassPathResource pathResource = new ClassPathResource(indexPath);
+        // fileInputStream = new FileInputStream(pathResource.getFile());
+        return pathResource.getInputStream();
     }
 }

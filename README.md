@@ -2,9 +2,10 @@
 
 <p align=center>
   <a href="https://github.com/skmcj/liushu">
-    <img src="https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/logo-v3.0.png" alt="流书网-图书外卖" style="width: 200px">
+    <img src="https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/logo-v3.0.png" alt="流书网-图书外卖" style="width: 200px">
   </a>
 </p>
+
 
 <p align=center style="font-weight: bold;">
    流书网-图书外卖
@@ -99,52 +100,247 @@ sql                                 -- 项目数据库
 
 ### 前端配置
 
+- 用户模块`user_model`
 
+  - `/src/main.js`
+
+    ```js
+    // 根据自己的部署位置更改，如：部署位置域名 + '/api/img/'
+    // 即将 http://localhost:8080 改为自己部署服务器访问域名
+    Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
+    ```
+
+  - `/src/utils/request.js`
+
+    ```js
+    const request = Axios.create({
+      // 设置请求根路径
+      // 将 http://localhost:8080 更改为后端部署位置访问路径
+      baseURL: 'http://localhost:8080/api',
+      // 跨域请求时发送Cookie
+      withCredentials: true
+    });
+    ```
+
+- 商家模块`store_backstage`
+
+  - `/src/main.js`
+
+    ```js
+    // 将 http://localhost:8080 改为自己部署服务器访问域名
+    Vue.prototype.$staticUrl = 'http://localhost:8080';
+    
+    Vue.prototype.$ossPath = 'http://localhost:8080/api/img/';
+    ```
+
+  - `/src/utils/request.js`
+
+    ```js
+    const request = Axios.create({
+      // 设置请求根路径
+      // 将 http://localhost:8080 更改为后端部署位置访问路径
+      baseURL: 'http://localhost:8080/api',
+      // 跨域请求时发送Cookie
+      withCredentials: true
+    });
+    ```
 
 ### 后端配置
 
-主要为`application.yml`
+详细要求可看`application.yml`注解
+
+大致如下
+
+```yaml
+# 端口
+server:
+  port: 8080
+#  servlet:
+#    context-path: /api
+
+# 使用 smtp 协议
+spring:
+  # 应用名称
+  application:
+    name: liushu
+  # 数据库配置
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: # 数据库链接
+      username: # 数据库用户名
+      password: # 数据库密码
+  # 模板插件配置
+  freemarker:
+    template-loader-path: classpath:/templates/
+  main:
+    banner-mode: off
+  # 邮件配置
+  mail:
+    # 选用QQ邮箱
+    protocol: smtp
+    host: smtp.qq.com
+    # 端口号465或587
+    port: 587
+    # 发送方昵称
+    nickname: 流书网-图书外卖
+    # 发送方
+    username: # 自己的邮箱服务器
+    password: # 对应邮箱服务授权码
+    test-connection: false
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          timeout: 10000
+#          ssl:
+#            # 打开ssl安全验证
+#            enable: true
+#            required: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+          # 设置是否需要认证，如果为true,那么用户名和密码就必须的，
+          # 如果设置false，可以不设置用户名和密码，当然也得看你的对接的平台是否支持无密码进行访问的。
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        # 开启debug模式，这样邮件发送过程的日志会在控制台打印出来，方便排查错误
+        debug: false
+  #        mime:
+  #          splitlongparameters: false
+  # 线程池配置
+  task:
+    pool:
+      # 核心线程数
+      core-size: 10
+      # 最大线程数
+      max-size: 25
+      # 线程队列大小
+      queue-capacity: 10
+      # 线程忍受空闲时间
+      keep-alive: 60
+    # 线程名称前缀
+    thread-name-prefix:
+      scheduled: liushu-task-
+      timer-task: timer-task-
 
 
+# Mybatis-Plus 配置
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+    banner: false
 
-后续完善
+# 项目自定义配置项
+liushu:
+  # 项目部署地址
+  server-name: localhost # 本地部署
+  # 项目静态资源(图书封面等)地址
+  oss: # 自行配置一个本地路径
+  # JWT相关配置
+  jwt:
+    # 签名秘钥，可自定义
+    secret: # 自定义
+    # 默认过期时间(s) => 1天(86400s), 30分钟(1800s)
+    expires: 86400
+  # 验证码相关配置
+  captcha:
+    # 验证码有效时间(单位：s)
+    time: 300
+  # TIM 服务
+  tim:
+    # APP ID
+    SDKAPPID: # 腾讯IM服务应用APPID
+    # 秘钥
+    SECRETKEY: # 对应APPID的秘钥
+    # 签名过期时间 7 x 24 x 60 x 60 = 604800 = 7 天
+    EXPIRETIME: 604800
+  # mail 相关
+  mail:
+    # 邮件发送模式
+    # console - 控制台输出结果
+    # send - 真实发送邮件
+    mode: console
+  # 推荐算法相关
+  mahout:
+    user:
+      tourist-id: 2942
+      # 用户邻居数
+      nearest-num: 10
+      # 保存的最新
+      lately-num: 3
+  # 喜好度分值
+  preference:
+    # 点击分值
+    click: 1.0
+    # 加入购物车分值
+    add-cart: 2.0
+    # 收藏
+    collection: 3.0
+    # 结算分值
+    settlement: 4.0
+  # 时间轮相关配置
+  timing-wheel:
+    # 延时时间(s)
+    delay: 900
+  order:
+    # 订单逾期缓冲期限(天)
+    overdue-period: 15
+    # 到达一定的结点状态，用户无操作的缓冲期限(天)
+    # 如，订单配送完成后，用户没有确认收货，7 天后，商家可自行确认收货，以便进入下一状态
+    confirm-buff-day: 7
+    # 售后订单退货预约上门时间缓冲期限 - 天(需在此时间内)
+    aso-day: 7
+  # 用户相关
+  user:
+    # 充值模式 infinite | limit | real
+    recharge-mode: infinite
+    # 单次充值最大值
+    single-max: 1000
+  admin:
+    # 暂时未实现功能
+    username: # 平台管理用户名
+    password: # 平台管理密码
+  # 平台账户
+  account:
+    # 流书网账户ID
+    ls-id: 37
+    # 每笔订单平台收取的服务费 -> 2%
+    service-fee: 0.02
+```
 
 ## 项目截图
 
 ### 用户模块
 
-![用户模块登录](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608489286.png)
+![用户模块登录](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608489286.png)
 
-![用户模块首页](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608390378.png)
+![用户模块首页](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608390378.png)
 
-![用户模块分类](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608455880.png)
+![用户模块分类](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608455880.png)
 
-![用户模块个人](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608536214.png)
+![用户模块个人](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608536214.png)
 
 ### 商家模块
 
-![商家模块登录](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608558951.png)
+![商家模块登录](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608558951.png)
 
-![商家模块店铺](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608632114.png)
+![商家模块店铺](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608632114.png)
 
-![商家模块图书](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675608653729.png)
+![商家模块图书](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675608653729.png)
 
 ### 邮件
 
-![验证码邮件](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675666221489.png)
+![验证码邮件](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675666221489.png)
 
-![审核状态邮件](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/1675666266369.png)
+![审核状态邮件](https://s.cky.qystu.cc/gh/skmcj/pic-bed@main/common/1675666266369.png)
 
 ## 声明
 
 本项目仅用于学习交流使用，请勿滥用，如滥用所造成一切后果自负。
-
-
-
-
-
-
-
-**注意：** 目前项目尚未完成，部分关键文件及功能尚未上传，后续有空将继续完善。
-
-文档持续完善中 。。。

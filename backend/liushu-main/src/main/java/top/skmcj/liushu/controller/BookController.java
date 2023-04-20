@@ -58,7 +58,7 @@ public class BookController {
         if(lEmployee.getCompetence() > 1) {
             return Result.success(StatusCodeEnum.NO_ACCESS);
         }
-        System.out.println("bookDto => " + bookDto);
+        // System.out.println("bookDto => " + bookDto);
         bookService.saveBook(bookDto, lEmployee.getStoreId(), lEmployee.getId());
         return Result.success("图书新增成功");
     }

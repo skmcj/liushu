@@ -1,5 +1,7 @@
 package top.skmcj.liushu.util;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import top.skmcj.liushu.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,12 +10,22 @@ import java.util.Base64;
 /**
  * 通用工具
  */
+@Component
 public class CommonUtil {
+
+    private static String serverName;
+
+    @Value("${liushu.server-name}")
+    public void setServerName(String serverName) {
+        CommonUtil.serverName = serverName;
+    }
+
     /**
      * 获取当前服务器域名
      * @return
      */
     public static String getDoMain(HttpServletRequest request) {
+        if(serverName != null && ValidateMessUtil.validateLink(serverName)) return serverName;
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
     }
 
@@ -23,6 +35,7 @@ public class CommonUtil {
      * @return
      */
     public static String getImgDoMain(HttpServletRequest request) {
+        if(serverName != null && ValidateMessUtil.validateLink(serverName)) return serverName + "/api/img/";
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/api/img/";
     }
 
